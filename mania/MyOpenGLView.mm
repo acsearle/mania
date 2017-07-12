@@ -31,7 +31,7 @@ std::string load(std::string name, std::string ext) {
 }
 
 @implementation MyOpenGLView {
-    renderer* _renderer;
+    std::unique_ptr<renderer> _renderer;
 }
 
 
@@ -141,7 +141,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     
     // Init our renderer.  Use 0 for the defaultFBO which is appropriate for
     // OSX (but not iOS since iOS apps must create their own FBO)
-    _renderer = new renderer;
+    _renderer = renderer::make();
 }
 
 - (void)reshape

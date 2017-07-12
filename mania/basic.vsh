@@ -1,9 +1,10 @@
 #version 410
 
 in vec4 position;
-out vec4 vPosition;
+in vec4 color;
+out vec4 vColor;
 
 void main(void) {
     gl_Position = position;
-    vPosition = position;
+    vColor = color;
 }

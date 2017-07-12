@@ -54,6 +54,55 @@ namespace gl {
         
     };
     
+    template<typename T, std::size_t N> vec<T, N> operator*(vec<T, N> a, T b) {
+        vec<T, N> c;
+        for (std::size_t i = 0; i != N; ++i)
+            c[i] = a[i] * b;
+        return c;
+    }
+    
+    template<typename T, std::size_t N> vec<T, N>& operator+=(vec<T, N>& a, vec<T, N> b) {
+        for (std::size_t i = 0; i != N; ++i)
+            a[i] += b[i];
+        return a;
+    }
+    
+    template<typename T, std::size_t N> vec<T, N>& operator-=(vec<T, N>& a, vec<T, N> b) {
+        for (std::size_t i = 0; i != N; ++i)
+            a[i] -= b[i];
+        return a;
+    }
+    
+    template<typename T, std::size_t N> vec<T, N> operator+(vec<T, N> a, vec<T, N> b) {
+        vec<T, N> c;
+        for (std::size_t i = 0; i != N; ++i)
+            c[i] = a[i] + b[i];
+        return c;
+        
+    }
+    
+    template<typename T, std::size_t N> vec<T, N> operator-(vec<T, N> a, vec<T, N> b) {
+        vec<T, N> c;
+        for (std::size_t i = 0; i != N; ++i)
+            c[i] = a[i] - b[i];
+        return c;
+            
+    }
+    
+    template<typename T, std::size_t N> auto length(vec<T, N> a) {
+        T b = 0;
+        for (std::size_t i = 0; i != N; ++i)
+            b += a[i] * a[i];
+        return sqrt(b);
+    }
+    
+    template<typename T, std::size_t N> T dot(vec<T, N> a, vec<T, N> b) {
+        T c = 0;
+        for (std::size_t i = 0; i != N; ++i)
+            c += a[i] * b[i];
+        return c;
+    }
+    
     using vec2 = vec<float, 2>;
     using vec3 = vec<float, 3>;
     using vec4 = vec<float, 4>;

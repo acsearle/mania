@@ -47,13 +47,4 @@ namespace gl {
         glBindBuffer(target, 0);
     }
     
-    template<typename T>
-    void vbo::assign(GLenum target, const T* first, const T* last, GLenum usage) {
-        glBufferData(target,
-                     (last - first) * sizeof(T),
-                     first,
-                     usage);
-    }
-    
-    
 } // namespace gl

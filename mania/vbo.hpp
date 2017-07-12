@@ -32,8 +32,12 @@ namespace gl {
         static void unbind(GLenum target);
         
         template<typename T>
-        static void assign(GLenum target, const T* first, const T* last, GLenum usage);
-        
+        static void assign(GLenum target, const T* first, const T* last, GLenum usage) {
+            glBufferData(target,
+                         (last - first) * sizeof(T),
+                         first,
+                         usage);
+        }
     }; // class vbo
     
 } // namespace gl
