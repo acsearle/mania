@@ -22,6 +22,7 @@
 		CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889CB1F15064E005956A9 /* vbo.cpp */; };
 		CAF889D01F150B24005956A9 /* vec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889CE1F150B24005956A9 /* vec.cpp */; };
 		CAF889D31F150E21005956A9 /* vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D11F150E21005956A9 /* vertex.cpp */; };
+		CAF889D61F18E519005956A9 /* mat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D41F18E519005956A9 /* mat.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,8 @@
 		CAF889CF1F150B24005956A9 /* vec.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vec.hpp; sourceTree = "<group>"; };
 		CAF889D11F150E21005956A9 /* vertex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertex.cpp; sourceTree = "<group>"; };
 		CAF889D21F150E21005956A9 /* vertex.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vertex.hpp; sourceTree = "<group>"; };
+		CAF889D41F18E519005956A9 /* mat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mat.cpp; sourceTree = "<group>"; };
+		CAF889D51F18E519005956A9 /* mat.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mat.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,32 +87,17 @@
 		CAF889A31F14D618005956A9 /* mania */ = {
 			isa = PBXGroup;
 			children = (
-				CAF889B81F14D67C005956A9 /* MyOpenGLView.h */,
-				CAF889B91F14D67C005956A9 /* MyOpenGLView.mm */,
-				CAF889BC1F14DFCF005956A9 /* renderer.hpp */,
-				CAF889BB1F14DFCF005956A9 /* renderer.cpp */,
-				CAF889C91F150490005956A9 /* vao.hpp */,
-				CAF889C81F150490005956A9 /* vao.cpp */,
-				CAF889CC1F15064E005956A9 /* vbo.hpp */,
-				CAF889CB1F15064E005956A9 /* vbo.cpp */,
-				CAF889CF1F150B24005956A9 /* vec.hpp */,
-				CAF889CE1F150B24005956A9 /* vec.cpp */,
-				CAF889D21F150E21005956A9 /* vertex.hpp */,
-				CAF889D11F150E21005956A9 /* vertex.cpp */,
-				CAF889C21F14F1C0005956A9 /* program.hpp */,
-				CAF889C11F14F1C0005956A9 /* program.cpp */,
-				CAF889BE1F14E31B005956A9 /* shader.cpp */,
-				CAF889BF1F14E31B005956A9 /* shader.hpp */,
-				CAF889C41F14F51C005956A9 /* basic.vsh */,
-				CAF889C61F14F527005956A9 /* basic.fsh */,
+				CAF889D71F198B2D005956A9 /* src */,
 				CAF889A41F14D618005956A9 /* AppDelegate.h */,
 				CAF889A51F14D618005956A9 /* AppDelegate.m */,
+				CAF889AD1F14D618005956A9 /* Assets.xcassets */,
+				CAF889B21F14D618005956A9 /* Info.plist */,
+				CAF889AF1F14D618005956A9 /* Main.storyboard */,
+				CAF889B81F14D67C005956A9 /* MyOpenGLView.h */,
+				CAF889B91F14D67C005956A9 /* MyOpenGLView.mm */,
+				CAF889A71F14D618005956A9 /* Supporting Files */,
 				CAF889AA1F14D618005956A9 /* ViewController.h */,
 				CAF889AB1F14D618005956A9 /* ViewController.m */,
-				CAF889AD1F14D618005956A9 /* Assets.xcassets */,
-				CAF889AF1F14D618005956A9 /* Main.storyboard */,
-				CAF889B21F14D618005956A9 /* Info.plist */,
-				CAF889A71F14D618005956A9 /* Supporting Files */,
 			);
 			path = mania;
 			sourceTree = "<group>";
@@ -120,6 +108,39 @@
 				CAF889A81F14D618005956A9 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		CAF889D71F198B2D005956A9 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				CAF889D41F18E519005956A9 /* mat.cpp */,
+				CAF889D51F18E519005956A9 /* mat.hpp */,
+				CAF889C11F14F1C0005956A9 /* program.cpp */,
+				CAF889C21F14F1C0005956A9 /* program.hpp */,
+				CAF889BB1F14DFCF005956A9 /* renderer.cpp */,
+				CAF889BC1F14DFCF005956A9 /* renderer.hpp */,
+				CAF889BE1F14E31B005956A9 /* shader.cpp */,
+				CAF889BF1F14E31B005956A9 /* shader.hpp */,
+				CAF889C81F150490005956A9 /* vao.cpp */,
+				CAF889C91F150490005956A9 /* vao.hpp */,
+				CAF889CB1F15064E005956A9 /* vbo.cpp */,
+				CAF889CC1F15064E005956A9 /* vbo.hpp */,
+				CAF889CE1F150B24005956A9 /* vec.cpp */,
+				CAF889CF1F150B24005956A9 /* vec.hpp */,
+				CAF889D11F150E21005956A9 /* vertex.cpp */,
+				CAF889D21F150E21005956A9 /* vertex.hpp */,
+				CAF889D81F198B5F005956A9 /* shader */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		CAF889D81F198B5F005956A9 /* shader */ = {
+			isa = PBXGroup;
+			children = (
+				CAF889C61F14F527005956A9 /* basic.fsh */,
+				CAF889C41F14F51C005956A9 /* basic.vsh */,
+			);
+			name = shader;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -200,6 +221,7 @@
 				CAF889AC1F14D618005956A9 /* ViewController.m in Sources */,
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
 				CAF889A91F14D618005956A9 /* main.m in Sources */,
+				CAF889D61F18E519005956A9 /* mat.cpp in Sources */,
 				CAF889BD1F14DFCF005956A9 /* renderer.cpp in Sources */,
 				CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */,
 				CAF889CA1F150490005956A9 /* vao.cpp in Sources */,

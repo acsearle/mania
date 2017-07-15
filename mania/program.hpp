@@ -11,7 +11,9 @@
 
 #include <string>
 
-#include <OpenGL/gltypes.h>
+#include <OpenGL/gl3.h>
+
+#include "vec.hpp"
 
 namespace gl {
     
@@ -42,8 +44,12 @@ namespace gl {
         program& validate();
         
         program& use();
-                
+        
         // attributes and uniforms
+        
+        void assign(const GLchar* name, vec<float, 4> v) {
+            glUniform4fv(glGetUniformLocation(_name, name), 1, v.data());
+        }
         
     }; // program
     

@@ -9,6 +9,8 @@
 #ifndef vbo_hpp
 #define vbo_hpp
 
+#include <vector>
+
 #include <OpenGL/gltypes.h>
 
 namespace gl {
@@ -32,10 +34,10 @@ namespace gl {
         static void unbind(GLenum target);
         
         template<typename T>
-        static void assign(GLenum target, const T* first, const T* last, GLenum usage) {
+        static void assign(GLenum target, std::vector<T> data, GLenum usage) {
             glBufferData(target,
-                         (last - first) * sizeof(T),
-                         first,
+                         data.size() * sizeof(T),
+                         data.data(),
                          usage);
         }
     }; // class vbo
