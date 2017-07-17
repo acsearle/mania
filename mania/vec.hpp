@@ -9,6 +9,7 @@
 #ifndef vec_hpp
 #define vec_hpp
 
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <utility>
@@ -24,13 +25,75 @@ namespace gl {
         
     };
     
+    template<typename T, std::size_t N> struct vec_storage;
+
+    template<typename T>
+    struct vec_storage<T, 1> {
+        union {
+            T _[1];
+            struct { T x; };
+            struct { T r; };
+            struct { T s; };
+        };
+    };
+    
+    template<typename T>
+    struct vec_storage<T, 2> {
+        union {
+            T _[2];
+            struct { T x, y; };
+            struct { T r, g; };
+            struct { T s, t; };
+        };
+    };
+    
+    template<typename T>
+    struct vec_storage<T, 3> {
+        union {
+            T _[3];
+            struct { T x, y, z; };
+            struct { T r, g, b; };
+            struct { T s, t, p; };
+            // Named contiguous subvectors
+            struct { vec<T, 2> xy; };
+            struct { T _x_yz; vec<T, 2> yz; };
+            struct { vec<T, 2> rg; };
+            struct { T _r_gb; vec<T, 2> gb; };
+            struct { vec<T, 2> st; };
+            struct { T _s_tp; vec<T, 2> tp; };
+        };
+    };
+    
     template<typename T, std::size_t N>
-    class vec {
+    struct vec_storage {
+        union {
+            T _[N];
+            struct { T x, y, z, w; };
+            struct { T r, g, b, a; };
+            struct { T s, t, p, q; };
+            // Named contiguous subvectors for lowest 4 components
+            struct { vec<T, 2> xy, zw; };
+            struct { T _x_yz; vec<T, 2> yz; };
+            struct { vec<T, 3> xyz; };
+            struct { T _x_yzw; vec<T, 3> yzw; };
+            struct { vec<T, 2> rg, ba; };
+            struct { T _r_gb; vec<T, 2> gb; };
+            struct { vec<T, 3> rgb; };
+            struct { T _r_gba; vec<T, 3> gba; };
+            struct { vec<T, 2> st, pq; };
+            struct { T _s_tp; vec<T, 2> tp; };
+            struct { vec<T, 3> stp; };
+            struct { T _s_tpq; vec<T, 3> tpq; };
+        };
+    };
+    
+    template<typename T, std::size_t N>
+    class vec : public vec_storage<T, N> {
         
         // TriviallyCopyable allows us to move around by clobbering data
         static_assert(std::is_trivially_copyable<T>::value, "T must be TriviallyCopyable");
         
-        T _[N];
+        // T _[N];
         
     public:
         
@@ -53,66 +116,73 @@ namespace gl {
         template<typename U, typename = decltype(std::declval<T&>() = std::declval<const U&>())>
         constexpr explicit vec(const U& r) {
             for (size_type i = 0; i != N; ++i)
-                _[i] = r;
+                this->_[i] = r;
         }
         
         template<typename U, typename = decltype(std::declval<T&>() = std::declval<const U&>())>
         constexpr vec(const vec<U, N>& r) {
             for (size_type i = 0; i != N; ++i)
-                _[i] = r[i];
+                this->_[i] = r[i];
         }
         
         template<typename U, typename... Args, typename = decltype(std::declval<T&>() = std::declval<const U&>())>
         constexpr vec(const U& r, const Args&... args) {
-            _[0] = r;
-            new (_ + 1) vec<T, N - 1>(args...);
+            this->_[0] = r;
+            new (this->_ + 1) vec<T, N - 1>(args...);
         }
         
         template<typename U, std::size_t M, typename... Args, typename = decltype(std::declval<T&>() = std::declval<const U&>())>
         constexpr vec(const vec<U, M>& r, const Args&... args) {
             static_assert(M < N, "too many initializers");
-            new (_) vec<T, M>(r);
-            new (_ + M) vec<T, N - M>(args...);
+            new (this) vec<T, M>(r);
+            new (this->_ + M) vec<T, N - M>(args...);
         }
 
         template<typename U, typename = decltype(std::declval<T&>() = std::declval<const U&>())>
         constexpr vec& operator=(const U& r) {
             for (size_type i = 0; i != N; ++i)
-                _[i] = r;
+                this->_[i] = r;
             return *this;
         }
         
         template<typename U, typename = decltype(std::declval<T&>() = std::declval<const U&>())>
         constexpr vec& operator=(const vec<U, N>& r) {
             for (size_type i = 0; i != N; ++i)
-                _[i] = r[i];
+                this->_[i] = r[i];
             return *this;
         }
         
-        constexpr reference operator[](size_type i) { return _[i]; }
-        constexpr const_reference operator[](size_type i) const { return _[i]; }
+        constexpr reference operator[](size_type i) { assert(i < N); return this->_[i]; }
+        constexpr const_reference operator[](size_type i) const { assert(i < N); return this->_[i]; }
         
-        constexpr reference front() { return _[0]; }
-        constexpr const_reference front() const { return _[0]; }
+        constexpr reference front() { return this->_[0]; }
+        constexpr const_reference front() const { return this->_[0]; }
         
-        constexpr reference back() { return _[N - 1]; }
-        constexpr const_reference back() const { return _[N - 1]; }
+        constexpr reference back() { return this->_[N - 1]; }
+        constexpr const_reference back() const { return this->_[N - 1]; }
         
-        constexpr pointer data() { return _; }
-        constexpr const_pointer data() const { return _; }
+        constexpr pointer data() { return this->_; }
+        constexpr const_pointer data() const { return this->_; }
         
-        constexpr iterator begin() { return _; }
-        constexpr const_iterator begin() const { return _; }
-        constexpr const_iterator cbegin() const { return _; }
+        constexpr iterator begin() { return this->_; }
+        constexpr const_iterator begin() const { return this->_; }
+        constexpr const_iterator cbegin() const { return this->_; }
         
-        constexpr iterator end() { return _ + N; }
-        constexpr const_iterator end() const { return _ + N; }
-        constexpr const_iterator cend() const { return _ + N; }
+        constexpr iterator end() { return this->_ + N; }
+        constexpr const_iterator end() const { return this->_ + N; }
+        constexpr const_iterator cend() const { return this->_ + N; }
         
         constexpr bool empty() const { return !N; }
         constexpr size_type size() const { return N; }
         
     };
+    
+    template<typename T, std::size_t N>
+    void swap(vec<T, N>& a, vec<T, N>& b) {
+        using std::swap;
+        for (size_t i = 0; i != N; ++i)
+            swap(a[i], b[i]);
+    }
     
     
 #define UNARY(OP)\

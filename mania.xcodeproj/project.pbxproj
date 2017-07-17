@@ -23,6 +23,11 @@
 		CAF889D01F150B24005956A9 /* vec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889CE1F150B24005956A9 /* vec.cpp */; };
 		CAF889D31F150E21005956A9 /* vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D11F150E21005956A9 /* vertex.cpp */; };
 		CAF889D61F18E519005956A9 /* mat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D41F18E519005956A9 /* mat.cpp */; };
+		CAF889DB1F1AD842005956A9 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D91F1AD842005956A9 /* image.cpp */; };
+		CAF889E01F1ADC78005956A9 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAF889DF1F1ADC78005956A9 /* libpng16.a */; };
+		CAF889E31F1B163B005956A9 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889E11F1B163B005956A9 /* texture.cpp */; };
+		CAF889E61F1B1A88005956A9 /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889E41F1B1A88005956A9 /* matrix.cpp */; };
+		CAF889E91F1CC3B6005956A9 /* nr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889E71F1CC3B6005956A9 /* nr.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +60,16 @@
 		CAF889D21F150E21005956A9 /* vertex.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vertex.hpp; sourceTree = "<group>"; };
 		CAF889D41F18E519005956A9 /* mat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mat.cpp; sourceTree = "<group>"; };
 		CAF889D51F18E519005956A9 /* mat.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mat.hpp; sourceTree = "<group>"; };
+		CAF889D91F1AD842005956A9 /* image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = image.cpp; sourceTree = "<group>"; };
+		CAF889DA1F1AD842005956A9 /* image.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = image.hpp; sourceTree = "<group>"; };
+		CAF889DD1F1AD99E005956A9 /* libpng15.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng15.a; path = ../../../../usr/local/Cellar/libpng/1.5.17/lib/libpng15.a; sourceTree = "<group>"; };
+		CAF889DF1F1ADC78005956A9 /* libpng16.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng16.a; path = ../../../../usr/local/Cellar/libpng/1.6.30/lib/libpng16.a; sourceTree = "<group>"; };
+		CAF889E11F1B163B005956A9 /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texture.cpp; sourceTree = "<group>"; };
+		CAF889E21F1B163B005956A9 /* texture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = texture.hpp; sourceTree = "<group>"; };
+		CAF889E41F1B1A88005956A9 /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = matrix.cpp; sourceTree = "<group>"; };
+		CAF889E51F1B1A88005956A9 /* matrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = matrix.hpp; sourceTree = "<group>"; };
+		CAF889E71F1CC3B6005956A9 /* nr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nr.cpp; sourceTree = "<group>"; };
+		CAF889E81F1CC3B6005956A9 /* nr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = nr.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CAF889E01F1ADC78005956A9 /* libpng16.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +89,7 @@
 			children = (
 				CAF889A31F14D618005956A9 /* mania */,
 				CAF889A21F14D618005956A9 /* Products */,
+				CAF889DC1F1AD99E005956A9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -113,14 +130,23 @@
 		CAF889D71F198B2D005956A9 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				CAF889D91F1AD842005956A9 /* image.cpp */,
+				CAF889DA1F1AD842005956A9 /* image.hpp */,
 				CAF889D41F18E519005956A9 /* mat.cpp */,
 				CAF889D51F18E519005956A9 /* mat.hpp */,
 				CAF889C11F14F1C0005956A9 /* program.cpp */,
 				CAF889C21F14F1C0005956A9 /* program.hpp */,
 				CAF889BB1F14DFCF005956A9 /* renderer.cpp */,
 				CAF889BC1F14DFCF005956A9 /* renderer.hpp */,
+				CAF889D81F198B5F005956A9 /* shader */,
 				CAF889BE1F14E31B005956A9 /* shader.cpp */,
+				CAF889E71F1CC3B6005956A9 /* nr.cpp */,
+				CAF889E81F1CC3B6005956A9 /* nr.hpp */,
 				CAF889BF1F14E31B005956A9 /* shader.hpp */,
+				CAF889E11F1B163B005956A9 /* texture.cpp */,
+				CAF889E21F1B163B005956A9 /* texture.hpp */,
+				CAF889E41F1B1A88005956A9 /* matrix.cpp */,
+				CAF889E51F1B1A88005956A9 /* matrix.hpp */,
 				CAF889C81F150490005956A9 /* vao.cpp */,
 				CAF889C91F150490005956A9 /* vao.hpp */,
 				CAF889CB1F15064E005956A9 /* vbo.cpp */,
@@ -129,7 +155,6 @@
 				CAF889CF1F150B24005956A9 /* vec.hpp */,
 				CAF889D11F150E21005956A9 /* vertex.cpp */,
 				CAF889D21F150E21005956A9 /* vertex.hpp */,
-				CAF889D81F198B5F005956A9 /* shader */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -141,6 +166,15 @@
 				CAF889C41F14F51C005956A9 /* basic.vsh */,
 			);
 			name = shader;
+			sourceTree = "<group>";
+		};
+		CAF889DC1F1AD99E005956A9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CAF889DF1F1ADC78005956A9 /* libpng16.a */,
+				CAF889DD1F1AD99E005956A9 /* libpng15.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -220,11 +254,15 @@
 				CAF889D01F150B24005956A9 /* vec.cpp in Sources */,
 				CAF889AC1F14D618005956A9 /* ViewController.m in Sources */,
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
+				CAF889E61F1B1A88005956A9 /* matrix.cpp in Sources */,
 				CAF889A91F14D618005956A9 /* main.m in Sources */,
+				CAF889E91F1CC3B6005956A9 /* nr.cpp in Sources */,
 				CAF889D61F18E519005956A9 /* mat.cpp in Sources */,
 				CAF889BD1F14DFCF005956A9 /* renderer.cpp in Sources */,
 				CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */,
 				CAF889CA1F150490005956A9 /* vao.cpp in Sources */,
+				CAF889DB1F1AD842005956A9 /* image.cpp in Sources */,
+				CAF889E31F1B163B005956A9 /* texture.cpp in Sources */,
 				CAF889D31F150E21005956A9 /* vertex.cpp in Sources */,
 				CAF889BA1F14D67C005956A9 /* MyOpenGLView.mm in Sources */,
 			);
@@ -285,6 +323,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/local/include;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -327,6 +366,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = /usr/local/include;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -341,6 +381,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = mania/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/libpng/1.6.30/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = surly.mania;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -355,6 +396,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = mania/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/libpng/1.6.30/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = surly.mania;
 				PRODUCT_NAME = "$(TARGET_NAME)";

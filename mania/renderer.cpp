@@ -21,6 +21,7 @@
 #include "vertex.hpp"
 #include "vec.hpp"
 #include "mat.hpp"
+#include "image.hpp"
 
 using namespace gl;
 using namespace std;
@@ -99,6 +100,11 @@ vec2 un(vec2 a) {
 
 blenderer::blenderer()
 : _program("basic") {
+    
+    png_thing();
+    
+    vec2 a;
+    a.x = 7;
     
     glBindAttribLocation(_program, (GLuint) gl::attribute::position, "position");
     glBindAttribLocation(_program, (GLuint) gl::attribute::color, "color");
@@ -215,17 +221,17 @@ void blenderer::render() {
     
     gl::vec2 gravity;
     gravity[0] = 0;
-    gravity[1] = -9.8/60.0/60.0/60.0;
+    gravity[1] = -9.8/60.0/60.0/32.0;
     
     static double t = 0;
-    t += 0.02;
+    t += 0.04;
     
 
     auto b = normalize(ivec2(1,1));
 
     std::cout << b << std::endl;
     
-    //_lengths[15] = 0.25 + 0.125 * sin(t);
+    _lengths[15] = 0.25 + 0.125 * sin(t);
     
     
     for (size_t i = 0; i != _edges.size(); ++i) {
@@ -234,9 +240,9 @@ void blenderer::render() {
         vec2 d = _vertices[j].position - _vertices[k].position;
         
         // the stick damps relative velocity along its length
-        vec2 common = (_velocities[j] + _velocities[k]) * 0.5f;
+        vec2 common = (_velocities[j] + _velocities[k]) * 0.5;
         double l = length(d);
-        vec2 u = d * (float) (-1.0 / l);
+        vec2 u = d / -l;
         _velocities[j] -= u * dot(u, _velocities[j] - common);
         _velocities[k] -= u * dot(u, _velocities[k] - common);
         
@@ -245,8 +251,8 @@ void blenderer::render() {
         // Stiffest spring produces impulse to return to rest immediately
         
         double f = 0.5 * (l - _lengths[i]) / l;
-        _velocities[j] -= (d * (float) f);
-        _velocities[k] += (d * (float) f);
+        _velocities[j] -= d * f;
+        _velocities[k] += d * f;
         
         // Creep -- rods slowly adapt to their new length
         //(_lengths[i] *= 0.99) += 0.01 * l;
@@ -260,7 +266,7 @@ void blenderer::render() {
     for (size_t i = 0; i != _triangles.size(); ++i) {
         
         {
-            
+            /*
             auto x0 = _vertices[_triangles[i][0]].position;
             auto x1 = _vertices[_triangles[i][1]].position;
             auto x2 = _vertices[_triangles[i][2]].position;
@@ -281,7 +287,7 @@ void blenderer::render() {
             v2 += a;
             
             auto w = (cross(v0, x0) + cross(v1, x1) + cross(v1, x1)) / 3.0f;
-            
+            */
             /*
             v0 = w * normal(x0) / length(x0) + a;
             v1 = w * normal(x1) / length(x1) + a;
@@ -321,7 +327,7 @@ void blenderer::render() {
             
             
         }
-        
+        /*
         {
         auto a = _vertices[_triangles[i][0]].position;
         auto b = _vertices[_triangles[i][1]].position;
@@ -343,7 +349,7 @@ void blenderer::render() {
         _velocities[_triangles[i][1]] -= (un(bc) + un(ab)) * (float) g;
         _velocities[_triangles[i][2]] -= (un(ca) + un(bc)) * (float) g;
         }
-        
+        */
         
         
     }
@@ -376,7 +382,7 @@ void blenderer::render() {
             
     }
     
-    vec4 black(0,0,0,1);
+    vec4 black(0,0,1,1);
     vec4 white(1,1,1,1);
     
 

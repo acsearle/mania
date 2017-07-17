@@ -16,6 +16,36 @@
 
 namespace gl {
     
+    /*
+    struct all_t {};
+    inline const all_t all;
+    
+    template<typename T, std::size_t M, std::size_t N = M> struct column {
+        T* _;
+        
+        using size_type = std::size_t;
+        using value_type = T;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+
+        T& operator[](size_type i) { return _[i * N]; }
+        const T& operator[](size_type i) const { return _[i * N]; }
+        
+        template<typename U>
+        column& operator=(const vec<U, M>& r) {
+            for (size_type i = 0; i != M; ++i)
+                operator[](i) = r[i];
+        }
+
+        template<typename U>
+        column& operator=(const U& r) {
+            for (size_type i = 0; i != M; ++i)
+                operator[](i) = r;
+        }
+        
+    };
+     */
+    
     template<typename T, std::size_t M, std::size_t N = M>
     struct mat {
         
@@ -56,9 +86,11 @@ namespace gl {
         }
         
         constexpr reference operator[](size_type i) {
+            assert(i < M);
             return reinterpret_cast<reference>(_[i * N]);
         }
         constexpr const_reference operator[](size_type i) const {
+            assert(i < M);
             return reinterpret_cast<const_reference>(_[i * N]);
         }
         

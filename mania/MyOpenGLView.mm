@@ -30,6 +30,29 @@ std::string load(std::string name, std::string ext) {
     return load(path_for_resource(name, ext));
 }
 
+
+void fontStuff(void) {
+ 
+    /*
+    size_t width = 1024;
+    size_t height = width;
+    CGContextRef context = CGBitmapContextCreate(nullptr, width, height, 8, width * 4, nullptr, kCGImageAlphaLast);
+    assert(context);
+    
+    
+    
+    
+    CTFontGetGlyphsForCharacters(<#CTFontRef  _Nonnull font#>, <#const UniChar *characters#>, <#CGGlyph *glyphs#>, <#CFIndex count#>)
+    
+    CGContextShowGlyphsAtPositions(context, <#const CGGlyph * _Nullable glyphs#>, <#const CGPoint * _Nullable Lpositions#>, <#size_t count#>)
+    
+    
+    CGLReleaseContext(context);
+    */
+    
+}
+
+
 @implementation MyOpenGLView {
     std::unique_ptr<renderer> _renderer;
 }
@@ -142,6 +165,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     // Init our renderer.  Use 0 for the defaultFBO which is appropriate for
     // OSX (but not iOS since iOS apps must create their own FBO)
     _renderer = renderer::make();
+    
+    fontStuff();
+    
 }
 
 - (void)reshape
