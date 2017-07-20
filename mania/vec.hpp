@@ -242,6 +242,58 @@ return a;\
     
 #undef BINARY
     
+    template<typename T, std::size_t N>
+    std::ostream& operator<<(std::ostream& a, const vec<T, N>& b) {
+        a << "vec(";
+        for (std::size_t i = 0; i != N;) {
+            a << b[i];
+            ++i;
+            if (i != N)
+                a << ",";
+        }
+        return a << ")";
+    }
+    
+
+    template<typename T, std::size_t N, typename U>
+    bool operator==(const vec<T, N>& a, const vec<U, N>& b) {
+        for (std::size_t i = 0; i != N; ++i)
+            if (a[i] != b[i])
+                return false;
+        return true;
+    }
+    
+    template<typename T, std::size_t N, typename U>
+    bool operator!=(const vec<T, N>& a, const vec<U, N>& b) {
+        return !(a == b);
+    }
+    
+    // Lexicograhical ordering
+    
+    template<typename T, std::size_t N, typename U>
+    bool operator<(const vec<T, N>& a, const vec<U, N>& b) {
+        for (std::size_t i = 0; i != N; ++i)
+            if (a[i] < b[i])
+                return true;
+        return false;
+    }
+    
+    template<typename T, std::size_t N, typename U>
+    bool operator>(const vec<T, N>& a, const vec<U, N>& b) {
+        return b < a;
+    }
+
+    template<typename T, std::size_t N, typename U>
+    bool operator<=(const vec<T, N>& a, const vec<U, N>& b) {
+        return !(b < a);
+    }
+    
+    template<typename T, std::size_t N, typename U>
+    bool operator>=(const vec<T, N>& a, const vec<U, N>& b) {
+        return !(a < b);
+    }
+    
+    
     
     template<typename T, std::size_t N, typename U>
     auto dot(const vec<T, N>& a, const vec<U, N>& b) {
@@ -251,17 +303,31 @@ return a;\
             c += a[i] * b[i];
         return c;
     }
-
+    
     template<typename T, std::size_t N>
-    auto length(const vec<T, N>& a) {
-        return sqrt(dot(a, a));
+    auto dot(const vec<T, N>& a) {
+        auto c = a[0] * a[0];
+        for (std::size_t i = 0; i != N; ++i)
+            c += a[i] * a[i];
+        return c;
     }
     
-    // Specialize when std::hypot is available
+    template<typename T>
+    auto length(const vec<T, 1>& a) {
+        using std::abs;
+        return abs(a[0]);
+    }
+    
     template<typename T>
     auto length(const vec<T, 2>& a) {
         using std::hypot;
         return hypot(a[0], a[1]);
+    }
+    
+    template<typename T, std::size_t N>
+    auto length(const vec<T, N>& a) {
+        using std::sqrt;
+        return sqrt(dot(a, a));
     }
     
     template<typename T, std::size_t N>
@@ -280,7 +346,8 @@ return a;\
     template<typename T, std::size_t N>
     auto normalize(const vec<T, N>& a) {
         auto b = length(a);
-        return b ? a / b : (decltype(a / b)) a;
+        assert(b);
+        return a / b;
     }
 
     template<typename T, typename U>
@@ -292,18 +359,7 @@ return a;\
     vec<T, 2> perp(const vec<T, 2>& a) {
         return vec<T, 2>(-a[1], a[0]);
     }
-    
-    template<typename T, std::size_t N>
-    std::ostream& operator<<(std::ostream&, const vec<T, N>& a) {
-        std::cout << '[';
-        for (std::size_t i = 0; i != N; ++i) {
-            std::cout << a[i];
-            if (i != N - 1)
-                std::cout << ", ";
-        }
-        return std::cout << ']';
-    }
-    
+        
     static_assert(sizeof(int) == 4, "int is not 32 bit");
     using uint = uint32_t;
     

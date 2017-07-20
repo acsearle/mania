@@ -9,11 +9,11 @@
 #ifndef matrix_hpp
 #define matrix_hpp
 
-#include <cstddef>
+#include <vector>
 
 namespace manic {
     
-    template<typename ContiguousContainer>
+    template<typename T, typename ContiguousContainer = std::vector<T>>
     struct matrix {
         
         using value_type = typename ContiguousContainer::value_type;
@@ -23,27 +23,44 @@ namespace manic {
         
         ContiguousContainer _data;
         size_type  _m, _n;
-        size_type _stride;
         
-        matrix() = default;
+        matrix() : _m(0), _n(0) {}
         matrix(const matrix&) = default;
         matrix(matrix&&) = default;
         ~matrix() = default;
         matrix& operator=(const matrix&) = default;
         matrix& operator=(matrix&&) = default;
         
+        matrix(size_t rows, size_t columns)
+        : _m(rows)
+        , _n(columns)
+        , _data(rows * columns) {}
+        
+        void resize(size_t rows, size_t columns) {
+            _data.resize(rows * columns);
+        }
+        
+        size_type rows() const { return _m; }
+        size_type columns() const {return _m; }
+        
         value_type* data() { return _data.data(0); }
-        size_type stride() { return _stride(); }
         
         value_type& operator()(size_type i, size_type j) {
             assert(i < _m);
             assert(j < _n);
-            return _data[i * _stride + j];
+            return _data[i * _n + j];
         }
 
         value_type* operator[](size_type i) {
-            return _data.data() + i * _stride;
+            assert(i < _m);
+            return _data.data() + i * _n;
         }
+
+        const value_type* operator[](size_type i) const {
+            assert(i < _m);
+            return _data.data() + i * _n;
+        }
+
         
     };
     

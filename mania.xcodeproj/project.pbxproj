@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA72C7661F20A0AA006FEDF1 /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72C7641F20A0AA006FEDF1 /* hash.cpp */; };
+		CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72C7671F20AC66006FEDF1 /* cg.cpp */; };
 		CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A51F14D618005956A9 /* AppDelegate.m */; };
 		CAF889A91F14D618005956A9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A81F14D618005956A9 /* main.m */; };
 		CAF889AC1F14D618005956A9 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889AB1F14D618005956A9 /* ViewController.m */; };
@@ -31,6 +33,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CA72C7641F20A0AA006FEDF1 /* hash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hash.cpp; sourceTree = "<group>"; };
+		CA72C7651F20A0AA006FEDF1 /* hash.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = hash.hpp; sourceTree = "<group>"; };
+		CA72C7671F20AC66006FEDF1 /* cg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cg.cpp; sourceTree = "<group>"; };
+		CA72C7681F20AC66006FEDF1 /* cg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cg.hpp; sourceTree = "<group>"; };
 		CAF889A11F14D618005956A9 /* mania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mania.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF889A41F14D618005956A9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CAF889A51F14D618005956A9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -141,6 +147,10 @@
 				CAF889D81F198B5F005956A9 /* shader */,
 				CAF889BE1F14E31B005956A9 /* shader.cpp */,
 				CAF889E71F1CC3B6005956A9 /* nr.cpp */,
+				CA72C7641F20A0AA006FEDF1 /* hash.cpp */,
+				CA72C7651F20A0AA006FEDF1 /* hash.hpp */,
+				CA72C7671F20AC66006FEDF1 /* cg.cpp */,
+				CA72C7681F20AC66006FEDF1 /* cg.hpp */,
 				CAF889E81F1CC3B6005956A9 /* nr.hpp */,
 				CAF889BF1F14E31B005956A9 /* shader.hpp */,
 				CAF889E11F1B163B005956A9 /* texture.cpp */,
@@ -256,6 +266,7 @@
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
 				CAF889E61F1B1A88005956A9 /* matrix.cpp in Sources */,
 				CAF889A91F14D618005956A9 /* main.m in Sources */,
+				CA72C7661F20A0AA006FEDF1 /* hash.cpp in Sources */,
 				CAF889E91F1CC3B6005956A9 /* nr.cpp in Sources */,
 				CAF889D61F18E519005956A9 /* mat.cpp in Sources */,
 				CAF889BD1F14DFCF005956A9 /* renderer.cpp in Sources */,
@@ -263,6 +274,7 @@
 				CAF889CA1F150490005956A9 /* vao.cpp in Sources */,
 				CAF889DB1F1AD842005956A9 /* image.cpp in Sources */,
 				CAF889E31F1B163B005956A9 /* texture.cpp in Sources */,
+				CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */,
 				CAF889D31F150E21005956A9 /* vertex.cpp in Sources */,
 				CAF889BA1F14D67C005956A9 /* MyOpenGLView.mm in Sources */,
 			);

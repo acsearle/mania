@@ -22,7 +22,7 @@ void ludcmp(float **a, int n, int *indx, float *d) /*
                                                     or odd, respectively. This routine is used in combination with lubksb to solve linear equations
                                                     or invert a matrix. */
 {
-    int i,imax,j,k;
+    int i,imax=0,j,k;
     float big,dum,sum,temp;
     float *vv; /* vv stores the implicit scaling of each row. */
     vv = (float*) malloc(n * sizeof(float)); --vv;
