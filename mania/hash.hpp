@@ -26,7 +26,7 @@ namespace manic {
     };
     
     
-    uint64_t hash(uint64_t x) {
+    inline uint64_t hash(uint64_t x) {
         x = x * 3935559000370003845ull + 2691343689449507681ull;
         x ^= x >> 21; x ^= x << 37; x ^= x >> 4;
         x *= 4768777513237032717ull;

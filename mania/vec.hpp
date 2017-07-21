@@ -307,7 +307,7 @@ return a;\
     template<typename T, std::size_t N>
     auto dot(const vec<T, N>& a) {
         auto c = a[0] * a[0];
-        for (std::size_t i = 0; i != N; ++i)
+        for (std::size_t i = 1; i != N; ++i)
             c += a[i] * a[i];
         return c;
     }
