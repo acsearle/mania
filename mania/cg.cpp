@@ -14,14 +14,18 @@
 
 
 
+
+
+
+
+
 namespace manic {
     
         
     const double Delaunay::fuzz = 1e-6;
     const double Delaunay::bigscale = 1000.0;
-    unsigned int Delaunay::jran = 14921620; // why not use a real rng?
     
-    Delaunay::Delaunay(vector<Point<2>>& pvec, int options)
+    Delaunay::Delaunay(vector<vec<double, 2>>& pvec, int options)
     : npts((int) pvec.size())
     , ntri(0)
     , ntree(0)
@@ -34,7 +38,9 @@ namespace manic {
         double xl, xh, yl, yh;
         linehash = new unordered_map<uint64_t, int>(6*npts+12);
         trihash = new unordered_map<uint64_t, int>(2*npts+6);
-        perm = new int[npts]; // permutation to randomize order
+        //perm = new int[npts]; // permutation to randomize order
+        std::vector<int> perm(npts);
+        
         xl = xh = pvec[0].x;
         yl = yh = pvec[0].y;
         for (j = 0; j < npts; ++j) { // for incoming points...
@@ -48,31 +54,15 @@ namespace manic {
         // make bounding triangle from points-past-the-end
         delx = xh - xl;
         dely = yh - yl;
-        pts[npts] = Point<2>(0.5 * (xl + xh), yh + bigscale * dely);
-        pts[npts+1] = Point<2>(xl - 0.5*bigscale * delx, yl - 0.5 * bigscale * dely);
-        pts[npts+2] = Point<2>(xl + 0.5*bigscale * delx, yl - 0.5 * bigscale * dely);
+        pts[npts] = vec<double, 2>(0.5 * (xl + xh), yh + bigscale * dely);
+        pts[npts+1] = vec<double, 2>(xl - 0.5*bigscale * delx, yl - 0.5 * bigscale * dely);
+        pts[npts+2] = vec<double, 2>(xl + 0.5*bigscale * delx, yl - 0.5 * bigscale * dely);
         storetriangle(npts, npts+1, npts+2);
         // create a permutation
-        using std::swap;
-        for (j = npts; j > 0; j--)
-            swap(perm[j-1], perm[hash(jran++) % j]);
+        // this is a defensive shuffle that is not needed if the input is already shuffled
+        std::shuffle(perm.begin(), perm.end(), rand());
         // insert points in permuted order
         for (j = 0; j < npts; j++) {
-            
-            // debug
-            /*
-            std::cout << "triangles are " << std::endl;
-            for (int q = 0; q != ntree; ++q)
-                std::cout << thelist[q].stat
-                << ":" << thelist[q].p[0]
-                << ", " << thelist[q].p[1]
-                << ", " << thelist[q].p[2] << std::endl;
-            */
-            
-            
-            
-            // debug
-            
             insertapoint(perm[j]);
         }
         for (j = 0; j < ntree; j++) { // delete root triangle and connectng edges (but it persists, for fast lookup)
@@ -87,7 +77,6 @@ namespace manic {
             }
         }
         if (!(opt & 1)) {
-            delete[] perm;
             delete trihash;
             delete linehash;
         }
@@ -97,15 +86,19 @@ namespace manic {
         int i, j, k,l,s,tno=0,ntask,d0,d1,d2;
         uint64_t key;
         int tasks[50], taski[50], taskj[50];
+        
+        
+        static normal<> jran;
+        
         for(j=0;j<3;j++) {
             tno = whichcontainspoint(pts[r],1);
-            if (tno >= 0) break;
-            
-            //std::cout << "fuzzing" << std::endl;
-            // on an edge, fuzz
-            pts[r][0] += fuzz * delx * (hash(jran++)*5.4210109e-20-0.5);
-            pts[r][1] += fuzz * dely * (hash(jran++)*5.4210109e-20-0.5);
-            // todo: replace fuzz with deletion of triangles on both sides
+            if (tno >= 0)
+                break;
+            // point is on an edge; perturb it
+            pts[r][0] += fuzz * delx * (jran()-0.5);
+            pts[r][1] += fuzz * dely * (jran()-0.5);
+            // todo: replace fuzz with deletion of triangles on both sides,
+            // and ensure result still converges
         }
         if (j == 3) assert(false); // still degenerate!
         ntask = 0;
@@ -144,7 +137,7 @@ namespace manic {
         }
     }
     
-    int Delaunay::whichcontainspoint(const Point<2>& p, int strict) {
+    int Delaunay::whichcontainspoint(const vec<double, 2>& p, int strict) {
         int i,j=-1,k=0;
         while (thelist[k].stat <= 0) {
             for (i = 0; i<3; i++) {
@@ -205,18 +198,26 @@ namespace manic {
         return (ntree - 1);
     }
     
-    
+    vector<gl::vec<int,3>> Delaunay::triangles() const {
+        vector<gl::vec<int,3>> r;
+        auto b = thelist.data();
+        auto e = b + ntree;
+        for (; b != e; ++b)
+            if (b->stat > 0)
+                r.push_back(vec<int, 3>(b->p[0],b->p[1],b->p[2]));
+        return r;        
+    }
     
     
     struct gjy {
         
         gjy() {
             
-            std:vector<Point<2>> x;
+            std:vector<vec<double, 2>> x;
             /*
             int n = 100000;
             for (int i = 0; i != n; ++i) {
-                x.push_back(Point<2>(hash(i) * 5.4210109e-20,
+                x.push_back(vec<double, 2>(hash(i) * 5.4210109e-20,
                                      hash(i + n) * 5.4210109e-20));
             }
             
@@ -243,7 +244,7 @@ namespace manic {
             
             
             
-            exit(0);
+            //exit(0);
             
         };
         

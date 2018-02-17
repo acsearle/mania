@@ -45,7 +45,7 @@ namespace nr {
         }
         
         T& operator*() const { *get(); }
-        T& operator[](std::ptrdiff_t i) const { return reinterpret_cast<T&>(_ptr[i]); }
+        T& operator[](std::ptrdiff_t i) const { return *(_ptr + i).get(); }
         T* operator->() const { get(); }
         T* get() const { return reinterpret_cast<T*>(_ptr); }
         
@@ -61,9 +61,55 @@ namespace nr {
         stride_ptr& operator-=(std::ptrdiff_t n) { _ptr -= n; return *this; }
         stride_ptr operator-(std::ptrdiff_t n) const { return stride_ptr(_ptr - n); }
         
-        // ...
-    };
+        friend std::ptrdiff_t operator-(stride_ptr a, stride_ptr b) { return a._ptr - b._ptr; }
+        
+#define X(F)\
+        friend bool operator F (stride_ptr a, stride_ptr b) { return a._ptr F b._ptr; }\
+
+        X(<) X(<=) X(>) X(>=)
+        X(==) X(!=)
+        
+        friend T* unwrap(stride_ptr a) { return a.get(); }
+        
+    }; // class stride_ptr
     
+    
+    // Non-owning pointer to a single object
+    
+    template<typename T>
+    class observer_ptr {
+        
+        T* _ptr;
+    
+    public:
+        
+        observer_ptr() = default;
+        observer_ptr(const observer_ptr&) = default;
+        observer_ptr(observer_ptr&&) = default;
+        ~observer_ptr() = default;
+        observer_ptr& operator=(const observer_ptr&) = default;
+        observer_ptr& operator=(observer_ptr&&) = default;
+
+        observer_ptr(T* ptr) : _ptr(ptr) {}
+        observer_ptr& operator=(T* ptr) { _ptr = ptr; return *this; }
+        
+        operator bool() const { return static_cast<bool>(_ptr); }
+        T* operator->() const { return _ptr; }
+        T& operator*() const { return *_ptr; }
+        T* get() const { return _ptr; }
+        
+        friend bool operator==(observer_ptr a, observer_ptr b) { return a._ptr == b._ptr; }
+        friend bool operator!=(observer_ptr a, observer_ptr b) { return a._ptr != b._ptr; }
+        
+        friend T* unwrap(observer_ptr ptr) { return ptr._ptr; }
+        
+    }; // class observer_ptr
+    
+    template<typename T>
+    T* unwrap(T* ptr) { return ptr; }
+    
+    template<typename T>
+    T& unwrap(T& ref) { return ref; }
     
     
     

@@ -16,6 +16,8 @@ namespace gl {
         glEnableVertexAttribArray((GLuint) attribute::position);
         glEnableVertexAttribArray((GLuint) attribute::color);
     }
+    
+    // number of components of a vector type
 
     template<typename T>
     constexpr GLint size(T) {
@@ -27,6 +29,8 @@ namespace gl {
         static_assert((1 <= N) && (N <= 4), "Only 1-4 components accepted");
         return (GLint) N;
     }
+    
+    // GLenum value for a type (or the type of the elements of a vector)
     
     constexpr GLenum type(unsigned char) {
         return GL_UNSIGNED_BYTE;

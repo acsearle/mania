@@ -184,6 +184,7 @@ namespace gl {
             swap(a[i], b[i]);
     }
     
+    // elementwise operations
     
 #define UNARY(OP)\
 template<typename T, std::size_t N> auto operator OP (const vec<T, N>& a) {\
@@ -254,6 +255,7 @@ return a;\
         return a << ")";
     }
     
+    // short-circuit comparison
 
     template<typename T, std::size_t N, typename U>
     bool operator==(const vec<T, N>& a, const vec<U, N>& b) {
@@ -268,7 +270,7 @@ return a;\
         return !(a == b);
     }
     
-    // Lexicograhical ordering
+    // lexicograhical ordering
     
     template<typename T, std::size_t N, typename U>
     bool operator<(const vec<T, N>& a, const vec<U, N>& b) {
@@ -295,6 +297,8 @@ return a;\
     
     
     
+    // non-elementwise operations
+    
     template<typename T, std::size_t N, typename U>
     auto dot(const vec<T, N>& a, const vec<U, N>& b) {
         static_assert(N, "");
@@ -304,43 +308,41 @@ return a;\
         return c;
     }
     
+    template<typename T>
+    auto sqr(const T& a) {
+        return a * a;
+    }
+    
     template<typename T, std::size_t N>
-    auto dot(const vec<T, N>& a) {
-        auto c = a[0] * a[0];
+    auto sqr(const vec<T, N>& a) {
+        static_assert(N, "");
+        auto c = sqr(a[0]);
         for (std::size_t i = 1; i != N; ++i)
-            c += a[i] * a[i];
+            c += sqr(a[i]);
         return c;
-    }
-    
-    template<typename T>
-    auto length(const vec<T, 1>& a) {
-        using std::abs;
-        return abs(a[0]);
-    }
-    
-    template<typename T>
-    auto length(const vec<T, 2>& a) {
-        using std::hypot;
-        return hypot(a[0], a[1]);
     }
     
     template<typename T, std::size_t N>
     auto length(const vec<T, N>& a) {
         using std::sqrt;
-        return sqrt(dot(a, a));
+        return sqrt(dot(a));
+    }
+    
+    template<typename T>
+    auto length(const vec<T, 1>& a) {
+        using std::abs;
+        return abs(a[0]); // use abs for 1d
+    }
+    
+    template<typename T>
+    auto length(const vec<T, 2>& a) {
+        using std::hypot;
+        return hypot(a[0], a[1]); // use hypot for 2d
     }
     
     template<typename T, std::size_t N>
     auto distance(const vec<T, N>& a, const vec<T, N>& b) {
         return length(a - b);
-    }
-    
-    template<typename T, typename U>
-    auto cross(const vec<T, 3>& a, const vec<U, 3>& b) {
-        using R = decltype(std::declval<const T&>() * std::declval<const U&>());
-        return vec<R, 3>(a[1] * b[2] - a[2] * b[1],
-                         a[2] * b[0] - a[0] * b[2],
-                         a[0] * b[1] - a[1] * b[0]);
     }
     
     template<typename T, std::size_t N>
@@ -349,11 +351,27 @@ return a;\
         assert(b);
         return a / b;
     }
+    
+    
+    
+    // cross product for 3-vectors
+    
+    template<typename T, typename U>
+    auto cross(const vec<T, 3>& a, const vec<U, 3>& b) {
+        using R = decltype(std::declval<const T&>() * std::declval<const U&>());
+        return vec<R, 3>(a[1] * b[2] - a[2] * b[1],
+                         a[2] * b[0] - a[0] * b[2],
+                         a[0] * b[1] - a[1] * b[0]);
+    }
 
+    // cross product for 2-vectors by analogy
+    
     template<typename T, typename U>
     auto cross(const vec<T, 2>& a, const vec<U, 2>& b) {
         return a[0] * b[1] - a[1] * b[0];
     }
+    
+    // perpendicular vector to a 2-vector by ccw rotation
     
     template<typename T>
     vec<T, 2> perp(const vec<T, 2>& a) {

@@ -22,6 +22,7 @@
 #include "vec.hpp"
 #include "mat.hpp"
 #include "image.hpp"
+#include "cg.hpp"
 
 using namespace gl;
 using namespace std;
@@ -221,15 +222,33 @@ void blenderer::render() {
     
     gl::vec2 gravity;
     gravity[0] = 0;
-    gravity[1] = -9.8/60.0/60.0/32.0;
+    gravity[1] = -9.8/60.0/60.0/64.0;
     
     static double t = 0;
     t += 0.04;
     
 
+    /*
+     
+     Make bubbles:
+     
+     random points
+     triangulate
+     assign mass of gas to each triangle
+     * mass of vertex is weighted average of triangles (is it?)
+     forces are surface tension in, pressure out
+     * how are these applied? at vertices? along edges?
+     
+     next: heat? apply to given point (needs lookup)
+     
+     */
+    
+    
+    
+    
     auto b = normalize(ivec2(1,1));
 
-    std::cout << b << std::endl;
+    //std::cout << b << std::endl;
     
     _lengths[15] = 0.25 + 0.125 * sin(t);
     
@@ -239,23 +258,33 @@ void blenderer::render() {
         auto k = _edges[i][1];
         vec2 d = _vertices[j].position - _vertices[k].position;
         
+        
+        
         // the stick damps relative velocity along its length
         vec2 common = (_velocities[j] + _velocities[k]) * 0.5;
         double l = length(d);
-        vec2 u = d / -l;
+        vec2 u = 0.3 * d / -l;
         _velocities[j] -= u * dot(u, _velocities[j] - common);
         _velocities[k] -= u * dot(u, _velocities[k] - common);
         
+        // surface tension
         
+        _velocities[j] -= d / 600.0;
+        _velocities[k] += d / 600.0;
+
         
         // Stiffest spring produces impulse to return to rest immediately
         
+        /*
         double f = 0.5 * (l - _lengths[i]) / l;
         _velocities[j] -= d * f;
         _velocities[k] += d * f;
+         */
         
         // Creep -- rods slowly adapt to their new length
         //(_lengths[i] *= 0.99) += 0.01 * l;
+        
+        
         
     
         
@@ -266,7 +295,6 @@ void blenderer::render() {
     for (size_t i = 0; i != _triangles.size(); ++i) {
         
         {
-            /*
             auto x0 = _vertices[_triangles[i][0]].position;
             auto x1 = _vertices[_triangles[i][1]].position;
             auto x2 = _vertices[_triangles[i][2]].position;
@@ -275,6 +303,27 @@ void blenderer::render() {
             auto& v1 = _velocities[_triangles[i][1]];
             auto& v2 = _velocities[_triangles[i][2]];
             
+            auto area = -cross(x0 - x1, x2 - x1);
+            auto p = 1e-4 / area;
+            
+            // animate one
+            if (i == 10) {
+                p = (1e-4 + (1 + sin(t)) * 1e-3) / area;
+            }
+            auto f = perp(x0 - x1) * p;
+            v0 += f;
+            v1 += f;
+            f = perp(x1 - x2) * p;
+            v1 += f;
+            v2 += f;
+            f = perp(x2 - x0) * p;
+            v2 += f;
+            v0 += f;
+            
+            
+            
+
+            /*
             auto a = (v0 + v1 + v2) / 3.0f;
             v0 -= a;
             v1 -= a;
@@ -379,8 +428,23 @@ void blenderer::render() {
             v[1] = -v[1];
             v *= 0.5;
         }
-            
+        
+        if (x[1] > 1.0) {
+            x[1] = 1.0;
+            v[1] = -v[1];
+            v *= 0.5;
+        }
+
+        
     }
+    
+    
+    std::vector<gl::vec<double, 2>> vx;
+    vx.reserve(_vertices.size());
+    for (auto& a : _vertices)
+        vx.push_back(a.position);
+    auto vy = manic::Delaunay(vx, 0).triangles();
+    
     
     vec4 black(0,0,1,1);
     vec4 white(1,1,1,1);
@@ -391,10 +455,19 @@ void blenderer::render() {
     
     gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
     
+    static int j = 0;
+    static int i = 0;
+    if (j++ == 15) {
+        j = 0;
+        ++i;
+    }
+    
     
     _program.assign("mColor", white);
-    gl::vbo::assign(GL_ELEMENT_ARRAY_BUFFER, _triangles, GL_STREAM_DRAW);
-    glDrawElements(GL_TRIANGLES, (GLsizei) _triangles.size() * 3, GL_UNSIGNED_SHORT, (void*) 0);
+    //gl::vbo::assign(GL_ELEMENT_ARRAY_BUFFER, _triangles, GL_STREAM_DRAW);
+    //glDrawElements(GL_TRIANGLES, (GLsizei) _triangles.size() * 3, GL_UNSIGNED_SHORT, (void*) 0);
+    gl::vbo::assign(GL_ELEMENT_ARRAY_BUFFER, vy, GL_STREAM_DRAW);
+    glDrawElements(GL_TRIANGLES, (GLsizei) /*(i % (*/vy.size()/* + 1))*/  * 3, GL_UNSIGNED_INT, (void*) 0);
 
 
     vbo::assign(GL_ELEMENT_ARRAY_BUFFER, _edges, GL_STATIC_DRAW);

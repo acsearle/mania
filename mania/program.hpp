@@ -16,6 +16,18 @@
 #include "vec.hpp"
 
 namespace gl {
+
+    inline void glUniform(GLuint location, GLuint v0) {
+        glUniform1ui(location, v0);
+    }
+
+    inline void glUniform(GLuint location, GLfloat v0) {
+        glUniform1f(location, v0);
+    }
+    
+    inline void glUniform(GLuint location, const vec<GLfloat, 4>& value) {
+        glUniform4fv(location, 1, value.data());
+    }
     
     class shader;
     
@@ -48,7 +60,7 @@ namespace gl {
         // attributes and uniforms
         
         void assign(const GLchar* name, vec<float, 4> v) {
-            glUniform4fv(glGetUniformLocation(_name, name), 1, v.data());
+            glUniform(glGetUniformLocation(_name, name), v);
         }
         
     }; // program
