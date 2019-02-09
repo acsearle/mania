@@ -16,6 +16,92 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <map>
+
+namespace manic {
+    
+    constexpr std::size_t hash(const char* p) {
+        std::size_t x = 0;
+        while (*p) {
+            x ^= *p++;
+            x ^= x >> 21; x ^= x << 37; x ^= x >> 4;
+        }
+        return x;
+    }
+    
+    
+
+    union object;
+    struct instance;
+
+    template<std::size_t H>
+    struct attribute {
+        instance* _ptr;
+        object operator()(object) const;
+    };
+    
+    union object {
+        instance* _ptr;
+        attribute<hash("__add__")> __add__;
+        object operator+(object) const;
+        object operator()(object) const;
+    };
+    
+    struct instance {
+        std::atomic<std::ptrdiff_t> _strong;
+        object _class;
+        std::map<std::size_t, object> _attributes;
+        instance() : _strong(0), _class() {}
+        instance(const instance&) = delete;
+        instance(instance&&) = delete;
+        object (*__getattr__)(object self, std::size_t);
+        object (*__call__)(object self, object x);
+    };
+    
+    template<std::size_t H>
+    object attribute<H>::operator()(object o) const {
+        return _ptr->__getattr__(reinterpret_cast<object const&>(*this), H)(o);
+    }
+    
+    object object::operator+(object y) const {
+        return __add__(y);
+    }
+    
+    object object::operator()(object x) const {
+        return _ptr->__call__(*this, x);
+    }
+    
+    struct type : instance {
+    };
+    
+    /*
+    struct function_ : instance {
+        function_(object (*f)(object, object)) {
+            __call__ = f;
+        }
+    };
+     */
+    /*
+    object function(object (*f)(object, object)) {
+        auto p = new instance;
+        p->__call__ = f;
+        return object(p);
+    }
+     */
+                         
+                         
+    
+    /*
+    struct integer : instance {
+        integer() {
+            _attributes[hash("__add__")] = function([](object self, object other) {
+                return object();
+            });
+        }
+    };
+     */
+    
+} // manic
 
 namespace mania {
     
@@ -64,6 +150,7 @@ namespace mania {
         
         href<0> x;
         href<1> y;
+        // ... thousands ...
 
         object() : _ptr(nullptr) {}
         explicit object(base* p) : _ptr(p) {}
@@ -285,7 +372,6 @@ namespace mania {
         return x;
     }
     
-    // stuff the string into a std::size_t
     constexpr std::size_t mangle(const char* p) {
         std::size_t x = 0;
         int s = 0;
@@ -335,7 +421,7 @@ namespace mania {
             
             exit(0);
         };
-    } _;
+    };
     
 } // mania
 

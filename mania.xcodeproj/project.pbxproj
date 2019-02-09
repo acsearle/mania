@@ -7,15 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CA284D791FF1C41300565175 /* bit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA284D771FF1C41300565175 /* bit.cpp */; };
-		CA284D7C1FF6223100565175 /* scratch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA284D7A1FF6223100565175 /* scratch.cpp */; };
 		CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA284D7D1FFE361900565175 /* preprocessor.cpp */; };
-		CA72C7661F20A0AA006FEDF1 /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72C7641F20A0AA006FEDF1 /* hash.cpp */; };
+		CA3FF5E42079A828009F006F /* int.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA3FF5E22079A828009F006F /* int.cpp */; };
 		CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72C7671F20AC66006FEDF1 /* cg.cpp */; };
 		CA72C76C1F26FDFA006FEDF1 /* noise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72C76A1F26FDFA006FEDF1 /* noise.cpp */; };
-		CA8844EE1FA33C9100FC196C /* memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA8844EC1FA33C9100FC196C /* memory.cpp */; };
 		CA8844F11FA33EE300FC196C /* optional.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA8844EF1FA33EE300FC196C /* optional.cpp */; };
-		CADB9B45202C282000415C1B /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADB9B43202C281F00415C1B /* debug.cpp */; };
 		CADB9B48203595E900415C1B /* queue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADB9B46203595E900415C1B /* queue.cpp */; };
 		CADB9B4B203596D400415C1B /* object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CADB9B49203596D400415C1B /* object.cpp */; };
 		CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A51F14D618005956A9 /* AppDelegate.m */; };
@@ -31,39 +27,33 @@
 		CAF889C71F14F527005956A9 /* basic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = CAF889C61F14F527005956A9 /* basic.fsh */; };
 		CAF889CA1F150490005956A9 /* vao.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889C81F150490005956A9 /* vao.cpp */; };
 		CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889CB1F15064E005956A9 /* vbo.cpp */; };
-		CAF889D01F150B24005956A9 /* vec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889CE1F150B24005956A9 /* vec.cpp */; };
 		CAF889D31F150E21005956A9 /* vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D11F150E21005956A9 /* vertex.cpp */; };
-		CAF889D61F18E519005956A9 /* mat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D41F18E519005956A9 /* mat.cpp */; };
 		CAF889DB1F1AD842005956A9 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D91F1AD842005956A9 /* image.cpp */; };
 		CAF889E01F1ADC78005956A9 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAF889DF1F1ADC78005956A9 /* libpng16.a */; };
-		CAF889E31F1B163B005956A9 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889E11F1B163B005956A9 /* texture.cpp */; };
-		CAF889E61F1B1A88005956A9 /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889E41F1B1A88005956A9 /* matrix.cpp */; };
 		CAF889E91F1CC3B6005956A9 /* nr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889E71F1CC3B6005956A9 /* nr.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		CA284D771FF1C41300565175 /* bit.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bit.cpp; sourceTree = "<group>"; };
 		CA284D781FF1C41300565175 /* bit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bit.hpp; sourceTree = "<group>"; };
-		CA284D7A1FF6223100565175 /* scratch.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = scratch.cpp; sourceTree = "<group>"; };
-		CA284D7B1FF6223100565175 /* scratch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = scratch.hpp; sourceTree = "<group>"; };
 		CA284D7D1FFE361900565175 /* preprocessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = preprocessor.cpp; sourceTree = "<group>"; };
 		CA284D7E1FFE361900565175 /* preprocessor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = preprocessor.hpp; sourceTree = "<group>"; };
-		CA72C7641F20A0AA006FEDF1 /* hash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hash.cpp; sourceTree = "<group>"; };
+		CA3FF5E22079A828009F006F /* int.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = int.cpp; sourceTree = "<group>"; };
+		CA3FF5E32079A828009F006F /* int.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = int.hpp; sourceTree = "<group>"; };
 		CA72C7651F20A0AA006FEDF1 /* hash.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = hash.hpp; sourceTree = "<group>"; };
 		CA72C7671F20AC66006FEDF1 /* cg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cg.cpp; sourceTree = "<group>"; };
 		CA72C7681F20AC66006FEDF1 /* cg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cg.hpp; sourceTree = "<group>"; };
 		CA72C76A1F26FDFA006FEDF1 /* noise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = noise.cpp; sourceTree = "<group>"; };
 		CA72C76B1F26FDFA006FEDF1 /* noise.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = noise.hpp; sourceTree = "<group>"; };
-		CA8844EC1FA33C9100FC196C /* memory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = memory.cpp; sourceTree = "<group>"; };
 		CA8844ED1FA33C9100FC196C /* memory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = memory.hpp; sourceTree = "<group>"; };
 		CA8844EF1FA33EE300FC196C /* optional.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = optional.cpp; sourceTree = "<group>"; };
 		CA8844F01FA33EE300FC196C /* optional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = optional.hpp; sourceTree = "<group>"; };
-		CADB9B43202C281F00415C1B /* debug.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = debug.cpp; sourceTree = "<group>"; };
+		CA999588205935AD005436C8 /* zip.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = zip.hpp; sourceTree = "<group>"; };
 		CADB9B44202C282000415C1B /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		CADB9B46203595E900415C1B /* queue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = queue.cpp; sourceTree = "<group>"; };
 		CADB9B47203595E900415C1B /* queue.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = queue.hpp; sourceTree = "<group>"; };
 		CADB9B49203596D400415C1B /* object.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = object.cpp; sourceTree = "<group>"; };
 		CADB9B4A203596D400415C1B /* object.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = object.hpp; sourceTree = "<group>"; };
+		CAE2F1B4220E952A00B832F6 /* graveyard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = graveyard.cpp; sourceTree = "<group>"; };
 		CAF889A11F14D618005956A9 /* mania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mania.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF889A41F14D618005956A9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CAF889A51F14D618005956A9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -87,19 +77,14 @@
 		CAF889C91F150490005956A9 /* vao.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vao.hpp; sourceTree = "<group>"; };
 		CAF889CB1F15064E005956A9 /* vbo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vbo.cpp; sourceTree = "<group>"; };
 		CAF889CC1F15064E005956A9 /* vbo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vbo.hpp; sourceTree = "<group>"; };
-		CAF889CE1F150B24005956A9 /* vec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vec.cpp; sourceTree = "<group>"; };
 		CAF889CF1F150B24005956A9 /* vec.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vec.hpp; sourceTree = "<group>"; };
 		CAF889D11F150E21005956A9 /* vertex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertex.cpp; sourceTree = "<group>"; };
 		CAF889D21F150E21005956A9 /* vertex.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vertex.hpp; sourceTree = "<group>"; };
-		CAF889D41F18E519005956A9 /* mat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mat.cpp; sourceTree = "<group>"; };
 		CAF889D51F18E519005956A9 /* mat.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mat.hpp; sourceTree = "<group>"; };
 		CAF889D91F1AD842005956A9 /* image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = image.cpp; sourceTree = "<group>"; };
 		CAF889DA1F1AD842005956A9 /* image.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = image.hpp; sourceTree = "<group>"; };
-		CAF889DD1F1AD99E005956A9 /* libpng15.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng15.a; path = ../../../../usr/local/Cellar/libpng/1.5.17/lib/libpng15.a; sourceTree = "<group>"; };
 		CAF889DF1F1ADC78005956A9 /* libpng16.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng16.a; path = ../../../../usr/local/Cellar/libpng/1.6.30/lib/libpng16.a; sourceTree = "<group>"; };
-		CAF889E11F1B163B005956A9 /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texture.cpp; sourceTree = "<group>"; };
 		CAF889E21F1B163B005956A9 /* texture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = texture.hpp; sourceTree = "<group>"; };
-		CAF889E41F1B1A88005956A9 /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = matrix.cpp; sourceTree = "<group>"; };
 		CAF889E51F1B1A88005956A9 /* matrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = matrix.hpp; sourceTree = "<group>"; };
 		CAF889E71F1CC3B6005956A9 /* nr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nr.cpp; sourceTree = "<group>"; };
 		CAF889E81F1CC3B6005956A9 /* nr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = nr.hpp; sourceTree = "<group>"; };
@@ -137,6 +122,7 @@
 		CAF889A31F14D618005956A9 /* mania */ = {
 			isa = PBXGroup;
 			children = (
+				CAF889D81F198B5F005956A9 /* shader */,
 				CAF889D71F198B2D005956A9 /* src */,
 				CAF889A41F14D618005956A9 /* AppDelegate.h */,
 				CAF889A51F14D618005956A9 /* AppDelegate.m */,
@@ -163,53 +149,46 @@
 		CAF889D71F198B2D005956A9 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				CA284D771FF1C41300565175 /* bit.cpp */,
 				CA284D781FF1C41300565175 /* bit.hpp */,
 				CA72C7671F20AC66006FEDF1 /* cg.cpp */,
 				CA72C7681F20AC66006FEDF1 /* cg.hpp */,
-				CA72C7641F20A0AA006FEDF1 /* hash.cpp */,
+				CADB9B44202C282000415C1B /* debug.hpp */,
+				CAE2F1B4220E952A00B832F6 /* graveyard.cpp */,
 				CA72C7651F20A0AA006FEDF1 /* hash.hpp */,
 				CAF889D91F1AD842005956A9 /* image.cpp */,
 				CAF889DA1F1AD842005956A9 /* image.hpp */,
-				CAF889D41F18E519005956A9 /* mat.cpp */,
+				CA3FF5E22079A828009F006F /* int.cpp */,
+				CA3FF5E32079A828009F006F /* int.hpp */,
 				CAF889D51F18E519005956A9 /* mat.hpp */,
-				CAF889E41F1B1A88005956A9 /* matrix.cpp */,
 				CAF889E51F1B1A88005956A9 /* matrix.hpp */,
-				CA8844EC1FA33C9100FC196C /* memory.cpp */,
-				CADB9B46203595E900415C1B /* queue.cpp */,
-				CADB9B47203595E900415C1B /* queue.hpp */,
-				CADB9B49203596D400415C1B /* object.cpp */,
-				CADB9B4A203596D400415C1B /* object.hpp */,
 				CA8844ED1FA33C9100FC196C /* memory.hpp */,
 				CA72C76A1F26FDFA006FEDF1 /* noise.cpp */,
 				CA72C76B1F26FDFA006FEDF1 /* noise.hpp */,
 				CAF889E71F1CC3B6005956A9 /* nr.cpp */,
 				CAF889E81F1CC3B6005956A9 /* nr.hpp */,
+				CADB9B49203596D400415C1B /* object.cpp */,
+				CADB9B4A203596D400415C1B /* object.hpp */,
 				CA8844EF1FA33EE300FC196C /* optional.cpp */,
 				CA8844F01FA33EE300FC196C /* optional.hpp */,
 				CA284D7D1FFE361900565175 /* preprocessor.cpp */,
 				CA284D7E1FFE361900565175 /* preprocessor.hpp */,
 				CAF889C11F14F1C0005956A9 /* program.cpp */,
 				CAF889C21F14F1C0005956A9 /* program.hpp */,
+				CADB9B46203595E900415C1B /* queue.cpp */,
+				CADB9B47203595E900415C1B /* queue.hpp */,
 				CAF889BB1F14DFCF005956A9 /* renderer.cpp */,
 				CAF889BC1F14DFCF005956A9 /* renderer.hpp */,
-				CA284D7A1FF6223100565175 /* scratch.cpp */,
-				CA284D7B1FF6223100565175 /* scratch.hpp */,
-				CAF889D81F198B5F005956A9 /* shader */,
 				CAF889BE1F14E31B005956A9 /* shader.cpp */,
 				CAF889BF1F14E31B005956A9 /* shader.hpp */,
-				CAF889E11F1B163B005956A9 /* texture.cpp */,
 				CAF889E21F1B163B005956A9 /* texture.hpp */,
 				CAF889C81F150490005956A9 /* vao.cpp */,
 				CAF889C91F150490005956A9 /* vao.hpp */,
 				CAF889CB1F15064E005956A9 /* vbo.cpp */,
 				CAF889CC1F15064E005956A9 /* vbo.hpp */,
-				CAF889CE1F150B24005956A9 /* vec.cpp */,
 				CAF889CF1F150B24005956A9 /* vec.hpp */,
 				CAF889D11F150E21005956A9 /* vertex.cpp */,
 				CAF889D21F150E21005956A9 /* vertex.hpp */,
-				CADB9B43202C281F00415C1B /* debug.cpp */,
-				CADB9B44202C282000415C1B /* debug.hpp */,
+				CA999588205935AD005436C8 /* zip.hpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -227,7 +206,6 @@
 			isa = PBXGroup;
 			children = (
 				CAF889DF1F1ADC78005956A9 /* libpng16.a */,
-				CAF889DD1F1AD99E005956A9 /* libpng15.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -304,30 +282,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CA8844EE1FA33C9100FC196C /* memory.cpp in Sources */,
-				CA284D791FF1C41300565175 /* bit.cpp in Sources */,
 				CA72C76C1F26FDFA006FEDF1 /* noise.cpp in Sources */,
 				CAF889C31F14F1C0005956A9 /* program.cpp in Sources */,
 				CAF889C01F14E31B005956A9 /* shader.cpp in Sources */,
-				CAF889D01F150B24005956A9 /* vec.cpp in Sources */,
 				CAF889AC1F14D618005956A9 /* ViewController.m in Sources */,
+				CA3FF5E42079A828009F006F /* int.cpp in Sources */,
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
 				CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */,
-				CADB9B45202C282000415C1B /* debug.cpp in Sources */,
-				CA284D7C1FF6223100565175 /* scratch.cpp in Sources */,
 				CADB9B48203595E900415C1B /* queue.cpp in Sources */,
-				CAF889E61F1B1A88005956A9 /* matrix.cpp in Sources */,
 				CAF889A91F14D618005956A9 /* main.m in Sources */,
-				CA72C7661F20A0AA006FEDF1 /* hash.cpp in Sources */,
 				CAF889E91F1CC3B6005956A9 /* nr.cpp in Sources */,
 				CA8844F11FA33EE300FC196C /* optional.cpp in Sources */,
-				CAF889D61F18E519005956A9 /* mat.cpp in Sources */,
 				CAF889BD1F14DFCF005956A9 /* renderer.cpp in Sources */,
 				CADB9B4B203596D400415C1B /* object.cpp in Sources */,
 				CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */,
 				CAF889CA1F150490005956A9 /* vao.cpp in Sources */,
 				CAF889DB1F1AD842005956A9 /* image.cpp in Sources */,
-				CAF889E31F1B163B005956A9 /* texture.cpp in Sources */,
 				CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */,
 				CAF889D31F150E21005956A9 /* vertex.cpp in Sources */,
 				CAF889BA1F14D67C005956A9 /* MyOpenGLView.mm in Sources */,
@@ -455,7 +425,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = mania/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -470,7 +440,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = mania/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";

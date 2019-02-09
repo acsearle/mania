@@ -12,9 +12,9 @@ namespace gl {
     
     void vertex::bind() {
         glVertexAttribPointer((GLuint) attribute::position, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) offsetof(vertex, position));
-        glVertexAttribPointer((GLuint) attribute::color, 4, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) offsetof(vertex, color));
+        glVertexAttribPointer((GLuint) attribute::texCoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*) offsetof(vertex, texCoord));
         glEnableVertexAttribArray((GLuint) attribute::position);
-        glEnableVertexAttribArray((GLuint) attribute::color);
+        glEnableVertexAttribArray((GLuint) attribute::texCoord);
     }
     
     // number of components of a vector type

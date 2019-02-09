@@ -26,7 +26,7 @@ namespace gl {
     
     struct vertex {
         vec2 position;
-        vec4 color;
+        vec2 texCoord;
         static void bind();
     };
     

@@ -184,6 +184,25 @@ namespace gl {
             swap(a[i], b[i]);
     }
     
+    template<std::size_t I, typename T, std::size_t N>
+    T& get(vec<T, N>& x) { return x[I]; }
+
+    template<std::size_t I, typename T, std::size_t N>
+    const T& get(const vec<T, N>& x) { return x[I]; }
+
+    template<std::size_t I, typename T, std::size_t N>
+    T&& get(vec<T, N>&& x) { return x[I]; }
+    
+    template<std::size_t I, typename T, std::size_t N>
+    const T&& get(const vec<T, N>&& x) { return x[I]; }
+    
+    template<typename T>
+    class tuple_size;
+    
+    template<typename T, std::size_t N>
+    class tuple_size<vec<T, N>> : public std::integral_constant<std::size_t, N> {};
+
+    
     // elementwise operations
     
 #define UNARY(OP)\
@@ -274,9 +293,12 @@ return a;\
     
     template<typename T, std::size_t N, typename U>
     bool operator<(const vec<T, N>& a, const vec<U, N>& b) {
-        for (std::size_t i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i) {
             if (a[i] < b[i])
                 return true;
+            else if (b[i] < a[i])
+                return false;
+        }
         return false;
     }
     

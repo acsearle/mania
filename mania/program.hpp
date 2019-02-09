@@ -17,8 +17,8 @@
 
 namespace gl {
 
-    inline void glUniform(GLuint location, GLuint v0) {
-        glUniform1ui(location, v0);
+    inline void glUniform(GLint location, GLint v0) {
+        glUniform1i(location, v0);
     }
 
     inline void glUniform(GLuint location, GLfloat v0) {
@@ -61,6 +61,10 @@ namespace gl {
         
         void assign(const GLchar* name, vec<float, 4> v) {
             glUniform(glGetUniformLocation(_name, name), v);
+        }
+        
+        void assign(const GLchar* name, GLint x) {
+            glUniform(glGetUniformLocation(_name, name), x);
         }
         
     }; // program
