@@ -44,6 +44,7 @@ namespace gl {
             struct { T x, y; };
             struct { T r, g; };
             struct { T s, t; };
+            struct { T width, height; };
         };
     };
     
@@ -361,7 +362,13 @@ return a;\
         using std::hypot;
         return hypot(a[0], a[1]); // use hypot for 2d
     }
-    
+
+    template<typename T>
+    auto length(const vec<T, 3>& a) {
+        using std::hypot;
+        return hypot(a[0], a[1], a[2]); // use hypot for 3d
+    }
+
     template<typename T, std::size_t N>
     auto distance(const vec<T, N>& a, const vec<T, N>& b) {
         return length(a - b);

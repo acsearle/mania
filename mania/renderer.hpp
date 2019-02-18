@@ -11,7 +11,7 @@
 
 #include <memory>
 #include <string>
-
+#define GL_SILENCE_DEPRECATION
 #include <OpenGL/gltypes.h>
 
 std::string load(std::string name, std::string ext);

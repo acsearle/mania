@@ -63,7 +63,7 @@ namespace gl {
         constexpr mat() = default;
         constexpr mat(const mat&) = default;
         constexpr mat(mat&&) = default;
-        ~mat();
+        ~mat() {}
         constexpr mat& operator=(const mat&);
         constexpr mat& operator=(mat&&);
         
@@ -208,7 +208,7 @@ return a;\
     auto dot(const mat<T, M, N>& a, const vec<U, N>& b) {
         vec<decltype(std::declval<const T&>() * std::declval<const U&>()), M> c;
         for (size_t i = 0; i != M; ++i)
-                c[i] += dot(a[i], b);
+                c[i] = dot(a[i], b);
         return c;
     }
     

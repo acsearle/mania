@@ -10,6 +10,7 @@
 #define shader_hpp
 
 #include <string>
+#define GL_SILENCE_DEPRECATION
 #include <OpenGL/gltypes.h>
 
 namespace gl {

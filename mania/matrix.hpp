@@ -13,6 +13,7 @@
 
 namespace manic {
     
+    /*
     template<typename T, typename ContiguousContainer = std::vector<T>>
     struct matrix {
         
@@ -63,6 +64,355 @@ namespace manic {
 
         
     };
+     */
+    
+    
+    
+    using std::vector;
+    using std::array;
+    
+    // A type that holds a T and provides access to it via the pointer interface.
+    // Useful for implementing operator->() on iterators that
+    
+    template<typename T>
+    class indirect {
+        const T _value;
+    public:
+        indirect() = delete;
+        indirect(const indirect&) = delete;
+        indirect(indirect&&) = default;
+        explicit indirect(T&& x) : _value(std::move(x)) {}
+        ~indirect() = default;
+        indirect& operator=(const indirect&) = delete;
+        indirect& operator=(indirect&&) = delete;
+        const T* operator->() const { return std::addressof(_value); }
+        const T& operator*() const { return _value; }
+        operator bool() const { return true; }
+        bool operator!() const { return false; }
+    };
+    
+    template<typename T>
+    indirect(T&& x) -> indirect<T>;
+    
+    // A reference type representing a contiguous region of memory.  Like a
+    // reference, assignment copies the contents.  There is no way to change
+    // what the span points at
+    
+    template<typename T>
+    class vector_view {
+        
+        T* _begin;
+        T* _end;
+        
+    public:
+        
+        vector_view() = delete;
+        
+        vector_view(vector_view const& r) = default;
+        
+        vector_view(T* first, T* last)
+        : _begin(first)
+        , _end(last) {
+        }
+        
+        ~vector_view() = default;
+        
+        vector_view const& operator=(vector_view const& r) const {
+            assert(r.size() == size());
+            std::copy(r.begin(), r.end(), _begin);
+            return *this;
+        }
+        
+        vector_view const& operator=(T x) const {
+            std::fill(begin(), end(), x);
+            return *this;
+        }
+        
+        template<typename It>
+        void assign(It first, It last) {
+            assert(std::distance(first, last) == size());
+            std::copy(first, last, begin());
+        }
+        
+        ptrdiff_t size() const {
+            return _end - _begin;
+        }
+        
+        T* begin() const {
+            return _begin;
+        }
+        
+        T* end() const {
+            return _end;
+        }
+        
+        T& operator[](ptrdiff_t i) const {
+            return _begin[i];
+        }
+        
+        vector_view sub(ptrdiff_t i, ptrdiff_t n) {
+            return vector_view(_begin + i, _begin + i + n);
+        }
+        
+    };
+    
+    template<typename T>
+    class matrix_view {
+        
+    public:
+        
+        class iterator {
+            
+        public:
+            
+            using difference_type = ptrdiff_t;
+            using value_type = vector_view<T>;
+            using pointer = void;
+            using reference = vector_view<T>;
+            using iterator_category = std::random_access_iterator_tag;
+
+            T* _begin;
+            ptrdiff_t _stride;
+            ptrdiff_t _columns;
+            
+            iterator() : _begin(nullptr), _stride(0), _columns(0) {}
+            
+            iterator(iterator const&) = default;
+            
+            iterator(T* b, ptrdiff_t s, ptrdiff_t c)
+            : _begin(b)
+            , _stride(s)
+            , _columns(c) {
+            }
+            
+            ~iterator() = default;
+            
+            iterator& operator=(iterator const&) = default;
+            
+            vector_view<T> operator*() const {
+                return vector_view<T>(_begin, _begin + _columns);
+            }
+            
+            iterator& operator++() {
+                _begin += _stride;
+                return *this;
+            }
+            
+            iterator operator+(ptrdiff_t i) const {
+                return iterator(_begin + _stride * i, _stride, _columns);
+            }
+            
+            vector_view<T> operator[](ptrdiff_t i) const {
+                return *(*this + i);
+            }
+            
+            bool operator==(iterator const& r) {
+                return _begin == r._begin;
+            }
+            
+            bool operator!=(iterator const& r) {
+                return _begin != r._begin;
+            }
+            
+            ptrdiff_t operator-(const iterator& r) {
+                assert(r._stride == _stride);
+                return (_begin - r._begin) / _stride;
+            }
+            
+            indirect<vector_view<T>> operator->() const {
+                return indirect(**this);
+            }
+            
+        };
+        
+        iterator const _begin;
+        ptrdiff_t const _rows;
+
+        
+        matrix_view() = delete;
+        
+        matrix_view(matrix_view const& r) = default;
+        
+        matrix_view(iterator b, ptrdiff_t r) : _begin(b), _rows(r) {}
+        
+        matrix_view const& operator=(matrix_view const& r) const {
+            assert(_rows == r._rows);
+            std::copy(r.begin(), r.end(), begin());
+            return *this;
+        }
+        
+        matrix_view const& operator=(const T& x) const {
+            std::fill(begin(), end(), x);
+            return *this;
+        }
+        
+        iterator begin() const {
+            return _begin;
+        }
+        
+        iterator end() const {
+            return _begin + _rows;
+        }
+        
+        vector_view<T> operator[](ptrdiff_t i) const {
+            return _begin[i];
+        }
+        
+        matrix_view sub(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c) {
+            return image(iterator(_begin._begin + i * _begin._stride + j,
+                                  _begin._stride,
+                                  c),
+                         r);
+        }
+        
+        ptrdiff_t rows() const { return _rows; }
+        ptrdiff_t columns() const { return _begin._columns; }
+        
+    };
+    
+    template<typename T>
+    bool operator==(matrix_view<T> const& a, matrix_view<T> const& b) {
+        return std::equal(a.begin(), a.end(), b.begin());
+    }
+    
+    template<typename T>
+    bool operator!=(matrix_view<T> const& a, matrix_view<T> const& b) {
+        return std::equal(a.begin(), a.end(), b.begin());
+    }
+    
+    template<typename T>
+    class matrix {
+        
+    public:
+        
+        using iterator = typename matrix_view<T>::iterator;
+
+        iterator _begin;
+        ptrdiff_t _rows;
+        std::vector<T> _store;
+        
+        matrix() : _begin(), _rows(0), _store() {}
+        
+        matrix(const matrix& r) : matrix() {
+            *this = r;
+        }
+        
+        matrix(matrix&& r) : matrix() {
+            r.swap(*this);
+        }
+        
+        matrix(const matrix_view<T>& r)
+        : matrix() {
+            operator=(r);
+        }
+        
+        
+        matrix(ptrdiff_t rows, ptrdiff_t columns)
+        : matrix() {
+            discard_and_resize(rows, columns);
+        }
+        
+        matrix(ptrdiff_t rows, ptrdiff_t columns, T x)
+        : matrix(rows, columns) {
+            *this = x;
+        }
+        
+        ~matrix() = default;
+        
+        matrix& operator=(const matrix& r) {
+            return operator=(static_cast<matrix_view<T>>(r));
+        }
+        
+        matrix& operator=(matrix&& r) {
+            matrix(std::move(r)).swap(*this);
+            return *this;
+        }
+        
+        matrix& operator=(const matrix_view<T>& r) {
+            discard_and_resize(r._rows, r._begin._columns);
+            std::copy(r.begin(), r.end(), begin());
+            return *this;
+        }
+        
+        matrix& operator=(T x) {
+            std::fill(begin(), end(), x);
+            return *this;
+        }
+        
+        void swap(matrix& r) {
+            using std::swap;
+            swap(_begin, r._begin);
+            swap(_rows, r._rows);
+            swap(_store, r._store);
+        }
+        
+        operator matrix_view<T>() const {
+            return matrix_view<T>(_begin, _rows);
+        }
+        
+        ptrdiff_t size() const {
+            return _rows;
+        }
+        
+        iterator begin() const {
+            return _begin;
+        }
+        
+        iterator end() const {
+            return _begin + _rows;
+        }
+        
+        vector_view<T> operator[](ptrdiff_t i) const {
+            return _begin[i];
+        }
+        
+        vector_view<T> front() const {
+            return *_begin;
+        }
+        
+        vector_view<T> back() const {
+            return _begin[_rows - 1];
+        }
+        
+        matrix_view<T> sub(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c) {
+            return matrix_view<T>(iterator(_begin._begin + i * _begin._stride + j,
+                                           _begin._stride,
+                                           c),
+                                  r);
+        }
+        
+        void crop(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c) {
+            _begin._begin += i * _begin._stride + j;
+            _begin._columns = c;
+            _rows = r;
+        }
+        
+        void discard_and_resize(ptrdiff_t rows, ptrdiff_t columns) {
+            _store.resize(rows * columns, 0);
+            _begin = iterator(_store.data(), columns, columns);
+            _rows = rows;
+        }
+        
+        void expand(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c, T x) {
+            matrix<T> a(r, c, x);
+            a.sub(i, j, _rows, _begin._columns) = *this;
+            a.swap(*this);
+        }
+        
+        void resize(ptrdiff_t r, ptrdiff_t c, T x = T()) {
+            matrix<T> a(r, c, x);
+            r = std::min(r, rows());
+            c = std::min(c, columns());
+            a.sub(0, 0, r, c) = sub(0, 0, r ,c);
+            a.swap(*this);
+        }
+        
+        ptrdiff_t rows() const { return _rows; }
+        ptrdiff_t columns() const { return _begin._columns; }
+        
+    };
+    
+
     
 }
 

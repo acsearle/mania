@@ -154,16 +154,4 @@ namespace manic {
     
  
     
-    struct hj {
-        hj() {
-            
-            uint64_t c;
-            std::cout << __builtin_subcll(0, 0, 1, &c) << std::endl;
-            std::cout << c << std::endl;
-            
-        }
-    };
-    
-    
-    
 }

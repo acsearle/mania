@@ -5,13 +5,12 @@
 //  Created by Antony Searle on 11/7/17.
 //  Copyright © 2017 Antony Searle. All rights reserved.
 //
-
+#define GL_SILENCE_DEPRECATION
 #import "MyOpenGLView.h"
 
 #include <string>
 #include <fstream>
 #include <iterator>
-
 #include <OpenGL/gl3.h>
 
 #include "renderer.hpp"

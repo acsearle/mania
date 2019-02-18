@@ -10,7 +10,7 @@
 #define vbo_hpp
 
 #include <vector>
-
+#define GL_SILENCE_DEPRECATION
 #include <OpenGL/gltypes.h>
 
 namespace gl {

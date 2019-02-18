@@ -8,11 +8,11 @@
 
 #ifndef vertex_hpp
 #define vertex_hpp
-
+#define GL_SILENCE_DEPRECATION
 #include <OpenGL/gltypes.h>
 
 #include "vec.hpp"
-
+#define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl3.h>
 
 namespace gl {

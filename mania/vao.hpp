@@ -8,7 +8,7 @@
 
 #ifndef vao_hpp
 #define vao_hpp
-
+#define GL_SILENCE_DEPRECATION
 #include <OpenGL/gltypes.h>
 
 namespace gl {

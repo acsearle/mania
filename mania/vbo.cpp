@@ -10,7 +10,7 @@
 
 #include <cassert>
 #include <utility>
-
+#define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl3.h>
 
 namespace gl {
