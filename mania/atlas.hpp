@@ -62,8 +62,8 @@ namespace manic {
         }
         
         void push(image const& img) {
-            auto i = _free.lower_bound(rect(0,0, img._width, img._height));
-            while ((i != _free.end()) && ((i->wh.x < img._width) || (i->wh.y < img._height)))
+            auto i = _free.lower_bound(rect(0,0, img.columns(), img.rows()));
+            while ((i != _free.end()) && ((i->wh.x < img.columns()) || (i->wh.y < img.rows())))
                 ++i;
             if (i == _free.end()) {
                 //assert(false);
@@ -71,33 +71,33 @@ namespace manic {
             }
             auto old = *i;
             _free.erase(i);
-            glPixelStorei(GL_UNPACK_ROW_LENGTH, (int) img._stride);
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) img.stride());
             glTexSubImage2D(GL_TEXTURE_2D, 0, old.xy.x, old.xy.y,
-                            (int) img._width, (int) img._height, GL_RGBA,
-                            GL_UNSIGNED_BYTE, img._data);
+                            (GLsizei) img.columns(), (GLsizei) img.rows(), GL_RGBA,
+                            GL_UNSIGNED_BYTE, img.data());
             sprite s;
-            s.a.position.x = -img._width / 2;
-            s.a.position.y = -img._height / 2;
+            s.a.position.x = -img.columns() / 2;
+            s.a.position.y = -img.rows() / 2;
             s.a.texCoord.s = old.xy.x / (float) _n;
             s.a.texCoord.t = old.xy.y / (float) _n;
-            s.b.position.x = s.a.position.x + img._width;
-            s.b.position.y = s.a.position.y + img._height;
-            s.b.texCoord.s = (old.xy.x + img._width) / (float) _n;
-            s.b.texCoord.t = (old.xy.y + img._height) / (float) _n;
+            s.b.position.x = s.a.position.x + img.columns();
+            s.b.position.y = s.a.position.y + img.rows();
+            s.b.texCoord.s = (old.xy.x + img.columns()) / (float) _n;
+            s.b.texCoord.t = (old.xy.y + img.rows()) / (float) _n;
             _used.push_back(s);
-            int w = old.wh.x - (int) img._width;
-            int h = old.wh.y - (int) img._height;
+            ptrdiff_t w = old.wh.x - img.columns();
+            ptrdiff_t h = old.wh.y - img.rows();
             
             if (old.wh.x * h >= w * old.wh.y) {
                 if (h)
-                    _free.insert(rect(old.xy.x, old.xy.y + img._height, old.wh.x, h));
+                    _free.insert(rect(old.xy.x, old.xy.y + img.rows(), old.wh.x, h));
                 if (w)
-                    _free.insert(rect(old.xy.x + img._width, old.xy.y, w, img._height));
+                    _free.insert(rect(old.xy.x + img.columns(), old.xy.y, w, img.rows()));
             } else {
                 if (w)
-                    _free.insert(rect(old.xy.x + img._width, old.xy.y, w, old.wh.y));
+                    _free.insert(rect(old.xy.x + img.columns(), old.xy.y, w, old.wh.y));
                 if (h)
-                    _free.insert(rect(old.xy.x, old.xy.y + img._height, img._width, h));
+                    _free.insert(rect(old.xy.x, old.xy.y + img.rows(), img.columns(), h));
             }
         }
     };

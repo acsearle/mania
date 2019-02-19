@@ -84,7 +84,7 @@ blenderer::blenderer()
         "/Users/acsearle/Downloads/textures/down.png",
         "/Users/acsearle/Downloads/textures/plate.png",
     }) {
-        auto pattern = manic::image::from_png(s);
+        auto pattern = manic::from_png(s);
         _atlas.push(pattern);
     }
     

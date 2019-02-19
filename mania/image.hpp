@@ -44,17 +44,27 @@ namespace manic {
     
 
     using pixel = gl::vec<unsigned char, 4>;
+
+    /*
+    template<typename T>
+    class column_vector_view {
+        struct column_vector_iterator {
+            
+        };
+    };
+     */
     
+    using image = matrix<pixel>;
     
-    class image
-    : public matrix<pixel> {
+    //class image {
         
-        using matrix::matrix;
+        // libpng and OpenGL both utilize row-major storage for images.
+        // Unfortunately this implies that the coordinate system for images is
+        // (row, column) = (y, x)
         
     //public:
         
-        /*
-        pixel* _allocation;
+        /*pixel* _allocation;
         pixel* _data;
     
         ptrdiff_t _width;
@@ -76,10 +86,7 @@ namespace manic {
             image(move(r)).swap(*this);
             return *this;
         }
-         */
         
-        
-        /*
         void swap(image& r) {
             using std::swap;
             swap(_data, r._data);
@@ -89,27 +96,27 @@ namespace manic {
         }
          */
         
-        static image from_png(const char*);
-        static image with_size(ptrdiff_t width, ptrdiff_t height);
-        void to_png(const char*);
+        image from_png(const char*);
+        //static image with_size(ptrdiff_t width, ptrdiff_t height);
+        void to_png(image, const char*);
         
-        void multiply_alpha();
-        void divide_alpha();
+        void multiply_alpha(image& a);
+        void divide_alpha(image& a);
         
-        void crop(ptrdiff_t x, ptrdiff_t y, ptrdiff_t w, ptrdiff_t h);
+        //void crop(ptrdiff_t x, ptrdiff_t y, ptrdiff_t w, ptrdiff_t h);
         
-        void halve();
+        void halve(image&);
         
-        void bevel();
+        void bevel(image&);
         
-        pixel& operator()(ptrdiff_t i, ptrdiff_t j);
+        //pixel& operator()(ptrdiff_t i, ptrdiff_t j);
         
-        void draw_rect(ptrdiff_t x, ptrdiff_t y, ptrdiff_t width, ptrdiff_t height, pixel c);
+        //void draw_rect(ptrdiff_t x, ptrdiff_t y, ptrdiff_t width, ptrdiff_t height, pixel c);
         
-        void clear(pixel c);
+        //void clear(pixel c);
         
 
-    };
+    //};
 
 }
 

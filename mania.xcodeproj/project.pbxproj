@@ -14,6 +14,7 @@
 		CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72B7B3221A7DB100AC9441 /* main.cpp */; };
 		CA72B7B9221A7F2B00AC9441 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA72B7B8221A7F2B00AC9441 /* libpng16.a */; };
 		CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72C7671F20AC66006FEDF1 /* cg.cpp */; };
+		CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF80221C091C00D8B4B2 /* povtools.cpp */; };
 		CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A51F14D618005956A9 /* AppDelegate.m */; };
 		CAF889A91F14D618005956A9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A81F14D618005956A9 /* main.m */; };
 		CAF889AC1F14D618005956A9 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889AB1F14D618005956A9 /* ViewController.m */; };
@@ -68,6 +69,8 @@
 		CA72C7681F20AC66006FEDF1 /* cg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cg.hpp; sourceTree = "<group>"; };
 		CA72C76B1F26FDFA006FEDF1 /* noise.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = noise.hpp; sourceTree = "<group>"; };
 		CA999588205935AD005436C8 /* zip.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = zip.hpp; sourceTree = "<group>"; };
+		CAC2FF80221C091C00D8B4B2 /* povtools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = povtools.cpp; sourceTree = "<group>"; };
+		CAC2FF81221C091C00D8B4B2 /* povtools.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = povtools.hpp; sourceTree = "<group>"; };
 		CADB9B44202C282000415C1B /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		CADB9B4A203596D400415C1B /* object.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = object.hpp; sourceTree = "<group>"; };
 		CAE2F1B4220E952A00B832F6 /* graveyard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = graveyard.cpp; sourceTree = "<group>"; };
@@ -149,6 +152,8 @@
 		CA72B7B2221A7DB100AC9441 /* scratch */ = {
 			isa = PBXGroup;
 			children = (
+				CAC2FF80221C091C00D8B4B2 /* povtools.cpp */,
+				CAC2FF81221C091C00D8B4B2 /* povtools.hpp */,
 				CA72B7B3221A7DB100AC9441 /* main.cpp */,
 			);
 			path = scratch;
@@ -410,6 +415,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */,
+				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

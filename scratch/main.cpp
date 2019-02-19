@@ -35,19 +35,13 @@ int match(matrix_view<int> g, matrix_view<int> s) {
     return quality;
 }
 
-static int counter = 0;
-static int finder = 0;
-
-//void apply(vector<vector<int>>& g, array<array<int, 2>, 2>& s ) {
 void apply(matrix<int>& g, matrix_view<int> s ) {
     int best_i = 0, best_j = 0, best_q = 0;
     for (int i = 0; i != g.size() - 1; ++i)
         for (int j = 0; j != g.size() - 1; ++j) {
             int q = match(g.sub(i, j, 2, 2), s);
-            if (q == 5) {
-                ++finder;
+            if (q == 5)
                 return;
-            }
             if (q > best_q) {
                 best_i = i;
                 best_j = j;
@@ -56,30 +50,25 @@ void apply(matrix<int>& g, matrix_view<int> s ) {
         }
     if (best_q == 0) {
         expand(g);
-        apply(g, s); // can't recurse forever because we will eventually have
-        // a border 2 thick
+        apply(g, s);
         return;
     }
     for (int k = 0; k != 2; ++k)
         for (int l = 0; l != 2; ++l)
             g[best_i+k][best_j+l] = s[k][l];
-    ++counter;
 }
 
 int main(int argc, const char * argv[]) {
-    const auto N = 5;
-    std::array<int, N> v;
+    const auto N = 2;
+    std::vector<int> v(N);
     std::iota(v.begin(), v.end(), 0);
-    // std::array<std::array<int, 2>, 2> s = {};
     matrix<int> s(2,2);
-    // vector<vector<int>> current;
     matrix<int> current;
     expand(current);
     for (auto a : v)
         for (auto b: v)
             for (auto c : v)
                 for (auto d : v) {
-                    //printf("%d%d\n%d%d\n\n", a, b, c, d);
                     s[0][0] = a;
                     s[0][1] = b;
                     s[1][0] = c;
@@ -88,30 +77,8 @@ int main(int argc, const char * argv[]) {
                     
                 }
     
-    printf("created %d found %d\n", counter, finder);
+    ((matrix_view<int>) current + 1).print();
     
-    for (auto x : current) {
-        for (auto&& y : x)
-            printf("%d", y+1);
-        printf("\n");
-    }
-    
-    finder= 0;
-    counter = 0;
-    for (auto a : v)
-        for (auto b: v)
-            for (auto c : v)
-                for (auto d : v) {
-                    //printf("%d%d\n%d%d\n\n", a, b, c, d);
-                    s[0][0] = a;
-                    s[0][1] = b;
-                    s[1][0] = c;
-                    s[1][1] = d;
-                    apply(current, s);
-                    
-                }
-    printf("%d\n", counter);
-    printf("%ld\n", current.size()*32);
     
 }
 

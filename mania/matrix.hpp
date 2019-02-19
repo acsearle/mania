@@ -94,15 +94,13 @@ namespace manic {
     template<typename T>
     indirect(T&& x) -> indirect<T>;
     
-    // A reference type representing a contiguous region of memory.  Like a
-    // reference, assignment copies the contents.  There is no way to change
-    // what the span points at
+    // Views a sequence of objects in
     
     template<typename T>
     class vector_view {
         
-        T* _begin;
-        T* _end;
+        T* const _begin;
+        T* const _end;
         
     public:
         
@@ -157,6 +155,15 @@ namespace manic {
     };
     
     template<typename T>
+    class const_matrix_view;
+    
+    template<typename T>
+    class const_matrix;
+    
+    template<typename T>
+    class matrix;
+    
+    template<typename T>
     class matrix_view {
         
     public:
@@ -170,10 +177,7 @@ namespace manic {
             using pointer = void;
             using reference = vector_view<T>;
             using iterator_category = std::random_access_iterator_tag;
-
-            T* _begin;
-            ptrdiff_t _stride;
-            ptrdiff_t _columns;
+            
             
             iterator() : _begin(nullptr), _stride(0), _columns(0) {}
             
@@ -223,11 +227,16 @@ namespace manic {
                 return indirect(**this);
             }
             
+        private:
+            
+            friend class matrix_view;
+            friend class matrix<T>;
+            
+            T* _begin;
+            ptrdiff_t _stride;
+            ptrdiff_t _columns;
+            
         };
-        
-        iterator const _begin;
-        ptrdiff_t const _rows;
-
         
         matrix_view() = delete;
         
@@ -258,15 +267,27 @@ namespace manic {
             return _begin[i];
         }
         
-        matrix_view sub(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c) {
-            return image(iterator(_begin._begin + i * _begin._stride + j,
+        matrix_view sub(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c) const {
+            return matrix_view(iterator(_begin._begin + i * _begin._stride + j,
                                   _begin._stride,
                                   c),
                          r);
         }
         
+        T& operator()(ptrdiff_t i, ptrdiff_t j) const {
+            return *(_begin._begin + i * _begin._stride + j);
+        }
+
+        
         ptrdiff_t rows() const { return _rows; }
         ptrdiff_t columns() const { return _begin._columns; }
+        
+    private:
+        
+        iterator const _begin;
+        ptrdiff_t const _rows;
+        
+        friend class matrix<T>;
         
     };
     
@@ -280,16 +301,16 @@ namespace manic {
         return std::equal(a.begin(), a.end(), b.begin());
     }
     
+    // We can't quite implement matrix by inheriting from matrix_view for
+    // several reasons.
+    
     template<typename T>
     class matrix {
         
     public:
         
         using iterator = typename matrix_view<T>::iterator;
-
-        iterator _begin;
-        ptrdiff_t _rows;
-        std::vector<T> _store;
+        using const_iterator = typename matrix_view<const T>::iterator;
         
         matrix() : _begin(), _rows(0), _store() {}
         
@@ -339,6 +360,7 @@ namespace manic {
             return *this;
         }
         
+        
         void swap(matrix& r) {
             using std::swap;
             swap(_begin, r._begin);
@@ -349,7 +371,11 @@ namespace manic {
         operator matrix_view<T>() const {
             return matrix_view<T>(_begin, _rows);
         }
-        
+
+        operator matrix_view<const T>() const {
+            return matrix_view<const T>(_begin, _rows);
+        }
+
         ptrdiff_t size() const {
             return _rows;
         }
@@ -362,6 +388,10 @@ namespace manic {
             return _begin + _rows;
         }
         
+        T* data() const {
+            return _begin._begin;
+        }
+        
         vector_view<T> operator[](ptrdiff_t i) const {
             return _begin[i];
         }
@@ -372,6 +402,10 @@ namespace manic {
         
         vector_view<T> back() const {
             return _begin[_rows - 1];
+        }
+        
+        T& operator()(ptrdiff_t i, ptrdiff_t j) const {
+            return *(_begin._begin + i * _begin._stride + j);
         }
         
         matrix_view<T> sub(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c) {
@@ -409,10 +443,43 @@ namespace manic {
         
         ptrdiff_t rows() const { return _rows; }
         ptrdiff_t columns() const { return _begin._columns; }
+        ptrdiff_t stride() const { return _begin._stride; }
+        
+        void print() const {
+            for (auto&& row : *this) {
+                for (auto&& value : row)
+                    std::cout << value << ' ';
+                std::cout << '\n';
+            }
+        }
+
+    private:
+        
+        iterator _begin;
+        ptrdiff_t _rows;
+        std::vector<T> _store;
         
     };
     
+    template<typename T> matrix<T> operator+(matrix_view<T> a, matrix_view<T> b) {
+        assert(a.rows() == b.rows());
+        assert(b.columns() == b.columns());
+        matrix<T> c(a.rows(), a.columns());
+        for (ptrdiff_t i = 0; i != a.rows(); ++i)
+            for (ptrdiff_t j = 0; j != a.columns(); ++j)
+                c(i, j) = a(i, j) + b(i, j);
+        return c;
+    }
+    
 
+    template<typename T> matrix<T> operator+(matrix_view<T> a, T b) {
+        matrix<T> c(a.rows(), a.columns());
+        for (ptrdiff_t i = 0; i != a.rows(); ++i)
+            for (ptrdiff_t j = 0; j != a.columns(); ++j)
+                c(i, j) = a(i, j) + b;
+        return c;
+    }
+    
     
 }
 
