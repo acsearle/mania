@@ -98,7 +98,7 @@ namespace manic {
         
         image from_png(const char*);
         //static image with_size(ptrdiff_t width, ptrdiff_t height);
-        void to_png(image, const char*);
+        void to_png(const image&, const char*);
         
         void multiply_alpha(image& a);
         void divide_alpha(image& a);
@@ -117,6 +117,25 @@ namespace manic {
         
 
     //};
+    
+    
+    void blur(matrix_view<pixel> a, const_matrix_view<pixel> b);
+    
+    /*
+    template<typename T, typename U, typename V>
+    void filter_rows(matrix_view<T> dest, const_matrix_view<U> src, const_vector_view<V> filter) {
+        for (auto i = 0; i != dest.rows(); ++i)
+            for (auto j = 0; j != dest.columns(); ++j)
+                dest(i, j) = dot(src.sub(i, j, 1, filter.size()).front(), filter);
+    }
+    
+    template<typename T, typename U, typename V>
+    void filter_columns(matrix_view<T> dest, const matrix_view<U> src, const_vector_view<T> filter) {
+        for (auto i = 0; i != dest.rows(); ++i)
+            for (auto j = 0; j != dest.columns(); ++j)
+                dest(i, j) = dot(src.sub(i, j, filter.size(), 1), filter);
+    }
+*/
 
 }
 

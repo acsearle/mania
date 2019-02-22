@@ -28,7 +28,7 @@ namespace manic {
     
     template<typename... Args>
     tuple<Args...> capture_as_tuple(Args&&... args) {
-        return tuple<Args...>(forward<Args...>(args...));
+        return tuple<Args...>(std::forward<Args>(args)...);
     }
     
     template<typename... Iterators>
@@ -77,7 +77,11 @@ namespace manic {
         friend bool operator==(const zip_iterator& a, const zip_iterator& b) {
             return get<0>(a._iterators) == get<0>(a._iterators);
         }
-        
+
+        friend bool operator!=(const zip_iterator& a, const zip_iterator& b) {
+            return get<0>(a._iterators) != get<0>(a._iterators);
+        }
+
     }; // class zip_iterator<Iterators...>
     
     template<typename... Args>
@@ -100,8 +104,9 @@ namespace manic {
         using difference_type = std::common_type_t<typename Iterables::difference_type...>;
         using size_type = std::common_type_t<typename Iterables::size_type...>;
         
-        zip_iterable(Iterables&&... iterables)
-        : _iterables(forward<Iterables>(iterables)...) {
+        template<typename... IterablesR>
+        zip_iterable(IterablesR&&... iterables)
+        : _iterables(forward<IterablesR>(iterables)...) {
         }
         
         auto begin() {
@@ -143,8 +148,8 @@ namespace manic {
     }; // class zip_iterable<Iterables...>
     
     template<typename... Iterables>
-    zip_iterable<Iterables...> zip(Iterables&&... iterables) {
-        return zip_iterable<Iterables...>(forward<Iterables>(iterables)...);
+    zip_iterable<std::decay_t<Iterables>...> zip(Iterables&&... iterables) {
+        return zip_iterable<std::decay_t<Iterables>...>(forward<Iterables>(iterables)...);
     }
     
 } // namespace zip

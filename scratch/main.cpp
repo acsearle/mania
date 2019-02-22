@@ -14,9 +14,489 @@
 #include <numeric>
 #include <vector>
 
+#include <Accelerate/Accelerate.h>
+
 #include "matrix.hpp"
+#include "image.hpp"
+#include "zip.hpp"
+#include "noise.hpp"
 
 using namespace manic;
+
+
+/*
+void vDSP_fft2d_zripD(FFTSetupD __Setup, const DSPDoubleSplitComplex *__C, vDSP_Stride __IC0, vDSP_Stride __IC1, vDSP_Length __Log2N0, vDSP_Length __Log2N1, FFTDirection __flag);
+ */
+
+matrix<double> make_filter() {
+    ptrdiff_t n = 256;
+    ptrdiff_t log2n = log2(n);
+    matrix<double> a(n, n);
+    for (ptrdiff_t i = 0; i != n; ++i)
+        for (ptrdiff_t j = 0; j != n; ++j) {
+            double r = hypot(i - n/2, j - n/2);
+            if (r == 0)
+                r = 1;
+            double log2r = log2(r);
+            //double s = std::clamp(log2r - log2n + 2.0, 0.0, 2.0);
+            double s = std::clamp(log2n - 1 - log2r, 0.0, 7.0);
+            s = sin(s * M_PI / 7.0);
+            //s = (s > 0) && (s < 6);
+            
+            a((i + 128) % 256, (j + 128) % 256) = (s*s) / (r*r);
+        }
+    return a;
+}
+
+matrix<double> make_filter_lowpass() {
+    ptrdiff_t n = 256;
+    ptrdiff_t log2n = log2(n);
+    matrix<double> a(n, n);
+    for (ptrdiff_t i = 0; i != n; ++i)
+        for (ptrdiff_t j = 0; j != n; ++j) {
+            double r = hypot(i - n/2, j - n/2);
+            if (r == 0)
+                r = 1;
+            double log2r = log2(r);
+            //double s = std::clamp(log2r - log2n + 2.0, 0.0, 2.0);
+            double s = std::clamp(log2n - 1 - log2r, 0.0, 1.0);
+            s = sin(s * M_PI / 2.0);
+            
+            a((i + 128) % 256, (j + 128) % 256) = (s*s)/(r*r);
+        }
+    return a;
+}
+
+
+
+void fft_thing(matrix_view<double> d, matrix_view<double> imaginary, int direction) {
+    assert(d.stride() == imaginary.stride());
+    auto n = log2(std::max(d.rows(), d.columns()));
+    FFTSetupD s = vDSP_create_fftsetupD(ceil(n), 2);
+    DSPDoubleSplitComplex a;
+    a.realp = d.data();
+    a.imagp = imaginary.data();
+    vDSP_fft2d_zipD(s, &a, 1, d.stride(), log2(d.rows()), log2(d.columns()), direction);
+    d /= n;
+    imaginary /= n;
+    
+    
+    //d = e;
+    
+    //for (auto&& [a0, a1] : zip(d, e))
+        //for (auto&& [b, c] : zip(a0, a1))
+    /*
+    for (int i = 0; i != d.rows(); ++i)
+        for (int j = 0; j != d.columns(); ++j)
+            d(i, j) = hypot(d(i, j), e(i, j));
+    */
+}
+
+
+
+matrix<double> convolve(const_matrix_view<double> a, const_matrix_view<double> b) {
+    ptrdiff_t r = a.rows() - b.rows();
+    ptrdiff_t c = a.columns() - b.columns();
+    matrix<double> d(r, c);
+    for (ptrdiff_t i = 0; i != r; ++i)
+        for (ptrdiff_t j = 0; j != c; ++j) {
+            double e = 0.0;
+            for (ptrdiff_t k = 0; k != b.rows(); ++k)
+                for (ptrdiff_t l = 0; l != b.columns(); ++l)
+                    e += a(i + k, j + l) * b(k, l);
+            d(i, j) = e;
+        }
+    return d;
+}
+
+pixel hue(double s) {
+    gl::vec<double, 3> mid(0.5, 0.5, 0.5);
+    gl::vec<double, 3> red(1.0, 0.0, 0.0);
+    gl::vec<double, 3> green = cross(mid, red);
+    red = cross(mid, green);
+    red /= length(red);
+    red *= std::hypot(0.5, 0.25, 0.25);
+    green /= length(green);
+    green *= std::hypot(0.5, 0.25, 0.25);
+    mid += red*cos(s) + green*sin(s);
+    pixel p;
+    p.rgb = mid * 255;
+    p.a = 255;
+    return p;
+}
+
+void save(const_matrix_view<double> n) {
+    double lo = n[0][0];
+    double hi = n[0][0];
+    for (auto&& a : n)
+        for (auto&& b : a) {
+            lo = std::min(lo, b);
+            hi = std::max(hi, b);
+        }
+    
+    std::cout << lo << ", " << hi << std::endl;
+    image z(n.rows(), n.columns());
+    for (ptrdiff_t i = 0; i != n.rows(); ++i)
+        for (ptrdiff_t j = 0; j != n.columns(); ++j) {
+            z(i, j).rgb = 255.0 * (n(i, j) - lo) / (hi - lo);
+            z(i, j).a = 255;
+            //z(i, j) = hue((n(i, j) - lo) / (hi - lo) * 2 * M_PI);
+        }
+    to_png(z, "/Users/acsearle/Downloads/textures/noise.png");
+    
+}
+
+void posterize(matrix_view<double> v, ptrdiff_t n = 4) {
+    double lo = v[0][0];
+    double hi = v[0][0];
+    for (auto&& a : v)
+        for (auto&& b : a) {
+            lo = std::min(lo, b);
+            hi = std::max(hi, b);
+        }
+    for (ptrdiff_t i = 0; i != v.rows(); ++i)
+        for (ptrdiff_t j = 0; j != v.columns(); ++j)
+            v(i, j) = floor((v(i, j) - lo) / (hi - lo) * n);
+
+}
+
+
+matrix<double> inflate(const_matrix_view<double> a) {
+    matrix<double> b(a);
+    matrix<double> cplx(a.rows(), a.columns());
+    cplx = 0.0;
+    fft_thing(b, cplx, kFFTDirection_Forward);
+    matrix<double> c(512, 512);
+    matrix<double> cplx_c(512, 512);
+    c = 0.0;
+    cplx_c = 0.0;
+    c.sub(0,0,128,128) = b.sub(0,0,128,128);
+    c.sub(0,384,128,128) = b.sub(0,128,128,128);
+    c.sub(384,0,128,128) = b.sub(128,0,128,128);
+    c.sub(384,384,128,128) = b.sub(128,128,128,128);
+    cplx_c.sub(0,0,128,128) = cplx.sub(0,0,128,128);
+    cplx_c.sub(0,384,128,128) = cplx.sub(0,128,128,128);
+    cplx_c.sub(384,0,128,128) = cplx.sub(128,0,128,128);
+    cplx_c.sub(384,384,128,128) = cplx.sub(128,128,128,128);
+    fft_thing(c, cplx_c, kFFTDirection_Inverse);
+    return c;
+}
+
+double power(const_matrix_view<double> v) {
+    double p = 0;
+    for (ptrdiff_t i = 0; i != v.rows(); ++i)
+        for (ptrdiff_t j = 0; j != v.columns(); ++j)
+            p += v(i, j) * v(i, j);
+    return p;
+}
+
+
+template<typename A, typename B, typename C>
+void filter_rows(matrix_view<C> c, const_matrix_view<A> a, const_vector_view<B> b) {
+    assert(c.rows() == a.rows());
+    assert(c.columns() + b.columns() == a.columns());
+    for (ptrdiff_t i = 0; i != c.rows(); ++i)
+        for (ptrdiff_t j = 0; j != c.columns(); ++j) {
+            for (ptrdiff_t k = 0; k != b.size(); ++k)
+                c(i, j) += a(i, j + k) * b(k);
+        }
+}
+
+template<typename A, typename B, typename C>
+void filter_columns(matrix_view<C> c, const_matrix_view<A> a, const_vector_view<B> b) {
+    assert(c.columns() == a.columns());
+    assert(c.rows() + b.size() == a.rows());
+    for (ptrdiff_t i = 0; i != c.rows(); ++i)
+        for (ptrdiff_t j = 0; j != c.columns(); ++j) {
+            for (ptrdiff_t k = 0; k != b.size(); ++k)
+                c(i, j) += a(i + k, j) * b(k);
+        }
+}
+
+template<typename A, typename B>
+void explode(matrix_view<B> b, const_matrix_view<A> a) {
+    assert(b.rows() == 2 * a.rows());
+    assert(b.columns() == 2 * a.columns());
+    for (ptrdiff_t i = 0; i != a.rows(); ++i)
+        for (ptrdiff_t j = 0; j != a.columns(); ++j)
+            b(2 * i, 2 * j) = a(i, j);
+}
+
+template<typename T, typename G>
+void perturb(matrix_view<T> a, G& g) {
+    for (ptrdiff_t i = 0; i != a.rows(); ++i)
+        for (ptrdiff_t j = 0; j != a.columns(); ++j)
+            a(i, j) += g();
+}
+
+template<typename T>
+void threshold(matrix_view<T> a, T b = 0) {
+    for (ptrdiff_t i = 0; i != a.rows(); ++i)
+        for (ptrdiff_t j = 0; j != a.columns(); ++j)
+            a(i, j) = b < a(i, j);
+}
+
+bool is_odd(ptrdiff_t a) {
+    return a & 1;
+}
+
+bool is_even(ptrdiff_t a) {
+    return !is_odd(a);
+}
+
+double _terrain_noise(uint64_t seed, ptrdiff_t i, ptrdiff_t j) {
+    seed = hash(hash(seed ^ i) ^ j);
+    return static_cast<int64_t>(seed) * pow(2.0, -63);
+}
+
+void _terrain_perturb(uint64_t seed, ptrdiff_t i, ptrdiff_t j, matrix_view<double> a) {
+    for (ptrdiff_t s = 0; s != a.rows(); ++s)
+        for (ptrdiff_t t = 0; t != a.columns(); ++t)
+            a(s, t) += _terrain_noise(seed, i + s, j + t);
+}
+
+void _terrain_recurse(ptrdiff_t i,
+                      ptrdiff_t j,
+                      ptrdiff_t rows,
+                      ptrdiff_t columns,
+                      const_vector_view<double> filter,
+                      ptrdiff_t depth,
+                      matrix<double>& a,
+                      matrix<double>& b,
+                      uint64_t seed) {
+
+    if (depth == 7) {
+        
+        a.discard_and_resize(rows, columns);
+        a = 0.0;
+        return;
+        
+    }
+        
+    // Expand our working size to account for filter losses
+    i -= filter.size() / 2;
+    j -= filter.size() / 2;
+    rows += filter.size();
+    columns += filter.size();
+    
+    // Round coordinates to next octave
+    ptrdiff_t i2 = (i - 1) / 2;
+    ptrdiff_t j2 = (j - 1) / 2;
+    ptrdiff_t rows2 = (i + rows + 1) / 2 - i2;
+    ptrdiff_t columns2 = (j + columns + 1) / 2 - j2;
+    
+    // Get terrain from next level
+    _terrain_recurse(i2, j2, rows2, columns2, filter, depth + 1, a, b, seed);
+    assert(a.rows() == rows2);
+    assert(a.columns() == columns2);
+    
+    // Add noise
+    _terrain_perturb(hash(seed ^ depth), i2, j2, a);
+    // seed has already been hashed so it won't have coincidences with depth
+    
+    // Double size
+    b.discard_and_resize(a.rows() * 2, a.columns() * 2);
+    b = 0.0;
+    explode(b, a);
+    
+    // Account for rounding in higher coordinates
+    b.crop(i - i2 * 2, j - j2 * 2, rows, columns);
+    
+    // Low-pass filter by ping-pong
+    a.discard_and_resize(b.rows(), b.columns() - filter.size());
+    a = 0.0;
+    assert(a._invariant());
+    assert(b._invariant());
+    filter_rows(a, b, filter);
+    b.discard_and_resize(a.rows() - filter.size(), a.columns());
+    b = 0.0;
+    filter_columns(b, a, filter);
+    
+    // Prepare output
+    swap(a, b);
+    
+}
+
+matrix<double> terrain(ptrdiff_t i, ptrdiff_t j, ptrdiff_t rows, ptrdiff_t columns, uint64_t seed = 0) {
+    
+    // Deterministically generate terrain of given region
+    
+    vector<double> filter(16);
+    for (ptrdiff_t i = 0; i != 16; ++i) {
+        filter[i] = exp(-sqr(i - 7.5) / 8.0);
+    }
+    filter *= sqrt(8.0) / sum(filter);
+    
+    matrix<double> a;
+    matrix<double> b;
+    
+    _terrain_recurse(i, j, rows, columns, filter, 0, a, b, hash(seed));
+    // we defensively hashed the seed
+    
+    return a;
+}
+
+
+int main(int argc, char** argv) {
+    
+   
+    /*
+    auto n = 512;
+    matrix<double> a(n*2,n*2);
+    
+    a.sub(0,0,n+1,n+1) = terrain(0,0,n+1,n+1);
+    a.sub(0,n+1,n+1,n-1) = terrain(0,n+1,n+1,n-1);
+    a.sub(n+1,0,n-1,n+1) = terrain(n+1,0,n-1,n+1);
+    a.sub(n+1,n+1,n-1,n-1) = terrain(n+1,n+1,n-1,n-1);
+    */
+    //auto b = terrain(0,0,2*n,2*n);
+    //a -= b;
+    //threshold(a);
+    
+    auto n = 4096;
+    auto a = terrain(0,0,n,n);
+    threshold(a);
+    //posterize(a, 2);
+    save(a);
+    
+    //matrix<double> a = terrain(128, 128, 1024, 1024);
+    //threshold(a);
+    //save(a);
+    
+    
+    /*
+    {
+        
+        vector<double> filter(16);
+        for (ptrdiff_t i = 0; i != 16; ++i) {
+            filter[i] = exp(-sqr(i - 7.5) / 8.0);
+        }
+        filter *= sqrt(8.0) / sum(filter);
+        filter.print();
+        
+        manic::normal rng(0);
+        matrix<double> a(32, 32);
+        a = 0.0;
+        
+        for (ptrdiff_t k = 0; k != 6; ++k) {
+            perturb(a, rng);
+            matrix<double> b(a.rows() * 2, a.columns() * 2);
+            b = 0.0;
+            explode(b, a);
+            a.discard_and_resize(b.rows(), b.columns() - filter.size());
+            a = 0.0;
+            filter_rows(a, b, filter);
+            b.discard_and_resize(a.rows() - filter.size(), a.columns());
+            b = 0.0;
+            filter_columns(b, a, filter);
+            swap(a, b);
+        }
+        threshold(a);
+        save(a);
+        
+    }
+    */
+    
+    
+    /*
+    auto n = make_filter();
+    
+    manic::normal rg(459);
+    
+    matrix<double> nz(n.rows(), n.columns());
+    matrix<double> nzc(n.rows(), n.columns());
+    
+    for (auto&& a : nz)
+        for (auto&& b : a)
+            b = rg();
+    nzc = 0;
+    fft_thing(nz, nzc, +1);
+    nz *= n;
+    nzc *= n;
+    //nz = n;
+    //nzc = 0;
+    
+    fft_thing(n, nzc, -1);
+    */
+    /*
+    auto n2 = inflate(n);
+    
+    std::cout << power(n) << std::endl;
+    std::cout << power(n2) << std::endl;
+    n2 *= 2.0;
+    std::cout << power(n2) << std::endl;
+    
+
+    n2.crop(128,128,256,256);
+    n2 = inflate(n2);
+    n2 *= 2.0;
+    n2.crop(128,128,256,256);
+    n += n2;
+    */
+    //n = inflate(n);
+    
+    //fft_thing(n, kFFTDirection_Forward);
+    
+
+    
+    /*for (auto&& a : n)
+        for (auto&& b : a)
+            b = b > 0;*/
+     
+    //n *= 1000;
+    
+    //auto m = 8;
+    //n.sub(m, 0, 257-2*m, 256) = 0;
+    //n.sub(0, m, 256, 257-2*m) = 0;
+    
+    //fft_thing(n,+1);
+    // n.print();
+    
+    //n.sub(0,0,1,128).print();
+    
+    //n.sub(0,0,256,128).swap(n.sub(0,128,256,128));
+    //n.sub(0,0,128,256).swap(n.sub(128,0,128,256));
+    
+    /*
+    auto k = n;
+    for (int i = 0; i != 128; ++i)
+        for (int j = 0; j != 128; ++j)
+            k(i + 64, j + 64) += n(i * 2, j * 2) * 2;
+    n = k;
+     */
+    
+    //k.crop(127 - m, 127 - m, 2 * m - 1, 2 * m - 1);
+    //save(n);
+    
+    
+    /*
+    
+    std::vector<double> a(15, 0.0);
+    std::vector<double> b(15, 0.0);
+    double as = 0, bs = 0;
+    for (int i = 0; i != a.size(); ++i) {
+        double x = i - 7;
+        as += a[i] = exp(-x * x * 0.125);
+        bs += b[i] = exp(-x * x * 0.125/4);
+    }
+    for (int i = 0; i != a.size(); ++i) {
+        a[i] /= as;
+        b[i] /= bs;
+        std::cout << a[i] << ", " << b[i] << std::endl;
+    }
+    matrix<double> f = outer_product<double>(b, b) - outer_product<double>(a, a);
+    
+    matrix<double> n(256, 256);
+    for (auto&& a : n)
+        for (auto&& b : a)
+            b = rand() / (double) RAND_MAX;
+    
+    n = convolve(n, f);
+    //n.print();
+     */
+    
+    return 0;
+}
 
 void expand(matrix<int>& v) {
     v.expand(1, 1, v.size() + 2, v.front().size() + 2, -1);
@@ -35,7 +515,7 @@ int match(matrix_view<int> g, matrix_view<int> s) {
     return quality;
 }
 
-void apply(matrix<int>& g, matrix_view<int> s ) {
+void applyz(matrix<int>& g, matrix_view<int> s ) {
     int best_i = 0, best_j = 0, best_q = 0;
     for (int i = 0; i != g.size() - 1; ++i)
         for (int j = 0; j != g.size() - 1; ++j) {
@@ -50,7 +530,7 @@ void apply(matrix<int>& g, matrix_view<int> s ) {
         }
     if (best_q == 0) {
         expand(g);
-        apply(g, s);
+        applyz(g, s);
         return;
     }
     for (int k = 0; k != 2; ++k)
@@ -58,7 +538,7 @@ void apply(matrix<int>& g, matrix_view<int> s ) {
             g[best_i+k][best_j+l] = s[k][l];
 }
 
-int main(int argc, const char * argv[]) {
+int main_terrain_generator(int argc, const char * argv[]) {
     const auto N = 2;
     std::vector<int> v(N);
     std::iota(v.begin(), v.end(), 0);
@@ -73,13 +553,13 @@ int main(int argc, const char * argv[]) {
                     s[0][1] = b;
                     s[1][0] = c;
                     s[1][1] = d;
-                    apply(current, s);
+                    ::applyz(current, s);
                     
                 }
     
     ((matrix_view<int>) current + 1).print();
     
-    
+    return 0;
 }
 
 /*

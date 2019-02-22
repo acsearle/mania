@@ -14,7 +14,12 @@
 		CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72B7B3221A7DB100AC9441 /* main.cpp */; };
 		CA72B7B9221A7F2B00AC9441 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA72B7B8221A7F2B00AC9441 /* libpng16.a */; };
 		CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72C7671F20AC66006FEDF1 /* cg.cpp */; };
+		CAB75874221D524C00043768 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CA72B7B8221A7F2B00AC9441 /* libpng16.a */; };
+		CAB75875221D528900043768 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAF889D91F1AD842005956A9 /* image.cpp */; };
+		CAB75877221E8CF300043768 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAB75876221E8CF300043768 /* Accelerate.framework */; };
 		CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF80221C091C00D8B4B2 /* povtools.cpp */; };
+		CAC2FF85221D2DCC00D8B4B2 /* chunk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF83221D2DCC00D8B4B2 /* chunk.cpp */; };
+		CAC2FF88221D2DED00D8B4B2 /* surface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF86221D2DED00D8B4B2 /* surface.cpp */; };
 		CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A51F14D618005956A9 /* AppDelegate.m */; };
 		CAF889A91F14D618005956A9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A81F14D618005956A9 /* main.m */; };
 		CAF889AC1F14D618005956A9 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889AB1F14D618005956A9 /* ViewController.m */; };
@@ -69,8 +74,13 @@
 		CA72C7681F20AC66006FEDF1 /* cg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cg.hpp; sourceTree = "<group>"; };
 		CA72C76B1F26FDFA006FEDF1 /* noise.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = noise.hpp; sourceTree = "<group>"; };
 		CA999588205935AD005436C8 /* zip.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = zip.hpp; sourceTree = "<group>"; };
+		CAB75876221E8CF300043768 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		CAC2FF80221C091C00D8B4B2 /* povtools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = povtools.cpp; sourceTree = "<group>"; };
 		CAC2FF81221C091C00D8B4B2 /* povtools.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = povtools.hpp; sourceTree = "<group>"; };
+		CAC2FF83221D2DCC00D8B4B2 /* chunk.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = chunk.cpp; sourceTree = "<group>"; };
+		CAC2FF84221D2DCC00D8B4B2 /* chunk.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = chunk.hpp; sourceTree = "<group>"; };
+		CAC2FF86221D2DED00D8B4B2 /* surface.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = surface.cpp; sourceTree = "<group>"; };
+		CAC2FF87221D2DED00D8B4B2 /* surface.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = surface.hpp; sourceTree = "<group>"; };
 		CADB9B44202C282000415C1B /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		CADB9B4A203596D400415C1B /* object.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = object.hpp; sourceTree = "<group>"; };
 		CAE2F1B4220E952A00B832F6 /* graveyard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = graveyard.cpp; sourceTree = "<group>"; };
@@ -125,6 +135,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CAB75877221E8CF300043768 /* Accelerate.framework in Frameworks */,
+				CAB75874221D524C00043768 /* libpng16.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,6 +277,10 @@
 				CAF889D91F1AD842005956A9 /* image.cpp */,
 				CAF889DA1F1AD842005956A9 /* image.hpp */,
 				CAF889E51F1B1A88005956A9 /* matrix.hpp */,
+				CAC2FF83221D2DCC00D8B4B2 /* chunk.cpp */,
+				CAC2FF84221D2DCC00D8B4B2 /* chunk.hpp */,
+				CAC2FF86221D2DED00D8B4B2 /* surface.cpp */,
+				CAC2FF87221D2DED00D8B4B2 /* surface.hpp */,
 				CA72C76B1F26FDFA006FEDF1 /* noise.hpp */,
 				CAF889BB1F14DFCF005956A9 /* renderer.cpp */,
 				CAF889BC1F14DFCF005956A9 /* renderer.hpp */,
@@ -284,6 +300,7 @@
 		CAF889DC1F1AD99E005956A9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CAB75876221E8CF300043768 /* Accelerate.framework */,
 				CA72B7B8221A7F2B00AC9441 /* libpng16.a */,
 			);
 			name = Frameworks;
@@ -414,6 +431,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CAB75875221D528900043768 /* image.cpp in Sources */,
 				CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */,
 				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
 			);
@@ -424,8 +442,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				CAF889C31F14F1C0005956A9 /* program.cpp in Sources */,
+				CAC2FF88221D2DED00D8B4B2 /* surface.cpp in Sources */,
 				CAF889C01F14E31B005956A9 /* shader.cpp in Sources */,
 				CAF889AC1F14D618005956A9 /* ViewController.m in Sources */,
+				CAC2FF85221D2DCC00D8B4B2 /* chunk.cpp in Sources */,
 				CA3FF5E42079A828009F006F /* int.cpp in Sources */,
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
 				CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */,
@@ -486,6 +506,10 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libpng/1.6.36/lib,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -499,6 +523,10 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libpng/1.6.36/lib,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

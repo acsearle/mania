@@ -18,12 +18,22 @@ namespace manic {
     
     // deterministic multidimensional noise grid
     
+    /*
     template<std::size_t N>
     uint64_t noise(uint64_t seed, gl::vec<uint64_t, N> x) {
         for (size_t i = 0; i != N; ++i)
             seed = x[i] = hash(seed ^ x[i]);
         return seed;
     }
+     */
+    
+    /*
+    uint64_t noise(uint64_t seed, ptrdiff_t i, ptrdiff_t j) {
+        seed ^= hash(i);
+        seed ^= hash(j);
+        return seed;
+    }
+     */
     
     // filtered octave interpolation over grid
     // recurse on dimension

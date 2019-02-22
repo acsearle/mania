@@ -7,7 +7,10 @@
 //
 
 #include "image.hpp"
+
 #include <png.h>
+
+#include <numeric>
 
 namespace manic {
     
@@ -33,6 +36,7 @@ namespace manic {
         png_image_finish_read(&a, nullptr, c.data(), (png_int_32) c.stride() * sizeof(pixel), nullptr);
         png_image_free(&a);
         multiply_alpha(c);
+        
         return c;
     }
     
@@ -43,10 +47,11 @@ namespace manic {
         a.height = (png_uint_32) img.rows();
         a.version =  PNG_IMAGE_VERSION;
         a.width = (png_uint_32) img.columns();
-        png_image_write_to_file(&a, filename, 0, img.data(), (png_int_32) img.stride(), nullptr);
+        png_image_write_to_file(&a, filename, 0, img.data(), (png_int_32) img.stride() * sizeof(pixel), nullptr);
+        std::cout << a.message << std::endl;
         png_image_free(&a);
     }
-    
+        
     /*
     void halve(image& img) {
         ptrdiff_t w = img.columns() / 2;
@@ -101,6 +106,21 @@ namespace manic {
     }
     */
     
+    void blur(matrix_view<pixel> a, const_matrix_view<pixel> b) {
+        std::vector<double> c(5, 0.0);
+        double* d = c.data() + 2;
+        for (ptrdiff_t k = -2; k != 3; ++k)
+            c[k + 2] = exp(-0.5 * k * k);
+        double e = std::accumulate(c.begin(), c.end(), 0.0);
+        for (ptrdiff_t i = 0; i != b.rows(); ++i)
+            for (ptrdiff_t j = 0; j != b.columns(); ++j) {
+                gl::vec<double, 4> f = 0.0;
+                for (ptrdiff_t k = -2; k != 3; ++k)
+                    f += b(i, j + k) * d[k];
+                a(i, j) = f / e;
+            }
+    }
 
+    
     
 }
