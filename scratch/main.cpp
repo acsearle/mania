@@ -24,14 +24,14 @@
 
 using namespace manic;
 
-int main(int argc, char** argv) {
+int main_table(int argc, char** argv) {
     
     table<uint64_t, uint64_t> t;
     
-    for (uint64_t i = 0; i != 200; ++i)
+    for (uint64_t i = 0; i != 20000000; ++i)
         t[i] = i;
     
-    t.print();
+    //t.print();
     
     return 0;
 }
@@ -229,11 +229,11 @@ bool is_even(ptrdiff_t a) {
 
 
 
-int main_terrain(int argc, char** argv) {
+int main(int argc, char** argv) {
     
     
     
-    auto n = 16;
+    auto n = 1024;
     matrix<double> a(n*2,n*2);
     
     a.sub(0,0,n+1,n+1) = terrain(0,0,n+1,n+1);
@@ -242,7 +242,7 @@ int main_terrain(int argc, char** argv) {
     a.sub(n+1,n+1,n-1,n-1) = terrain(n+1,n+1,n-1,n-1);
     
     auto b = terrain(0,0,2*n,2*n);
-    a -= b;
+    //a -= b;
     //threshold(a);
     
     //auto n = 1024;

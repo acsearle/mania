@@ -17,7 +17,7 @@ namespace manic {
     template<typename T>
     struct vector : vector_view<T>, raw_vector<T> {
         
-        vector() = default;
+        vector() : vector_view<T>(nullptr, 0), raw_vector<T>() {};
         
         vector(const vector& v) : vector(static_cast<const_vector_view<T>>(v)) {}
         vector(vector&& v) = default;
@@ -63,7 +63,9 @@ namespace manic {
         }
         
         void swap(vector& v) {
-            vector_view<T>::swap(v);
+            using std::swap;
+            swap(this->_begin, v._begin);
+            swap(this->_size, v._size);
             raw_vector<T>::swap(v);
         }
         

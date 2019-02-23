@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "matrix_view.hpp"
+#include "raw_vector.hpp"
 
 namespace manic {
     
@@ -33,38 +34,22 @@ namespace manic {
     // T* const.  Views may be passed by value.
     //
 
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-   
     
     template<typename T>
-    struct matrix : matrix_view<T> {
-        
-        std::vector<T> _store;
+    struct matrix : matrix_view<T>, raw_vector<T> {
         
         bool _invariant() {
             assert(this->_columns >= 0);
             assert(this->_stride >= 0);
             assert(this->_rows >= 0);
-            assert(this->_begin >= _store.data());
+            assert(this->_begin >= this->_allocation);
             assert(this->_stride >= this->_columns);
-            assert(this->_begin + (this->_rows - 1) * this->_stride + this->_columns <= _store.data() + _store.size());
+            assert(this->_begin + (this->_rows - 1) * this->_stride + this->_columns
+                   <= this->_allocation + this->_capacity);
             return true;
         }
         
-        
-        
-        
-        matrix() : matrix_view<T>(nullptr, 0, 0, 0), _store() {}
+        matrix() : matrix_view<T>(nullptr, 0, 0, 0), raw_vector<T>() {}
         
         matrix(const matrix& r) : matrix() {
             *this = r;
@@ -76,20 +61,35 @@ namespace manic {
         
         matrix(const_matrix_view<T> v)
         : matrix() {
-            operator=(v);
+            *this = v;
         }
         
         matrix(ptrdiff_t rows, ptrdiff_t columns)
-        : matrix() {
-            discard_and_resize(rows, columns);
+        : matrix_view<T>(nullptr, columns, columns, rows)
+        , raw_vector<T>(rows * columns) {
+            this->_begin = this->_allocation;
+            std::uninitialized_default_construct_n(this->_begin, rows * columns);
+            assert(_invariant());
         }
         
-        matrix(ptrdiff_t rows, ptrdiff_t columns, T x)
-        : matrix(rows, columns) {
-            *this = x;
+        matrix(ptrdiff_t rows, ptrdiff_t columns, const T& x)
+        : matrix_view<T>(nullptr, columns, columns, rows)
+        , raw_vector<T>(rows * columns) {
+            this->_begin = this->_allocation;
+            std::uninitialized_fill_n(this->_begin, rows * columns, x);
+            assert(_invariant());
         }
         
-        ~matrix() = default;
+        void _destroy_all() {
+            if constexpr (!std::is_trivially_destructible<T>::value) {
+                for (ptrdiff_t i = 0; i != this->_rows; ++i)
+                    std::destroy_n(this->_begin + i * this->_stride, this->_columns);
+            }
+        }
+        
+        ~matrix() {
+            _destroy_all();
+        }
         
         matrix& operator=(const matrix& r) {
             return operator=(static_cast<const_matrix_view<T>>(r));
@@ -101,8 +101,18 @@ namespace manic {
         }
         
         matrix& operator=(const_matrix_view<T> r) {
-            discard_and_resize(r.rows(), r.columns());
-            std::copy(r.begin(), r.end(), this->begin());
+            _destroy_all();
+            if (this->_capacity < r.rows() * r.columns()) {
+                raw_vector<T> v(std::max(r.rows() * r.columns(), this->_capacity * 2));
+                v.swap(*this);
+            }
+            this->_begin = this->_allocation;
+            this->_columns = r._columns;
+            this->_stride = r._stride;
+            this->_rows = r._rows;
+            for (ptrdiff_t i = 0; i != this->_rows; ++i)
+                std::uninitialized_copy_n(r._begin + i * r._stride, r._columns, this->_begin + i * this->_stride);
+            assert(_invariant());
             return *this;
         }
         
@@ -119,8 +129,19 @@ namespace manic {
             swap(this->_columns, r._columns);
             swap(this->_stride, r._stride);
             swap(this->_rows, r._rows);
-            swap(this->_store, r._store);
+            swap(this->_allocation, r._allocation);
+            swap(this->_capacity, r._capacity);
+            assert(_invariant());
         }
+        
+        void clear() {
+            _destroy_all();
+            this->_rows = 0;
+            this->_columns = 0;
+            assert(_invariant());
+        }
+        
+        
         
         // Mutators
         
@@ -131,26 +152,52 @@ namespace manic {
             assert(c >= 0);
             assert(i + r <= this->_rows);
             assert(j + c <= this->_columns);
+            
+            if constexpr (!std::is_trivially_destructible<T>::value) {
+                for (ptrdiff_t i2 = 0; i2 != i; ++i2) {
+                    std::destroy_n(this->_begin + this->_stride * i2, this->_columns);
+                }
+                for (ptrdiff_t i2 = i; i2 != (i + r); ++i2) {
+                    std::destroy_n(this->_begin + this->_stride * i2, j);
+                    std::destroy_n(this->_begin + this->_stride * i2 + j + c, this->_columns - j - c);
+                }
+                for (ptrdiff_t i2 = i + r; i2 != this->_rows; ++i2) {
+                    std::destroy_n(this->_begin + this->_stride * i2, this->_columns);
+                }
+            }
+            
             this->_begin += i * this->_stride + j;
             this->_columns = c;
             this->_rows = r;
+            assert(_invariant());
+
         }
         
+        // Resizes without preserving values
         void discard_and_resize(ptrdiff_t rows, ptrdiff_t columns) {
-            _store.resize(rows * columns, 0);
-            this->_begin = _store.data();
+            _destroy_all();
+            if (this->_capacity < rows * columns) {
+                raw_vector<T> v(std::max(rows * columns, 2 * this->_capacity));
+                v.swap(*this);
+            }
+            this->_begin = this->_allocation;
             this->_columns = columns;
             this->_stride = columns;
             this->_rows = rows;
+            std::uninitialized_default_construct_n(this->_begin, rows * columns);
+            assert(_invariant());
+
         }
         
-        void expand(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c, T x) {
+        void expand(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c, const T& x) {
+            // todo: detect when we can do this in-place
             matrix<T> a(r, c, x);
             a.sub(i, j, this->_rows, this->_columns) = *this;
             a.swap(*this);
         }
         
-        void resize(ptrdiff_t r, ptrdiff_t c, T x = T()) {
+        // Resizes preserving values, and padding with x
+        void resize(ptrdiff_t r, ptrdiff_t c, const T& x = T()) {
             matrix<T> a(r, c, x);
             r = std::min(r, this->_rows);
             c = std::min(c, this->_columns);

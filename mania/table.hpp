@@ -14,11 +14,11 @@
 #include <utility>
 #include <algorithm>
 #include <iostream>
-#include <vector>
 
 #include "hash.hpp"
 #include "filter_iterator.hpp"
 #include "transform_iterator.hpp"
+#include "vector.hpp"
 
 namespace manic {
     
@@ -72,8 +72,8 @@ namespace manic {
             }
         };
 
-        using _bucket_iterator = filter_iterator<typename std::vector<_bucket>::iterator, _bucket_predicate>;
-        using _const_bucket_iterator = filter_iterator<typename std::vector<_bucket>::const_iterator, _bucket_predicate>;
+        using _bucket_iterator = filter_iterator<typename vector<_bucket>::iterator, _bucket_predicate>;
+        using _const_bucket_iterator = filter_iterator<typename vector<_bucket>::const_iterator, _bucket_predicate>;
 
         using value_type = entry;
         using reference = value_type&;
@@ -83,7 +83,8 @@ namespace manic {
         using const_iterator = transform_iterator<_const_bucket_iterator, _bucket_subscript>;
         
         
-        std::vector<_bucket> _buckets;
+        //std::vector<_bucket> _buckets;
+        vector<_bucket> _buckets;
         uint64_t _occupants;
         
         table()
