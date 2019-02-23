@@ -9,6 +9,8 @@
 #ifndef povtools_hpp
 #define povtools_hpp
 
-#include <stdio.h>
+#include "vec.hpp"
+
+
 
 #endif /* povtools_hpp */

@@ -21,6 +21,11 @@ namespace manic {
         
         std::map<gl::vec<ptrdiff_t, 2>, std::unique_ptr<chunk>> _chunks;
         
+        chunk* operator()(ptrdiff_t i, ptrdiff_t j) const {
+            auto p = _chunks.find(gl::vec<ptrdiff_t, 2>(i, j));
+            return p != _chunks.end() ? p->second.get() : nullptr;
+        }
+        
     };
     
 };

@@ -18,10 +18,21 @@
 
 #include "matrix.hpp"
 #include "image.hpp"
-#include "zip.hpp"
-#include "noise.hpp"
+
+#include "table.hpp"
+#include "terrain.hpp"
 
 using namespace manic;
+
+int main(int argc, char** argv) {
+    
+    table<uint64_t, uint64_t> t;
+    
+    for (uint64_t i = 0; i != 20000000; ++i)
+        t[i] = i;
+    
+    return 0;
+}
 
 
 /*
@@ -191,36 +202,6 @@ double power(const_matrix_view<double> v) {
 }
 
 
-template<typename A, typename B, typename C>
-void filter_rows(matrix_view<C> c, const_matrix_view<A> a, const_vector_view<B> b) {
-    assert(c.rows() == a.rows());
-    assert(c.columns() + b.columns() == a.columns());
-    for (ptrdiff_t i = 0; i != c.rows(); ++i)
-        for (ptrdiff_t j = 0; j != c.columns(); ++j) {
-            for (ptrdiff_t k = 0; k != b.size(); ++k)
-                c(i, j) += a(i, j + k) * b(k);
-        }
-}
-
-template<typename A, typename B, typename C>
-void filter_columns(matrix_view<C> c, const_matrix_view<A> a, const_vector_view<B> b) {
-    assert(c.columns() == a.columns());
-    assert(c.rows() + b.size() == a.rows());
-    for (ptrdiff_t i = 0; i != c.rows(); ++i)
-        for (ptrdiff_t j = 0; j != c.columns(); ++j) {
-            for (ptrdiff_t k = 0; k != b.size(); ++k)
-                c(i, j) += a(i + k, j) * b(k);
-        }
-}
-
-template<typename A, typename B>
-void explode(matrix_view<B> b, const_matrix_view<A> a) {
-    assert(b.rows() == 2 * a.rows());
-    assert(b.columns() == 2 * a.columns());
-    for (ptrdiff_t i = 0; i != a.rows(); ++i)
-        for (ptrdiff_t j = 0; j != a.columns(); ++j)
-            b(2 * i, 2 * j) = a(i, j);
-}
 
 template<typename T, typename G>
 void perturb(matrix_view<T> a, G& g) {
@@ -244,118 +225,27 @@ bool is_even(ptrdiff_t a) {
     return !is_odd(a);
 }
 
-double _terrain_noise(uint64_t seed, ptrdiff_t i, ptrdiff_t j) {
-    seed = hash(hash(seed ^ i) ^ j);
-    return static_cast<int64_t>(seed) * pow(2.0, -63);
-}
-
-void _terrain_perturb(uint64_t seed, ptrdiff_t i, ptrdiff_t j, matrix_view<double> a) {
-    for (ptrdiff_t s = 0; s != a.rows(); ++s)
-        for (ptrdiff_t t = 0; t != a.columns(); ++t)
-            a(s, t) += _terrain_noise(seed, i + s, j + t);
-}
-
-void _terrain_recurse(ptrdiff_t i,
-                      ptrdiff_t j,
-                      ptrdiff_t rows,
-                      ptrdiff_t columns,
-                      const_vector_view<double> filter,
-                      ptrdiff_t depth,
-                      matrix<double>& a,
-                      matrix<double>& b,
-                      uint64_t seed) {
-
-    if (depth == 7) {
-        
-        a.discard_and_resize(rows, columns);
-        a = 0.0;
-        return;
-        
-    }
-        
-    // Expand our working size to account for filter losses
-    i -= filter.size() / 2;
-    j -= filter.size() / 2;
-    rows += filter.size();
-    columns += filter.size();
-    
-    // Round coordinates to next octave
-    ptrdiff_t i2 = (i - 1) / 2;
-    ptrdiff_t j2 = (j - 1) / 2;
-    ptrdiff_t rows2 = (i + rows + 1) / 2 - i2;
-    ptrdiff_t columns2 = (j + columns + 1) / 2 - j2;
-    
-    // Get terrain from next level
-    _terrain_recurse(i2, j2, rows2, columns2, filter, depth + 1, a, b, seed);
-    assert(a.rows() == rows2);
-    assert(a.columns() == columns2);
-    
-    // Add noise
-    _terrain_perturb(hash(seed ^ depth), i2, j2, a);
-    // seed has already been hashed so it won't have coincidences with depth
-    
-    // Double size
-    b.discard_and_resize(a.rows() * 2, a.columns() * 2);
-    b = 0.0;
-    explode(b, a);
-    
-    // Account for rounding in higher coordinates
-    b.crop(i - i2 * 2, j - j2 * 2, rows, columns);
-    
-    // Low-pass filter by ping-pong
-    a.discard_and_resize(b.rows(), b.columns() - filter.size());
-    a = 0.0;
-    assert(a._invariant());
-    assert(b._invariant());
-    filter_rows(a, b, filter);
-    b.discard_and_resize(a.rows() - filter.size(), a.columns());
-    b = 0.0;
-    filter_columns(b, a, filter);
-    
-    // Prepare output
-    swap(a, b);
-    
-}
-
-matrix<double> terrain(ptrdiff_t i, ptrdiff_t j, ptrdiff_t rows, ptrdiff_t columns, uint64_t seed = 0) {
-    
-    // Deterministically generate terrain of given region
-    
-    vector<double> filter(16);
-    for (ptrdiff_t i = 0; i != 16; ++i) {
-        filter[i] = exp(-sqr(i - 7.5) / 8.0);
-    }
-    filter *= sqrt(8.0) / sum(filter);
-    
-    matrix<double> a;
-    matrix<double> b;
-    
-    _terrain_recurse(i, j, rows, columns, filter, 0, a, b, hash(seed));
-    // we defensively hashed the seed
-    
-    return a;
-}
 
 
-int main(int argc, char** argv) {
+int main_terrain(int argc, char** argv) {
     
-   
-    /*
-    auto n = 512;
+    
+    
+    auto n = 16;
     matrix<double> a(n*2,n*2);
     
     a.sub(0,0,n+1,n+1) = terrain(0,0,n+1,n+1);
     a.sub(0,n+1,n+1,n-1) = terrain(0,n+1,n+1,n-1);
     a.sub(n+1,0,n-1,n+1) = terrain(n+1,0,n-1,n+1);
     a.sub(n+1,n+1,n-1,n-1) = terrain(n+1,n+1,n-1,n-1);
-    */
-    //auto b = terrain(0,0,2*n,2*n);
-    //a -= b;
+    
+    auto b = terrain(0,0,2*n,2*n);
+    a -= b;
     //threshold(a);
     
-    auto n = 4096;
-    auto a = terrain(0,0,n,n);
-    threshold(a);
+    //auto n = 1024;
+    //auto a = terrain(0,0,n,n);
+    //threshold(a);
     //posterize(a, 2);
     save(a);
     
