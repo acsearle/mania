@@ -25,10 +25,12 @@ namespace manic {
     // for (auto it = end(); it != begin(); ) {
     //     f(*--it);
     // }
+    //
+    // We inherit from Predicate to facilitate empty base optimization in
+    // the common case where it is stateless.
 
-    
     template<typename Iterator, typename Predicate>
-    struct filter_iterator {
+    struct filter_iterator : private Predicate {
         
         using value_type = typename std::iterator_traits<Iterator>::value_type;
         using reference = typename std::iterator_traits<Iterator>::reference;
@@ -38,27 +40,35 @@ namespace manic {
         
         Iterator _begin;
         Iterator _end;
-        Predicate _predicate;
         
         filter_iterator() = default;
-        
+
+        template<typename It1, typename It2>
+        filter_iterator(It1&& first,
+                        It2&& last)
+        : _begin(std::forward<It1>(first))
+        , _end(std::forward<It2>(last)) {
+            _fast_forward();
+        }
+
         template<typename It1, typename It2, typename Pr>
         filter_iterator(It1&& first,
                         It2&& last,
                         Pr&& pred)
-        : _begin(std::forward<It1>(first))
-        , _end(std::forward<It2>(last))
-        , _predicate(std::forward<Pr>(pred)) {
+        : Predicate(std::forward<Pr>(pred))
+        , _begin(std::forward<It1>(first))
+        , _end(std::forward<It2>(last)) {
+            _fast_forward();
         }
         
         void _fast_forward() {
-            while ((_begin != _end) && !_predicate(*_begin))
+            while ((_begin != _end) && !Predicate::operator()(*_begin))
                 ++_begin;
         }
         
         void _rewind() {
             assert(_begin != _end);
-            while (!_predicate(*_begin))
+            while (!Predicate::operator()(*_begin))
                 --_begin;
         }
         

@@ -71,15 +71,16 @@ namespace manic {
                 return *b._entry;
             }
         };
-        
+
+        using _bucket_iterator = filter_iterator<typename std::vector<_bucket>::iterator, _bucket_predicate>;
+        using _const_bucket_iterator = filter_iterator<typename std::vector<_bucket>::const_iterator, _bucket_predicate>;
+
         using value_type = entry;
         using reference = value_type&;
         using const_reference = const value_type&;
         
-        using _fit = filter_iterator<typename std::vector<_bucket>::iterator, _bucket_predicate>;
-        using iterator = transform_iterator<_fit, _bucket_subscript>;
-        using _cfit = filter_iterator<typename std::vector<_bucket>::const_iterator, _bucket_predicate>;
-        using const_iterator = transform_iterator<_cfit, _bucket_subscript>;
+        using iterator = transform_iterator<_bucket_iterator, _bucket_subscript>;
+        using const_iterator = transform_iterator<_const_bucket_iterator, _bucket_subscript>;
         
         
         std::vector<_bucket> _buckets;
@@ -227,8 +228,8 @@ namespace manic {
             }
         }
         
-        void _put(uint64_t h, std::unique_ptr<entry> e) {
-            
+        entry* _put(uint64_t h, std::unique_ptr<entry> e) {
+            entry* pppp = e.get();
             uint64_t i = h;
             uint64_t idistance = 0;
             for (;;) {
@@ -236,11 +237,11 @@ namespace manic {
                     _subscript(i)._hash = h;
                     _subscript(i)._entry = std::move(e);
                     ++_occupants;
-                    return;
+                    return pppp;
                 } else if ((_subscript(i)._hash == h) && (_subscript(i)._entry->key == e->key)) {
                     // An equivalent key is already present
                     std::swap(e, _subscript(i)._entry);
-                    return;
+                    return pppp;
                 } else {
                     // see if we are more deserving of the slot
                     uint64_t jh = _subscript(i)._hash;
@@ -257,7 +258,7 @@ namespace manic {
             }
         }
         
-        void put(const Key& key, const T& value) {
+        entry* put(const Key& key, const T& value) {
             
             // provide a raw version of this for when we are rehashing, and
             // already know hash and have an entry
@@ -269,7 +270,7 @@ namespace manic {
                 resize();
             }
             
-            _put(hash(key), std::make_unique<entry>(key, value));
+            return _put(hash(key), std::make_unique<entry>(key, value));
             
         }
         
@@ -347,37 +348,39 @@ namespace manic {
         }
         
         const_iterator begin() const {
-            return const_iterator(_cfit(_buckets.begin(), _buckets.end(), _bucket_predicate()), _bucket_subscript());
+            return const_iterator(_const_bucket_iterator(_buckets.begin(), _buckets.end()));
         };
         
         const_iterator end() const {
-            return const_iterator(_cfit(_buckets.end(), _buckets.end(), _bucket_predicate()), _bucket_subscript());
+            return const_iterator(_const_bucket_iterator(_buckets.end(), _buckets.end()));
         };
         
         const_iterator cbegin() const { return begin(); }
         const_iterator cend() const { return end(); }
         
         iterator begin() {
-            return iterator(_fit(_buckets.begin(), _buckets.end(), _bucket_predicate()), _bucket_subscript());
+            return iterator(_bucket_iterator(_buckets.begin(), _buckets.end()));
         };
         
         iterator end() {
-            return iterator(_fit(_buckets.end(), _buckets.end(), _bucket_predicate()), _bucket_subscript());
+            return iterator(_bucket_iterator(_buckets.end(), _buckets.end()));
         };
         
-        void print() {
+        void print() const {
             std::cout << "{\n";
             for (auto&& a : *this) {
-                std::cout << "    " << a.key << " : " << a.value << std::endl;
+                std::cout << "\t" << a.key << "\t:\t" << a.value << std::endl;
             }
             std::cout << "}\n";
+            statistics();
+            std::cout << "sizeof(iterator) = " << sizeof(iterator) << std::endl;
+            std::cout << begin()->value << std::endl;
         }
 
         T& operator[](const Key& k) {
             T* p = get(k);
             if (!p) {
-                put(k, T());
-                p = get(k);
+                p = &put(k, T())->value;
             }
             return *p;
         }

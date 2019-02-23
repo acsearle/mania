@@ -28,8 +28,10 @@ int main(int argc, char** argv) {
     
     table<uint64_t, uint64_t> t;
     
-    for (uint64_t i = 0; i != 20000000; ++i)
+    for (uint64_t i = 0; i != 200; ++i)
         t[i] = i;
+    
+    t.print();
     
     return 0;
 }

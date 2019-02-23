@@ -11,33 +11,48 @@
 
 namespace manic {
     
+    // We inherit from UnaryFunction to enable empty base optimization in the
+    // common case that UnaryFunction is stateless
+    
     template<typename Iterator, typename UnaryFunction>
-    struct transform_iterator {
+    struct transform_iterator : private UnaryFunction {
         
         using reference = decltype((std::declval<const UnaryFunction&>()(*std::declval<const Iterator&>())));
         using value_type = std::decay_t<reference>;
-        using pointer = void;
+        using pointer = std::conditional_t<std::is_reference<reference>::value, std::add_pointer_t<reference>, indirect<reference>>;
         using iterator_category = typename std::iterator_traits<Iterator>::iterator_category;
         using difference_type = typename std::iterator_traits<Iterator>::difference_type;
         
         Iterator _iterator;
-        UnaryFunction _function;
         
         transform_iterator() = default;
-        
+
+        template<typename It>
+        explicit transform_iterator(It&& it)
+        : _iterator(std::forward<It>(it)) {
+        }
+
         template<typename It, typename Uf>
         transform_iterator(It&& it,
                         Uf&& ufn)
-        : _iterator(std::forward<It>(it))
-        , _function(std::forward<Uf>(ufn)) {
+        : UnaryFunction(std::forward<Uf>(ufn))
+        , _iterator(std::forward<It>(it)) {
         }
         
         reference operator*() const {
-            return _function(*_iterator);
+            return UnaryFunction::operator()(*_iterator);
         }
         
         reference operator[](difference_type i) const {
-            return _function(_iterator[i]);
+            return UnaryFunction::operator()(_iterator[i]);
+        }
+        
+        pointer operator->() const {
+            if constexpr(std::is_reference<reference>::value) {
+                return &**this;
+            } else {
+                return indirect(*this);
+            }
         }
         
         transform_iterator& operator++() {
