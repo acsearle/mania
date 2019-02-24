@@ -12,19 +12,16 @@
 #include <map>
 #include <memory>
 
-#include "vec.hpp"
 #include "chunk.hpp"
+#include "table.hpp"
+#include "vec.hpp"
 
 namespace manic {
     
-    struct surface {
+    struct surface
+    : table<gl::vec<ptrdiff_t, 2>, chunk> {
         
-        std::map<gl::vec<ptrdiff_t, 2>, std::unique_ptr<chunk>> _chunks;
-        
-        chunk* operator()(ptrdiff_t i, ptrdiff_t j) const {
-            auto p = _chunks.find(gl::vec<ptrdiff_t, 2>(i, j));
-            return p != _chunks.end() ? p->second.get() : nullptr;
-        }
+        void instantiate(ptrdiff_t i, ptrdiff_t j);
         
     };
     

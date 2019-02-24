@@ -10,6 +10,7 @@
 		CA0EB12B22201ADB00DAE8CF /* terrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB12922201ADB00DAE8CF /* terrain.cpp */; };
 		CA0EB12C22201ADB00DAE8CF /* terrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB12922201ADB00DAE8CF /* terrain.cpp */; };
 		CA0EB13C22208A6200DAE8CF /* table-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB13B22208A6200DAE8CF /* table-test.cpp */; };
+		CA0EB143222254B600DAE8CF /* f8-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB141222254B600DAE8CF /* f8-test.cpp */; };
 		CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA284D7D1FFE361900565175 /* preprocessor.cpp */; };
 		CA3FF5E42079A828009F006F /* int.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA3FF5E22079A828009F006F /* int.cpp */; };
 		CA72B7A8221A7C5500AC9441 /* main-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72B7A7221A7C5500AC9441 /* main-test.cpp */; };
@@ -76,11 +77,13 @@
 		CA0EB1362220226C00DAE8CF /* matrix_view.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = matrix_view.hpp; sourceTree = "<group>"; };
 		CA0EB137222023F100DAE8CF /* stride_ptr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stride_ptr.hpp; sourceTree = "<group>"; };
 		CA0EB138222027A500DAE8CF /* const_column_vector_view.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = const_column_vector_view.hpp; sourceTree = "<group>"; };
-		CA0EB139222081F600DAE8CF /* sparse.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sparse.hpp; sourceTree = "<group>"; };
 		CA0EB13A222083B900DAE8CF /* table.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = table.hpp; sourceTree = "<group>"; };
 		CA0EB13B22208A6200DAE8CF /* table-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "table-test.cpp"; sourceTree = "<group>"; };
 		CA0EB13D22210F8000DAE8CF /* filter_iterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = filter_iterator.hpp; sourceTree = "<group>"; };
 		CA0EB13E222113E400DAE8CF /* transform_iterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = transform_iterator.hpp; sourceTree = "<group>"; };
+		CA0EB13F22224CC300DAE8CF /* common.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = common.hpp; sourceTree = "<group>"; };
+		CA0EB1402222524300DAE8CF /* f8.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = f8.hpp; sourceTree = "<group>"; };
+		CA0EB141222254B600DAE8CF /* f8-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "f8-test.cpp"; sourceTree = "<group>"; };
 		CA284D781FF1C41300565175 /* bit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bit.hpp; sourceTree = "<group>"; };
 		CA284D7D1FFE361900565175 /* preprocessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = preprocessor.cpp; sourceTree = "<group>"; };
 		CA3FF5E22079A828009F006F /* int.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = int.cpp; sourceTree = "<group>"; };
@@ -195,6 +198,7 @@
 				CA0EB13B22208A6200DAE8CF /* table-test.cpp */,
 				CAE2F1BB2216B97000B832F6 /* deque-test.cpp */,
 				CAE2F1BE2216EBAB00B832F6 /* catch.hpp */,
+				CA0EB141222254B600DAE8CF /* f8-test.cpp */,
 			);
 			path = "mania-test";
 			sourceTree = "<group>";
@@ -313,8 +317,10 @@
 				CA284D781FF1C41300565175 /* bit.hpp */,
 				CAC2FF83221D2DCC00D8B4B2 /* chunk.cpp */,
 				CAC2FF84221D2DCC00D8B4B2 /* chunk.hpp */,
+				CA0EB13F22224CC300DAE8CF /* common.hpp */,
 				CADB9B44202C282000415C1B /* debug.hpp */,
 				CAE2F1BC2216B97000B832F6 /* deque.hpp */,
+				CA0EB1402222524300DAE8CF /* f8.hpp */,
 				CA72B7BA221A8C4600AC9441 /* gl */,
 				CAF889D91F1AD842005956A9 /* image.cpp */,
 				CAF889DA1F1AD842005956A9 /* image.hpp */,
@@ -322,7 +328,6 @@
 				CAF889BB1F14DFCF005956A9 /* renderer.cpp */,
 				CAF889BC1F14DFCF005956A9 /* renderer.hpp */,
 				CA72B7BB221A8E9400AC9441 /* scrapyard */,
-				CA0EB139222081F600DAE8CF /* sparse.hpp */,
 				CAC2FF86221D2DED00D8B4B2 /* surface.cpp */,
 				CAC2FF87221D2DED00D8B4B2 /* surface.hpp */,
 				CA0EB13A222083B900DAE8CF /* table.hpp */,
@@ -470,6 +475,7 @@
 				CA72B7AC221A7D0900AC9441 /* deque-test.cpp in Sources */,
 				CA72B7A8221A7C5500AC9441 /* main-test.cpp in Sources */,
 				CA0EB13C22208A6200DAE8CF /* table-test.cpp in Sources */,
+				CA0EB143222254B600DAE8CF /* f8-test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -585,6 +591,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -634,6 +641,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -641,6 +649,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -674,6 +683,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -683,6 +693,7 @@
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};

@@ -20,6 +20,7 @@
 #include "transform_iterator.hpp"
 #include "vector.hpp"
 
+
 namespace manic {
     
     // Hash table
@@ -32,18 +33,20 @@ namespace manic {
     //
     // http://codecapsule.com/2013/11/17/robin-hood-hashing-backward-shift-deletion/
   
-    template<typename Key, typename T>
+    template<typename Key, typename Value>
     struct table {
+        
+        using key_type = Key;
         
         struct entry {
             
             const Key key;
-            T value;
+            Value value;
             
             template<typename KR, typename TR>
             entry(KR&& key_, TR&& value_)
-            : key(key_)
-            , value(value_) {
+            : key(std::forward<KR>(key_))
+            , value(std::forward<TR>(value_)) {
             }
             
         };
@@ -51,10 +54,6 @@ namespace manic {
         struct _bucket {
             uint64_t _hash;
             std::unique_ptr<entry> _entry;
-            
-            explicit operator bool() const {
-                return static_cast<bool>(_entry);
-            }
         };
         
         struct _bucket_predicate {
@@ -138,7 +137,6 @@ namespace manic {
             using std::swap;
             swap(_buckets, r._buckets);
             swap(_occupants, r._occupants);
-            
         }
         
         void clear() {
@@ -201,7 +199,7 @@ namespace manic {
             return true;
         }
         
-        T* get(const Key& key) {
+        Value* get(const Key& key) {
             uint64_t h = hash(key);
             uint64_t i = h;
             uint64_t probes = 1;
@@ -209,7 +207,7 @@ namespace manic {
             if (!_occupants)
                 return nullptr;
             for (;;) {
-                if (!_subscript(i)) {
+                if (!_subscript(i)._entry) {
                     return nullptr;
                 }
                 if ((_subscript(i)._hash == h) && (_subscript(i)._entry->key == key)) {
@@ -234,7 +232,7 @@ namespace manic {
             uint64_t i = h;
             uint64_t idistance = 0;
             for (;;) {
-                if (!_subscript(i)) {
+                if (!_subscript(i)._entry) {
                     _subscript(i)._hash = h;
                     _subscript(i)._entry = std::move(e);
                     ++_occupants;
@@ -259,20 +257,11 @@ namespace manic {
             }
         }
         
-        entry* put(const Key& key, const T& value) {
-            
-            // provide a raw version of this for when we are rehashing, and
-            // already know hash and have an entry
-            
-            // There must be at least one free element or searching for
-            // elements will never fail
-            
+        entry* put(const Key& key, const Value& value) {
             if (_occupants * 4 >= _buckets.size() * 3) {
                 resize();
             }
-            
             return _put(hash(key), std::make_unique<entry>(key, value));
-            
         }
         
         void remove(const Key& key) {
@@ -281,7 +270,7 @@ namespace manic {
             if (!_occupants)
                 return;
             for (;;) {
-                if (!_subscript(i)) {
+                if (!_subscript(i)._entry) {
                     // Preferred slot is empty
                     return;
                 } else if ((_subscript(i)._hash == h) && (_subscript(i)._entry->key == key)) {
@@ -321,24 +310,20 @@ namespace manic {
             table t(std::max(_buckets.size() * 2, _buckets.size() + 1));
             for (auto& x : _buckets) {
                 if (x._entry) {
-                    // t.put(x._entry->key, x._entry->value);
                     t._put(x._hash, std::move(x._entry));
                 }
             }
-            using std::swap;
-            swap(_buckets, t._buckets);
-            swap(_occupants, t._occupants);
-            t._buckets.clear();
+            this->swap(t);
         }
         
         void statistics() const {
             assert(_invariant());
-            std::vector<int> histogram;
+            vector<int> histogram;
             for (size_t i = 0; i != _buckets.size(); ++i) {
                 auto& b = _buckets[i];
                 if (b) {
                     auto j = distance(i, b._hash);
-                    histogram.resize(std::max(histogram.size(), (size_t) j + 1), 0);
+                    histogram.resize(std::max(histogram.size(), (ptrdiff_t) j + 1), 0);
                     ++histogram[j];
                 }
             }
@@ -374,20 +359,55 @@ namespace manic {
             }
             std::cout << "}\n";
             statistics();
-            std::cout << "sizeof(iterator) = " << sizeof(iterator) << std::endl;
-            std::cout << begin()->value << std::endl;
         }
 
-        T& operator[](const Key& k) {
-            T* p = get(k);
+        Value& operator[](const Key& k) {
+            return get_or_default(k);
+        }
+        
+        Value& get_or_default(const Key& k) {
+            Value* p = get(k);
             if (!p) {
-                p = &put(k, T())->value;
+                p = &put(k, Value())->value;
+            }
+            return *p;
+        }
+        
+        Value& get_or_insert(const Key& k, const Value& v) {
+            Value* p = get(k);
+            if (!p) {
+                p = &put(k, v)->value;
+            }
+            return *p;
+        }
+        
+        template<typename F>
+        Value& get_or_insert_with(const Key& k, F&& f) {
+            // Gets the value if it exists, inserts the result of f() if it
+            // does not.
+            Value* p = get(k);
+            if (!p) {
+                p = &put(k, f())->value;
+            }
+            return *p;
+        }
+        
+        template<typename... Args>
+        Value& get_or_emplace(const Key& k, Args&&... args) {
+            Value& p = get(k);
+            if (!p) {
+                p = &put(k, Value(std::forward<Args>(args)...))->value;
             }
             return *p;
         }
 
         
-    };
+    }; // table
+    
+    template<typename K, typename V>
+    void swap(table<K, V>& a, table<K, V>& b) {
+        a.swap(b);
+    }
     
 };
 

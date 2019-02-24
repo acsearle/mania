@@ -24,15 +24,9 @@
 #include "vec.hpp"
 #include "mat.hpp"
 #include "image.hpp"
-#include "cg.hpp"
 #include "texture.hpp"
 #include "atlas.hpp"
-
-using namespace gl;
-using namespace std;
-
-typedef vec<GLushort, 2> edge;
-typedef vec<GLushort, 3> triangle;
+#include "surface.hpp"
 
 
 class blenderer
@@ -42,16 +36,19 @@ class blenderer
     gl::vao _vao;
     gl::vbo _vbo;
     
-    vector<vertex> _vertices;
+    std::vector<gl::vertex> _vertices;
     
     GLsizei _width, _height;
     
     manic::atlas _atlas;
     
-    vector<vector<int>> _grid;
-    vector<gl::vec<GLfloat, 2>> _entities;
+    //vector<vector<int>> _grid;
+    //vector<gl::vec<GLfloat, 2>> _entities;
     
+    manic::surface _surface;
     
+    gl::vec<double, 2> _camera_position;
+    double             _camera_zoom;
     
 public:
     
@@ -59,7 +56,7 @@ public:
     virtual ~blenderer() = default;
     void resize(GLsizei width, GLsizei height);
     void render();
-    void blit(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y);
+    void blit(ptrdiff_t i, float x, float y);
     void blit_twist(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y, double radians);
 
 };
@@ -67,6 +64,21 @@ public:
 std::unique_ptr<renderer> renderer::make() {
     return std::make_unique<blenderer>();
 }
+
+// As a general principle, we want to use nested local coordinates as much as
+// possible, because we access and copy lots of coordinates.  Using doubles
+// everywhere is convenient but squanders memory bandwidth, and limits
+// precision.  Obviously this is overkill for small worlds/projects.
+// As we dig into structures, offsets can accumulate
+
+// Is there a fundamental coordinate?  A pixel?  A sub-pixel?  If so, entities
+// need float storage.  Are entities rendered at non-integer co-ordinates?  If
+// so, we need GL_LINEAR, and we need to carefuly arrange tiles so they are
+// always rendered in the same order, and have enough overlap to blend properly.
+// * No, we just need to have border pixels supplied so GL_LINEAR works properly
+//
+// Conclusion: to support non-integer camera zooms, we need GL_LINEAR rendering.
+// Tiles must supply border pixels as well to supply GL_LINEAR what it needs.
 
 blenderer::blenderer()
 : _program("basic"), _atlas(1024) {
@@ -90,8 +102,8 @@ blenderer::blenderer()
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -112,41 +124,85 @@ blenderer::blenderer()
     
     _program.assign("sampler", 0);
     
-    auto N = 30;
     
-    for (int i = 0; i != N * N; ++i)
-        _entities.emplace_back(rand() % (N * 32), rand() % (N * 18));
-    
-    for (int i = 0; i != N; ++i) {
-        vector<int> v;
-        for (int j = 0; j != N; ++j) {
-            int k = 0;
-            if (i > j) {
-                if ((i + j) > N) {
-                    k = 3;
-                } else {
-                    k = 6;
-                }
-            } else {
-                if ((i + j) > N) {
-                    k = 4;
-                } else {
-                    k = 5;
-                }
-            }
-            if (!(rand() % N))
-                k = rand() % 7;
-            v.push_back(k);
-        }
-        _grid.push_back(v);
+    _surface.instantiate(0, 0);
+    _surface.instantiate(0, -1);
+    _surface.instantiate(-1, -1);
+
+    for (auto&& e : _surface) {
+        auto& c = e.value;
+        for (ptrdiff_t i = 0; i != c._rows * c._columns; ++i)
+            c._entities.emplace_back(rand() / (double) RAND_MAX * c._rows, rand() / (double) RAND_MAX * c._columns);
     }
-    
-    
     
     glPointSize(10.0);
     
+    _camera_position = 0;
+    _camera_zoom = 4.56789;
+    
     
 }
+
+// Rendering engine:
+//
+// Rendering unscaled asserts requires:
+//
+// Float x, float y
+// Integer asset tag
+//
+// Implicit is
+//
+// The texture atlas to use
+// The layer so populated / the ordering
+//
+// Everything
+// - Layers 0..n
+//   - Atlases 0..n
+//     - (x, y, identifier)
+//
+// If we make the implicit atlas, layer and ordering explicit we have to do
+// more work.  Fair tradeoff?
+//
+// Imagine trees in adjacent chunks; all at the same player, but all overdrawing
+// each other.  Z-buffer solves this for 3d geometry but we want to use alpha
+// heavily for shadows and smooth edges.  So we have to sort something,
+// somewhere.  We will tend to emit large runs of sorted order, so the sort
+// can benefit from this for the right algorithm.
+//
+// While the problem is acute when viewing along a coordinate axis, isometric
+// still suffers from it: a large sprite in one chunk can overhang a small
+// sprite in another.  Do we need to render chunks by row?
+//
+// When multiple atlases are in play, the pathological case occurs when
+// entities from different atlases are stacked in front of each other.  i.e.
+// every time a run of the same atlas breaks, we have to change texture and
+// issue a new draw command, or we have to pass a texture id in with each
+// vertex.
+//
+// We can ban this case by restricting layers to a single atlas, but this is
+// still problematic--we can only have one layer for overlappy things like
+// trees, power poles, buildings, i.e. things that live at the same z-level.
+//
+// tiles < ore < grass < belts < plates <
+// trees, buildings, poles, creatures
+// < robots < clouds
+//
+// Objects that don't overhang their exclusive footprint are precious; a set of
+// these can be rendered in any order.  Is this why assemblers are rhomboid?
+//
+// So layers can either be nonoverlapping and multi-atlas, or overlapping and
+// single atlas?  A weird restriction.
+//
+// Shadows are a devastating example of this.  They can't be cast properly
+// onto non-flat surfaces anyway (terrain, tiles, plates layers).
+//
+// What if we render shadows separately, with a special shader, that accumulates
+// them properly, and then renders them back onto main target?  Expensive but
+// high quality.  A lone item shadows everything on the ground correctly (but
+// also true of naive method), crowded objects don't deepen shadows (better)
+// and don't cast on each other (vs. casting wrongly on each other).  Hmm.
+
+
 
 void blenderer::resize(GLsizei width, GLsizei height) {
     
@@ -155,66 +211,22 @@ void blenderer::resize(GLsizei width, GLsizei height) {
     
 }
 
-void blenderer::blit(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y) {
+void blenderer::blit(ptrdiff_t i, float x, float y) {
     auto& r = _atlas[i];
-    vertex a = r.a;
-    vertex b = r.b;
+    gl::vertex a = r.a;
+    gl::vertex b = r.b;
     a.position.x += x;
     a.position.y += y;
     b.position.x += x;
     b.position.y += y;
-    vertex c = a;
-    vertex d = b;
+    gl::vertex c = a;
+    gl::vertex d = b;
     // a - c
     // | / |
     // d - b
     using std::swap;
     swap(c.position.x, d.position.x);
     swap(c.texCoord.x, d.texCoord.x);
-    _vertices.push_back(a);
-    _vertices.push_back(c);
-    _vertices.push_back(d);
-    _vertices.push_back(d);
-    _vertices.push_back(c);
-    _vertices.push_back(b);
-}
-
-void blenderer::blit_twist(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y, double radians) {
-    auto& r = _atlas[i];
-    
-    vertex a = r.a;
-    vertex b = r.b;
-    vertex c = a;
-    vertex d = b;
-    using std::swap;
-    swap(c.position.x, d.position.x);
-    swap(c.texCoord.x, d.texCoord.x);
-    // a - c
-    // | / |
-    // d - b
-
-    float cos_ = cos(radians);
-    float sin_ = sin(radians);
-    // rotate in ground plane
-    mat<GLfloat, 2> m(cos_, -sin_ * 16.0/9.0,
-                      sin_ * 9.0/16.0, cos_);
-    a.position = dot(m, a.position);
-    b.position = dot(m, b.position);
-    c.position = dot(m, c.position);
-    d.position = dot(m, d.position);
-    
-
-    a.position.x += x;
-    a.position.y += y;
-    b.position.x += x;
-    b.position.y += y;
-    c.position.x += x;
-    c.position.y += y;
-    d.position.x += x;
-    d.position.y += y;
-
-
-
     _vertices.push_back(a);
     _vertices.push_back(c);
     _vertices.push_back(d);
@@ -246,10 +258,10 @@ void blenderer::render() {
     
 
     glViewport(0, 0, _width, _height);
-    
+
     GLfloat transform[16] = {
-        4.0f/_width, 0, 0, -1,
-        0, -4.0f/_height, 0, 1,
+        (float) _camera_zoom/_width, 0, 0, 0,
+        0, - (float) _camera_zoom/_height, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
     };
@@ -264,41 +276,26 @@ void blenderer::render() {
     
     _vertices.clear();
 
-    for (int j = 0; j != _grid.size(); ++j)
-        for (int i = 0; i != _grid[j].size(); ++i)
-            blit_twist(_grid[j][i], i * 32, j * 18, angle);
-    
-    for (int i = 0; i != _entities.size(); ++i) {
-        blit(7, _entities[i].x, _entities[i].y);
-    }
-    
-    for (int i = 0; i != _entities.size(); ++i) {
-        int x = _entities[i].x / 32 + 0.5;
-        int y = _entities[i].y / 18 + 0.5;
-        y = std::clamp<int>(y, 0, _grid.size() - 1);
-        x = std::clamp<int>(x, 0, _grid[y].size() - 1);
-        auto dd = deltas[_grid[y][x]];
-        auto nu = _entities[i] + dd;
-        /*
-        int j = 0;
-        for (j = 0; j != _entities.size(); ++j) {
-            if (j == i)
-                continue;
-            auto del = nu - _entities[j];
-            if (del.x * del.x + del.y * del.y < 100) {
-                // We are collided but are we obstructing?
-                if (dd.x * del.x + dd.y * del.y <= 0)
-                    break;
-            }
-        }
-        if (j == _entities.size())*/
-            _entities[i] = nu;
+    _camera_position.x = sin(new_t * 1e-9) * 32;
+    _camera_position.y = cos(new_t * 1e-9) * 18;
+
+    for (auto&& d : _surface) {
+        auto&& c = d.value;
+        for (ptrdiff_t i = 0; i != c._rows; ++i)
+            for (ptrdiff_t j = 0; j != c._columns; ++j)
+                blit(c._tiles(i, j),
+                     (c._j * c._columns + j) * 32 - _camera_position.x,
+                     (c._i * c._rows + i) * 18 - _camera_position.y);
         
+        for (auto&& e : c._entities) {
+            blit(7,
+                 (c._j * c._columns + e.x) * 32  - _camera_position.x,
+                 (c._i * c._rows + e.y) * 18 - _camera_position.y);
+        }
     }
-    std::stable_sort(_entities.begin(), _entities.end(), [](auto a, auto b) {
-        return a.y > b.y;
-    });
     
+    
+
     
     //glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -308,4 +305,53 @@ void blenderer::render() {
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei) _vertices.size());
     
     
+}
+
+
+
+
+
+
+void blenderer::blit_twist(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y, double radians) {
+    auto& r = _atlas[i];
+    
+    gl::vertex a = r.a;
+    gl::vertex b = r.b;
+    gl::vertex c = a;
+    gl::vertex d = b;
+    using std::swap;
+    swap(c.position.x, d.position.x);
+    swap(c.texCoord.x, d.texCoord.x);
+    // a - c
+    // | / |
+    // d - b
+    
+    float cos_ = cos(radians);
+    float sin_ = sin(radians);
+    // rotate in ground plane
+    gl::mat<GLfloat, 2> m(cos_, -sin_ * 16.0/9.0,
+                      sin_ * 9.0/16.0, cos_);
+    a.position = dot(m, a.position);
+    b.position = dot(m, b.position);
+    c.position = dot(m, c.position);
+    d.position = dot(m, d.position);
+    
+    
+    a.position.x += x;
+    a.position.y += y;
+    b.position.x += x;
+    b.position.y += y;
+    c.position.x += x;
+    c.position.y += y;
+    d.position.x += x;
+    d.position.y += y;
+    
+    
+    
+    _vertices.push_back(a);
+    _vertices.push_back(c);
+    _vertices.push_back(d);
+    _vertices.push_back(d);
+    _vertices.push_back(c);
+    _vertices.push_back(b);
 }

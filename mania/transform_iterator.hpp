@@ -9,6 +9,8 @@
 #ifndef transform_iterator_hpp
 #define transform_iterator_hpp
 
+#include "indirect.hpp"
+
 namespace manic {
     
     // We inherit from UnaryFunction to enable empty base optimization in the

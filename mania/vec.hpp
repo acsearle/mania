@@ -14,6 +14,9 @@
 #include <iostream>
 #include <utility>
 
+#include "common.hpp"
+#include "hash.hpp"
+
 namespace gl {
     
     template<typename T, std::size_t N>
@@ -426,8 +429,18 @@ return a;\
     using uvec3 = vec<uint, 3>;
     using uvec4 = vec<uint, 4>;
 
+}
 
-
+namespace manic {
+    
+    template<typename T, std::size_t N>
+    u64 hash(const gl::vec<T, N>& v) {
+        u64 s = 0;
+        for (auto&& e : v) {
+            s = hash(s ^ hash(e));
+        }
+        return s;
+    }
     
 }
 

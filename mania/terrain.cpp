@@ -34,7 +34,7 @@ namespace manic {
                           matrix<double>& b,
                           uint64_t seed) {
         
-        if (depth == 7) {
+        if (depth == 2) {
             
             a.discard_and_resize(rows, columns);
             a = 0.0;

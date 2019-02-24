@@ -32,9 +32,6 @@ namespace manic {
 
             REQUIRE(t.size() == 100);
 
-            t.print();
-            t.statistics();
-            
             for (uint64_t i = 0; i != 100; ++i) {
                 uint64_t* p = t.get(i);
                 REQUIRE(p);
@@ -70,10 +67,6 @@ namespace manic {
             
             REQUIRE(t.size() == 100);
 
-            t.print();
-            t.statistics();
-            
-            
         }
         
     }

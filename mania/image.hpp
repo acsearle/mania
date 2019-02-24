@@ -21,23 +21,6 @@ namespace manic {
     using std::move;
     using std::forward;
 
-    struct f8 {
-        unsigned char _value;
-        explicit f8(int x) {
-            _value = std::clamp(x, 0, 255);
-        }
-    public:
-        explicit f8(double x) : _value(std::clamp(std::round(x * 255), 0.0, 255.0)) {}
-        operator double() const { return _value / 255.0; }
-        f8& operator+=(f8 x) { _value += x._value; return *this; }
-        f8& operator-=(f8 x) { _value -= x._value; return *this; }
-        f8 operator/(f8 x) { return f8(_value * 255 / x._value); }
-        f8 operator*(f8 x) { return f8(_value * x._value / 255); }
-        f8& operator/=(f8 x) { _value = _value * 255 / x._value; return *this; }
-        f8& operator*=(f8 x) { _value = _value * x._value / 255; return *this; }
-        f8 operator+(f8 x) { return f8(_value + x._value); }
-        f8 operator-(f8 x) { return f8(_value - x._value); }
-    };
     
     
 

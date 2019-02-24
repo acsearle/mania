@@ -9,6 +9,8 @@
 #ifndef const_vector_view_hpp
 #define const_vector_view_hpp
 
+#include <numeric>
+
 namespace manic {
     
     // Views contiguous objects.  Reference semantics, so assignment copies

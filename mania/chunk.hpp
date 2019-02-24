@@ -11,16 +11,23 @@
 
 #include "matrix.hpp"
 #include "vec.hpp"
+#include "terrain.hpp"
+#include "vec.hpp"
 
 namespace manic {
     
-    struct chunk
-    : matrix<unsigned char> {
+    struct chunk {
         
-        chunk(ptrdiff_t i, ptrdiff_t j)
-        : matrix<unsigned char>(16,16) {
-            
-        }
+        ptrdiff_t _i;
+        ptrdiff_t _j;
+        static const ptrdiff_t _rows = 16;
+        static const ptrdiff_t _columns = 16;
+        
+        matrix<uint8_t> _tiles;
+        
+        std::vector<gl::vec<float, 2>> _entities;
+        
+        chunk(ptrdiff_t i_, ptrdiff_t j_);
         
     };
     

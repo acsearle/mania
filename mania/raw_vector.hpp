@@ -48,6 +48,11 @@ namespace manic {
     template<typename T>
     struct raw_vector<const T>;
     
+    template<typename T>
+    void swap(raw_vector<T>& a, raw_vector<T>& b) {
+        a.swap(b);
+    }
+    
 }
 
 #endif /* raw_vector_hpp */

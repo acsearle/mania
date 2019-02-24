@@ -7,3 +7,11 @@
 //
 
 #include "surface.hpp"
+
+namespace manic {
+    
+    void surface::instantiate(ptrdiff_t i, ptrdiff_t j) {
+        get_or_insert_with(key_type(i, j), [=]() { return chunk(i, j); });
+    }
+    
+};

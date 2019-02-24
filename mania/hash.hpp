@@ -80,11 +80,15 @@ namespace manic {
     };
     
     inline uint64_t hash(uint64_t x) {
+        // Has period 2^62 but maps zero to non=zero
+        // There will be a value of x that cancels
         x = x * 3935559000370003845ull + 2691343689449507681ull;
+        // Have period 2^64
         x ^= x >> 21; x ^= x << 37; x ^= x >> 4;
         x *= 4768777513237032717ull;
         x ^= x << 20; x ^= x >> 41; x ^= x << 5;
-        return x * 2685821657736338717ull;
+        return x;
+        // return x * 2685821657736338717ull; // <- not in NR, why?
     }
     
     

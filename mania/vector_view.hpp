@@ -9,6 +9,8 @@
 #ifndef vector_view_hpp
 #define vector_view_hpp
 
+#include "const_vector_view.hpp"
+
 namespace manic {
     
     template<typename T>
@@ -72,7 +74,7 @@ namespace manic {
             std::copy(first, last, begin());
         }
         
-        void swap(vector_view<T> v) {
+        void swap(vector_view<T>& v) {
             assert(this->size() == v.size());
             std::swap_ranges(begin(), end(), v.begin());
         }
@@ -111,6 +113,12 @@ namespace manic {
             a(i) *= b;
         return a;
     }
+    
+    template<typename T>
+    void swap(vector_view<T>& a, vector_view<T>& b) {
+        a.swap(b);
+    }
+
 
     
 }

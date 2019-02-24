@@ -24,6 +24,31 @@
 
 using namespace manic;
 
+int main(int argc, char** argv) {
+
+    // Try to crack the hash function: x = x * 3935559000370003845ull + 2691343689449507681ull;
+    // The rest of it maps zero to zero
+
+    const u64 a = 3935559000370003845ull;
+    const u64 b = 2691343689449507681ull;
+    
+    u64 c = b;
+    u64 d = 0;
+    for (int i = 0; i != 64; ++i) {
+        if (c & (1ull << i)) {
+            c += (a << i);
+            assert(!(c & 1));
+            d |= (1ull << i);
+        }
+    }
+    std::cout << std::hex << d << std::endl;
+    
+    std::cout << hash(d) << std::endl;
+
+    
+}
+
+
 int main_table(int argc, char** argv) {
     
     table<uint64_t, uint64_t> t;
@@ -229,7 +254,7 @@ bool is_even(ptrdiff_t a) {
 
 
 
-int main(int argc, char** argv) {
+int main_terrain(int argc, char** argv) {
     
     
     

@@ -195,6 +195,11 @@ namespace manic {
         
     };
     
+    template<typename T>
+    void swap(vector<T>& a, vector<T>& b) {
+        a.swap(b);
+    }
+    
     
 } // namespace manic
 
