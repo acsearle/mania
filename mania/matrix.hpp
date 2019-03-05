@@ -141,7 +141,11 @@ namespace manic {
             assert(_invariant());
         }
         
-        
+        using matrix_view<T>::begin;
+        using matrix_view<T>::end;
+        using matrix_view<T>::size;
+        using matrix_view<T>::operator[];
+
         
         // Mutators
         

@@ -81,8 +81,6 @@ namespace manic {
         using iterator = transform_iterator<_bucket_iterator, _bucket_subscript>;
         using const_iterator = transform_iterator<_const_bucket_iterator, _bucket_subscript>;
         
-        
-        //std::vector<_bucket> _buckets;
         vector<_bucket> _buckets;
         uint64_t _occupants;
         

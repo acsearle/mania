@@ -24,11 +24,93 @@
 
 using namespace manic;
 
-int main(int argc, char** argv) {
+namespace ijk {
+    
+    template<typename T>
+    struct iterable {
 
+        T& _derived() { return reinterpret_cast<T&>(*this); }
+
+        auto begin() { return _derived().begin(); }
+        auto end() { return _derived().end(); }
+
+    };
+    
+    template<typename T>
+    iterable(T&&) -> iterable<T>;
+    
+    template<typename T>
+    auto sum(iterable<T>& x) {
+        std::decay_t<decltype(*x.begin())> z = 0;
+        for (auto&& y : x) {
+            z += y;
+        }
+        return z;
+    };
+    
+    template<typename T>
+    struct hybrid : iterable<hybrid<T>> {
+        std::vector<T> v;
+        auto begin() { return v.begin(); }
+        auto end() { return v.end(); }
+    };
+    
+    
+    void foo() {
+        hybrid<double> v;
+        v.v.push_back(7.0);
+        v.v.push_back(8.0);
+        std::cout << sum(v) << std::endl;
+    }
+}
+
+
+int main(int argc, char** argv) {
+    ijk::foo();
+}
+
+
+
+int main_mlcg(int argc, char** argv) {
+
+    // Try to understand MLCG
+    //
+    //         x *= 4768777513237032717ull;
+    
+    
+    auto a = 4768777513237032717ull;
+    std::cout << a << std::endl;
+    
+    while (a) {
+        std::cout << !!(a & (1ull << 63));
+        a <<= 1;
+    }
+    std::cout << std::endl;
+    a = 0;
+    --a;
+    std::cout << a << std::endl;
+    
+    /*
+    for (int i = 64; i--;) {
+        auto x = a << i;
+        auto b = a;
+        auto j = 1;
+        while (x * b != x) {
+            b *= b;
+            ++j;
+        }
+        std::cout << std::oct << b << std::endl;
+        std::cout << j << std::endl;
+    }
+     */
+
+    
+    
+    
     // Try to crack the hash function: x = x * 3935559000370003845ull + 2691343689449507681ull;
     // The rest of it maps zero to zero
 
+    /*
     const u64 a = 3935559000370003845ull;
     const u64 b = 2691343689449507681ull;
     
@@ -44,8 +126,8 @@ int main(int argc, char** argv) {
     std::cout << std::hex << d << std::endl;
     
     std::cout << hash(d) << std::endl;
-
-    
+*/
+    return 0;
 }
 
 

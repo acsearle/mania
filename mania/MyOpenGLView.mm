@@ -109,6 +109,26 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     [self setWantsBestResolutionOpenGLSurface:YES];
 }
 
+- (void) updateTrackingAreas {
+    
+    /*
+    NSTrackingAreaOptions options = (NSTrackingActiveAlways | NSTrackingInVisibleRect |
+                                     NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
+    
+    NSTrackingArea *area = [[NSTrackingArea alloc] initWithRect:[self bounds]
+                                                        options:options
+                                                          owner:self
+                                                       userInfo:nil];
+     */
+    
+    while (NSTrackingArea* p = [[self trackingAreas] firstObject]) {
+        NSLog(@"Removed tracking");
+        [self removeTrackingArea:p];
+    }
+    
+    [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self bounds] options:(NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved) owner:self userInfo:nil]];
+    
+}
 
 - (void) prepareOpenGL
 {
@@ -245,5 +265,63 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     
     CVDisplayLinkRelease(displayLink);
 }
+
+- (BOOL)acceptsFirstResponder
+{
+    return YES;
+}
+
+- (BOOL)becomeFirstResponder
+{
+    return  YES;
+}
+
+- (BOOL)resignFirstResponder
+{
+    return YES;
+}
+
+- (void) keyDown:(NSEvent *)event
+{
+    NSLog(@"%@\n", event.characters);
+}
+
+- (void) keyUp:(NSEvent*) event
+{
+    NSLog(@"%@\n", event.characters);
+}
+
+-(void) flagsChanged:(NSEvent *)event
+{
+    NSLog(@"%lu", (unsigned long)event.modifierFlags);
+}
+
+-(void) mouseUp:(NSEvent *)event {
+    
+    
+}
+
+-(void) mouseDown:(NSEvent *)event {
+    
+    
+}
+
+-(void) mouseMoved:(NSEvent *)event {
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSLog(@"Mouse %g %g\n", p.x, p.y);
+}
+
+-(void) mouseEntered:(NSEvent *)event {
+    
+}
+
+-(void) mouseExited:(NSEvent *)event {
+    
+}
+
+-(void) scrollWheel:(NSEvent *)event {
+    NSLog(@"Scrolling %hhd\n", [event hasPreciseScrollingDeltas]);
+}
+
 
 @end

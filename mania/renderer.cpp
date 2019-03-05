@@ -243,7 +243,7 @@ void blenderer::render() {
     
     static auto old_t = mach_absolute_time();
     auto new_t = mach_absolute_time();
-    std::cout << 1e9/(new_t - old_t) << std::endl;
+    //std::cout << 1e9/(new_t - old_t) << std::endl;
     old_t = new_t;
     
     static gl::vec<GLfloat, 2> deltas[] = {
@@ -266,7 +266,7 @@ void blenderer::render() {
         0, 0, 0, 1
     };
     
-    std::cout << _width << ", " << _height << std::endl;
+    //std::cout << _width << ", " << _height << std::endl;
     
     glUniformMatrix4fv(glGetUniformLocation(_program, "transform"), 1, GL_TRUE, transform);
     

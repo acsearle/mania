@@ -10,6 +10,7 @@
 
 @interface MyOpenGLView : NSOpenGLView {
     CVDisplayLinkRef displayLink;
+    //NSTrackingArea trackingArea;
 }
 
 @end

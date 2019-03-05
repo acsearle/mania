@@ -90,7 +90,12 @@ namespace manic {
         }
 
         
-    }; // struct filter_iterator
+    }; // struct transform_iterator
+    
+    template<typename Iterator, typename UnaryFunction>
+    transform_iterator(Iterator&&, UnaryFunction&&)
+    -> transform_iterator<std::decay_t<Iterator>, std::decay_t<UnaryFunction>>;
+    
     
     template<typename It1, typename Pr1, typename It2, typename Pr2>
     bool operator==(const transform_iterator<It1, Pr1>& a,

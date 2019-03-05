@@ -82,6 +82,11 @@ namespace manic {
             return (this->_allocation + this->_capacity) - (this->_begin + this->_size);
         }
         
+        using vector_view<T>::size;
+        using vector_view<T>::begin;
+        using vector_view<T>::end;
+        using vector_view<T>::operator[];
+        
         void resize(ptrdiff_t n) {
             if (n <= this->_size) {
                 std::destroy_n(this->_begin + n, this->_size - n);

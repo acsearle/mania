@@ -11,6 +11,8 @@
 		CA0EB12C22201ADB00DAE8CF /* terrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB12922201ADB00DAE8CF /* terrain.cpp */; };
 		CA0EB13C22208A6200DAE8CF /* table-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB13B22208A6200DAE8CF /* table-test.cpp */; };
 		CA0EB143222254B600DAE8CF /* f8-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB141222254B600DAE8CF /* f8-test.cpp */; };
+		CA0EB14622229D1D00DAE8CF /* table2-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB14522229D1D00DAE8CF /* table2-test.cpp */; };
+		CA0EB14B2222CBD700DAE8CF /* table3-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB14A2222CBD700DAE8CF /* table3-test.cpp */; };
 		CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA284D7D1FFE361900565175 /* preprocessor.cpp */; };
 		CA3FF5E42079A828009F006F /* int.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA3FF5E22079A828009F006F /* int.cpp */; };
 		CA72B7A8221A7C5500AC9441 /* main-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72B7A7221A7C5500AC9441 /* main-test.cpp */; };
@@ -84,7 +86,13 @@
 		CA0EB13F22224CC300DAE8CF /* common.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = common.hpp; sourceTree = "<group>"; };
 		CA0EB1402222524300DAE8CF /* f8.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = f8.hpp; sourceTree = "<group>"; };
 		CA0EB141222254B600DAE8CF /* f8-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "f8-test.cpp"; sourceTree = "<group>"; };
-		CA284D781FF1C41300565175 /* bit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bit.hpp; sourceTree = "<group>"; };
+		CA0EB144222295FA00DAE8CF /* table2.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = table2.hpp; sourceTree = "<group>"; };
+		CA0EB14522229D1D00DAE8CF /* table2-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "table2-test.cpp"; sourceTree = "<group>"; };
+		CA0EB1472222A2B200DAE8CF /* bit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bit.hpp; sourceTree = "<group>"; };
+		CA0EB1482222BD8100DAE8CF /* maybe.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = maybe.hpp; sourceTree = "<group>"; };
+		CA0EB1492222CBC200DAE8CF /* table3.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = table3.hpp; sourceTree = "<group>"; };
+		CA0EB14A2222CBD700DAE8CF /* table3-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "table3-test.cpp"; sourceTree = "<group>"; };
+		CA284D781FF1C41300565175 /* bit_ptr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bit_ptr.hpp; sourceTree = "<group>"; };
 		CA284D7D1FFE361900565175 /* preprocessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = preprocessor.cpp; sourceTree = "<group>"; };
 		CA3FF5E22079A828009F006F /* int.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = int.cpp; sourceTree = "<group>"; };
 		CA3FF5E32079A828009F006F /* int.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = int.hpp; sourceTree = "<group>"; };
@@ -194,11 +202,13 @@
 		CA72B7A6221A7C5500AC9441 /* mania-test */ = {
 			isa = PBXGroup;
 			children = (
+				CAE2F1BB2216B97000B832F6 /* deque-test.cpp */,
+				CA0EB141222254B600DAE8CF /* f8-test.cpp */,
 				CA72B7A7221A7C5500AC9441 /* main-test.cpp */,
 				CA0EB13B22208A6200DAE8CF /* table-test.cpp */,
-				CAE2F1BB2216B97000B832F6 /* deque-test.cpp */,
+				CA0EB14522229D1D00DAE8CF /* table2-test.cpp */,
+				CA0EB14A2222CBD700DAE8CF /* table3-test.cpp */,
 				CAE2F1BE2216EBAB00B832F6 /* catch.hpp */,
-				CA0EB141222254B600DAE8CF /* f8-test.cpp */,
 			);
 			path = "mania-test";
 			sourceTree = "<group>";
@@ -252,6 +262,7 @@
 		CA72B7BC221A8EE200AC9441 /* utility */ = {
 			isa = PBXGroup;
 			children = (
+				CA284D781FF1C41300565175 /* bit_ptr.hpp */,
 				CA72C7651F20A0AA006FEDF1 /* hash.hpp */,
 				CA0EB12E22201CB700DAE8CF /* indirect.hpp */,
 				CA999588205935AD005436C8 /* zip.hpp */,
@@ -314,7 +325,7 @@
 			isa = PBXGroup;
 			children = (
 				CAE2F1B9220F2FBA00B832F6 /* atlas.hpp */,
-				CA284D781FF1C41300565175 /* bit.hpp */,
+				CA0EB1472222A2B200DAE8CF /* bit.hpp */,
 				CAC2FF83221D2DCC00D8B4B2 /* chunk.cpp */,
 				CAC2FF84221D2DCC00D8B4B2 /* chunk.hpp */,
 				CA0EB13F22224CC300DAE8CF /* common.hpp */,
@@ -325,12 +336,15 @@
 				CAF889D91F1AD842005956A9 /* image.cpp */,
 				CAF889DA1F1AD842005956A9 /* image.hpp */,
 				CA0EB12D22201B6400DAE8CF /* la */,
+				CA0EB1482222BD8100DAE8CF /* maybe.hpp */,
 				CAF889BB1F14DFCF005956A9 /* renderer.cpp */,
 				CAF889BC1F14DFCF005956A9 /* renderer.hpp */,
 				CA72B7BB221A8E9400AC9441 /* scrapyard */,
 				CAC2FF86221D2DED00D8B4B2 /* surface.cpp */,
 				CAC2FF87221D2DED00D8B4B2 /* surface.hpp */,
 				CA0EB13A222083B900DAE8CF /* table.hpp */,
+				CA0EB144222295FA00DAE8CF /* table2.hpp */,
+				CA0EB1492222CBC200DAE8CF /* table3.hpp */,
 				CA0EB12922201ADB00DAE8CF /* terrain.cpp */,
 				CA0EB12A22201ADB00DAE8CF /* terrain.hpp */,
 				CA72B7BC221A8EE200AC9441 /* utility */,
@@ -472,10 +486,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA0EB14B2222CBD700DAE8CF /* table3-test.cpp in Sources */,
 				CA72B7AC221A7D0900AC9441 /* deque-test.cpp in Sources */,
 				CA72B7A8221A7C5500AC9441 /* main-test.cpp in Sources */,
 				CA0EB13C22208A6200DAE8CF /* table-test.cpp in Sources */,
 				CA0EB143222254B600DAE8CF /* f8-test.cpp in Sources */,
+				CA0EB14622229D1D00DAE8CF /* table2-test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,6 +9,12 @@
 #ifndef raw_vector_hpp
 #define raw_vector_hpp
 
+#include <cstdlib>
+#include <utility>
+
+#include "common.hpp"
+#include "vector_view.hpp"
+
 namespace manic {
     
     template<typename T>
@@ -22,7 +28,7 @@ namespace manic {
         raw_vector(const raw_vector&) = delete;
         raw_vector(raw_vector&& v) : raw_vector() { swap(v); }
         explicit raw_vector(ptrdiff_t capacity) {
-            _allocation = (T*) malloc(capacity * sizeof(T));
+            _allocation = (T*) std::malloc(capacity * sizeof(T));
             _capacity = capacity;
         }
         raw_vector(T* ptr, ptrdiff_t n) : _allocation(ptr), _capacity(n) {}
@@ -41,7 +47,14 @@ namespace manic {
             swap(_capacity, v._capacity);
         }
         
-        ptrdiff_t capacity() const { return _capacity; }
+        isize capacity() const { return _capacity; }
+
+        // Dicey methods
+        
+        isize size() const { return _capacity; }
+        T* begin() const { return _allocation; }
+        T* end() const { return _allocation + _capacity; }
+        T& operator[](isize i) const { return _allocation[i]; }
         
     };
     
@@ -52,6 +65,62 @@ namespace manic {
     void swap(raw_vector<T>& a, raw_vector<T>& b) {
         a.swap(b);
     }
+    
+    
+    
+    template<typename T>
+    struct basic_vector
+    : vector_view<T> {
+        
+        basic_vector() = default;
+        
+        basic_vector(const basic_vector& r)
+        : basic_vector(static_cast<const_vector_view<T>>(r)) {
+        }
+        
+        basic_vector(basic_vector&& r)
+        : basic_vector() {
+            r.swap(*this);
+        }
+        
+        basic_vector(const_vector_view<T> r)
+        : basic_vector() {
+            this->_begin = std::malloc(r.size() * sizeof(T));
+            this->_size = r.size();
+            std::uninitialized_copy(r.begin(), r.end(), this->_begin);
+        }
+        
+        ~basic_vector() {
+            std::destroy_n(this->_begin, this->_size);
+        }
+        
+        void swap(basic_vector& r) {
+            using std::swap;
+            swap(this->_begin, r._begin);
+            swap(this->_size, r._size);
+        }
+        
+        void clear() {
+            basic_vector().swap(*this);
+        }
+        
+        void resize(isize n) {
+            basic_vector r;
+            r.swap(*this);
+            this->_begin = std::malloc(n * sizeof(T));
+            this->_size = n;
+            std::uninitialized_move_n(r.begin(), std::min(this->_size, r._size), this->_begin);
+            if (this->size() > r._size)
+                std::uninitialized_default_construct_n(this->_begin + r._size, this->_size);
+        }
+        
+    };
+    
+    template<typename T>
+    void swap(basic_vector<T>& a, basic_vector<T>& b) {
+        a.swap(b);
+    }
+    
     
 }
 
