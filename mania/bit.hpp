@@ -33,8 +33,8 @@ namespace std {
         return !(x & (x - 1));
     }
     
-    template<>
-    constexpr std::size_t ceil2(std::size_t x) noexcept {
+    template<typename T>
+    constexpr T ceil2(T x) noexcept {
         --x;
         x |= x >> 1;
         x |= x >> 2;
@@ -45,6 +45,21 @@ namespace std {
         return ++x;
     }
     
+    template<typename T>
+    constexpr T floor2(T x) noexcept {
+        x |= x >> 1;
+        x |= x >> 2;
+        x |= x >> 4;
+        x |= x >> 8;
+        x |= x >> 16;
+        x |= x >> 32;
+        return x - (x >> 1);
+    }
+    
+    template<typename T>
+    constexpr int log2p1(T x) noexcept {
+        return x ? (63 - __builtin_clzll(x)) : 0;
+    }
     
 }
 

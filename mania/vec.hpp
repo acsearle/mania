@@ -384,6 +384,14 @@ return a;\
         return a / b;
     }
     
+    template<typename T, std::size_t N>
+    auto product(const vec<T, N>& a) {
+        auto b = a[0];
+        for (int i = 1; i != N; ++i)
+            b *= a[i];
+        return b;
+    }
+    
     
     
     // cross product for 3-vectors

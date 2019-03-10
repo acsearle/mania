@@ -99,8 +99,66 @@ namespace manic {
         return x;
     }
     
+    // Interleave bits to achieve a 1D indexing of 2D space with decent
+    // locality properties.  Good for spatial hashing
+    //
+    // https://en.wikipedia.org/wiki/Z-order_curve
     
+    constexpr u64 _morton_expand(u64 x) noexcept {
+        assert(x == (x & 0x00000000FFFFFFFF));
+        x = (x | (x << 16)) & 0x0000FFFF0000FFFF;
+        x = (x | (x <<  8)) & 0x00FF00FF00FF00FF;
+        x = (x | (x <<  4)) & 0x0F0F0F0F0F0F0F0F;
+        x = (x | (x <<  2)) & 0x3333333333333333;
+        x = (x | (x <<  1)) & 0x5555555555555555;
+        return x;
+    }
     
+    constexpr u64 _morton_contract(u64 x) noexcept {
+        assert(x == (x & 0x5555555555555555));
+        x = (x | (x >>  1)) & 0x3333333333333333;
+        x = (x | (x >>  2)) & 0x0F0F0F0F0F0F0F0F;
+        x = (x | (x >>  4)) & 0x00FF00FF00FF00FF;
+        x = (x | (x >>  8)) & 0x0000FFFF0000FFFF;
+        x = (x | (x >> 16)) & 0x00000000FFFFFFFF;
+        return x;
+    }
+    
+    constexpr u64 morton(u64 x, u64 y) noexcept {
+        return _morton_expand(x) | (_morton_expand(y) << 1);
+    }
+    
+    constexpr u64 morton2(u64 x) noexcept {
+        // We use the XOR-trick to swap bit ranges.  We achive interleaving
+        // by swapping the middle quarters of the bit range, and then recursing
+        // down.
+        u64 b = (x ^ (x >> 16)) & 0x00000000FFFF0000;
+        x ^= b | (b << 16);
+        b = (x ^ (x >> 8)) & 0x0000FF000000FF00;
+        x ^= b | (b << 8);
+        b = (x ^ (x >> 4)) & 0x00F000F000F000F0;
+        x ^= b | (b << 4);
+        b = (x ^ (x >> 2)) & 0x0C0C0C0C0C0C0C0C;
+        x ^= b | (b << 2);
+        b = (x ^ (x >> 1)) & 0x2222222222222222;
+        x ^= b | (b << 1);
+        return x;
+    }
+    
+    constexpr u64 morton2_reverse(u64 x) noexcept {
+        // Reverse the operation
+        u64 b = (x ^ (x >> 1)) & 0x2222222222222222;
+        x ^= b | (b << 1);
+        b = (x ^ (x >> 2)) & 0x0C0C0C0C0C0C0C0C;
+        x ^= b | (b << 2);
+        b = (x ^ (x >> 4)) & 0x00F000F000F000F0;
+        x ^= b | (b << 4);
+        b = (x ^ (x >> 8)) & 0x0000FF000000FF00;
+        x ^= b | (b << 8);
+        b = (x ^ (x >> 16)) & 0x00000000FFFF0000;
+        x ^= b | (b << 16);
+        return x;
+    }
     
 }
 

@@ -9,7 +9,10 @@
 #ifndef const_vector_view_hpp
 #define const_vector_view_hpp
 
+#include <iostream>
 #include <numeric>
+
+#include "common.hpp"
 
 namespace manic {
     
@@ -20,8 +23,8 @@ namespace manic {
     struct const_vector_view {
         
         using value_type = T;
-        using size_type = ptrdiff_t;
-        using difference_type = ptrdiff_t;
+        using size_type = isize;
+        using difference_type = isize;
         using reference = const T&;
         using const_reference = const T&;
         using iterator = const T*;
@@ -29,18 +32,18 @@ namespace manic {
         
         
         T* _begin;
-        ptrdiff_t _size;
+        isize _size;
         
         const_vector_view() = delete;
         const_vector_view(const const_vector_view& r) = default;
         const_vector_view(const_vector_view&& r) = default;
         
-        const_vector_view(std::nullptr_t, ptrdiff_t n)
+        const_vector_view(std::nullptr_t, isize n)
         : _begin(nullptr)
         , _size(n) {
         }
         
-        const_vector_view(const T* ptr, ptrdiff_t n)
+        const_vector_view(const T* ptr, isize n)
         : _begin(const_cast<T*>(ptr))
         , _size(n) {
         }
@@ -62,14 +65,14 @@ namespace manic {
         
         const T* begin() const { return _begin; }
         const T* end() const { return _begin + _size; }
-        ptrdiff_t size() const { return _size; }
-        ptrdiff_t columns() const { return _size; }
-        const T& operator[](ptrdiff_t i) const { return _begin[i]; }
-        const T& operator()(ptrdiff_t i) const { return _begin[i]; }
+        isize size() const { return _size; }
+        isize columns() const { return _size; }
+        const T& operator[](isize i) const { return _begin[i]; }
+        const T& operator()(isize i) const { return _begin[i]; }
         const T& front() const { return *_begin; }
         const T& back() const { return _begin[_size - 1]; }
         
-        const_vector_view sub(ptrdiff_t i, ptrdiff_t n) const {
+        const_vector_view sub(isize i, isize n) const {
             return const_vector_view(_begin + i, n);
         }
         
@@ -92,7 +95,7 @@ namespace manic {
     
     template<typename T>
     T sum(const_vector_view<T> a, T b = 0.0) {
-        for (ptrdiff_t i = 0; i != a.size(); ++i)
+        for (isize i = 0; i != a.size(); ++i)
             b += a(i);
         return b;
     }

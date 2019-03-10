@@ -27,6 +27,7 @@
 #include "texture.hpp"
 #include "atlas.hpp"
 #include "surface.hpp"
+#include "text.hpp"
 
 
 class blenderer
@@ -81,7 +82,7 @@ std::unique_ptr<renderer> renderer::make() {
 // Tiles must supply border pixels as well to supply GL_LINEAR what it needs.
 
 blenderer::blenderer()
-: _program("basic"), _atlas(1024) {
+: _program("text"), _atlas(1024) {
 
     //auto pattern2 = manic::image::from_png("/Users/acsearle/Downloads/basn6a08.png");
     //auto pattern = manic::image::from_png("/Users/acsearle/Downloads/tbrn2c08.png");
@@ -99,6 +100,8 @@ blenderer::blenderer()
         auto pattern = manic::from_png(s);
         _atlas.push(pattern);
     }
+    
+    manic::build_font(_atlas);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -138,7 +141,7 @@ blenderer::blenderer()
     glPointSize(10.0);
     
     _camera_position = 0;
-    _camera_zoom = 4.56789;
+    _camera_zoom = 8.0; //4.56789;
     
     
 }
@@ -287,10 +290,13 @@ void blenderer::render() {
                      (c._j * c._columns + j) * 32 - _camera_position.x,
                      (c._i * c._rows + i) * 18 - _camera_position.y);
         
+        int k = 33;
         for (auto&& e : c._entities) {
-            blit(7,
+            blit(k++,
                  (c._j * c._columns + e.x) * 32  - _camera_position.x,
                  (c._i * c._rows + e.y) * 18 - _camera_position.y);
+            if (k == 127)
+                k = 33;
         }
     }
     
