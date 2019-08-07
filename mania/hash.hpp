@@ -9,6 +9,7 @@
 #ifndef hash_hpp
 #define hash_hpp
 
+#include <cassert>
 #include <cstdint>
 #include <cmath>
 
@@ -89,13 +90,25 @@ namespace manic {
     //
     // hash(x) is also an injective function
     //
-    // better than libc++'s trivial std::hash implementation
+    // unlike libc++'s trivial std::hash implementation, suitable for direct
+    // use in hash tables (in non-adversarial environments)
     //
     inline uint64_t hash(uint64_t x) {
         x = x * 3935559000370003845ull + 2691343689449507681ull;
         x ^= x >> 21; x ^= x << 37; x ^= x >> 4;
         x *= 4768777513237032717ull;
         x ^= x << 20; x ^= x >> 41; x ^= x << 5;
+        return x;
+    }
+    
+    inline uint32_t hash32(uint32_t x) {
+        // NR does not provide a 32-bit version of hash(), but we construct one
+        // from the 32-bit versions of the components.  Test to make sure we
+        // haven't gotten unlocky.
+        x = x * 2891336453u + 1640531513u;
+        x ^= x >> 13; x ^= x << 17; x ^= x >> 5;
+        x *= 1597334677u;
+        x ^= x <<  9; x ^= x >> 17; x ^= x << 6;
         return x;
     }
     

@@ -10,7 +10,7 @@
 #define mat_hpp
 
 #include <cstddef>
-#include <experimental/optional>
+#include <optional>
 
 #include "vec.hpp"
 

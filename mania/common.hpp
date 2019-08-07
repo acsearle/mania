@@ -35,9 +35,6 @@ namespace manic {
     using usize = std::uintptr_t;
     using isize = std::intptr_t;
 
-    
-    //using usize =
-    
 }
 
 #endif /* common_h */

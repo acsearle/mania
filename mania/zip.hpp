@@ -9,148 +9,141 @@
 #ifndef zip_hpp
 #define zip_hpp
 
-#include <tuple>
 #include <iterator>
+#include <tuple>
+
+#include "capture.hpp"
 
 namespace manic {
-    
-    using std::forward;
-    using std::get;
-    using std::apply;
-    using std::tuple;
     
     // Zip iterator and zipped iterables
     //
     // for (auto& [a, b] : zip(u, v))
     //     ...
     
-    // Perfect captures arguments in a tuple, as if with auto&& for each
-    
-    template<typename... Args>
-    tuple<Args...> capture_as_tuple(Args&&... args) {
-        return tuple<Args...>(std::forward<Args>(args)...);
-    }
-    
     template<typename... Iterators>
     class zip_iterator {
-        tuple<Iterators...> _iterators;
+        
+        std::tuple<Iterators...> _iterators;
+    
     public:
         
         using difference_type = std::common_type_t<typename std::iterator_traits<Iterators>::difference_type...>;
-        using value_type = tuple<typename std::iterator_traits<Iterators>::value_type...>;
+        using value_type = std::tuple<typename std::iterator_traits<Iterators>::value_type...>;
         using pointer = void;
-        using reference = tuple<typename std::iterator_traits<Iterators>::value_type...>;
+        using reference = std::tuple<typename std::iterator_traits<Iterators>::value_type...>;
         using iterator_category = std::common_type_t<typename std::iterator_traits<Iterators>::iterator_category...>;
         
         
         template<typename... Args>
-        zip_iterator(Args&&... args)
-        : _iterators(forward<Args>(args)...) {
+        explicit zip_iterator(Args&&... args)
+        : _iterators(std::forward<Args>(args)...) {
         }
         
         zip_iterator& operator++() {
-            apply([] (auto&&... args) {
+            std::apply([] (auto&&... args) {
                 (..., ++args);
             }, _iterators);
             return *this;
         }
         
-        auto operator++(int) {
-            return apply([] (auto&&... args) {
+        zip_iterator operator++(int) {
+            return std::apply([] (auto&&... args) {
                 return zip_iterator(args++...);
             }, _iterators);
         }
         
-        auto operator*() const {
-            return apply([] (auto&&... args) {
-                return capture_as_tuple(*forward<decltype(args)>(args)...);
+        reference operator*() const {
+            return std::apply([] (auto&&... args) {
+                return capture(*args...);
             }, _iterators);
         }
         
         template<typename I>
-        auto operator[](I&& i) const {
-            return apply([&i](auto&&... args) {
-                return capture_as_tuple(forward<decltype(args)>(args)[i]...);
+        reference operator[](I&& i) const {
+            return std::apply([&i](auto&&... args) {
+                return capture(args[i]...);
             }, _iterators);
         }
         
         friend bool operator==(const zip_iterator& a, const zip_iterator& b) {
-            return get<0>(a._iterators) == get<0>(a._iterators);
+            return std::get<0>(a._iterators) == std::get<0>(a._iterators);
         }
 
         friend bool operator!=(const zip_iterator& a, const zip_iterator& b) {
-            return get<0>(a._iterators) != get<0>(a._iterators);
+            return std::get<0>(a._iterators) != std::get<0>(a._iterators);
         }
 
     }; // class zip_iterator<Iterators...>
     
     template<typename... Args>
-    zip_iterator<std::decay_t<Args>...> make_zip_iterator(Args&&... args) {
-        return zip_iterator<std::decay_t<Args>...>(forward<Args>(args)...);
-    }
+    zip_iterator(Args&&... args) -> zip_iterator<std::decay_t<Args>...>;
+    
     
     template<typename... Iterables>
-    class zip_iterable {
+    class zip {
         
-        tuple<Iterables...> _iterables;
+        std::tuple<Iterables...> _iterables;
         
     public:
         
-        using value_type = tuple<typename Iterables::value_type...>;
-        using reference = tuple<typename Iterables::reference...>;
-        using const_reference = tuple<typename Iterables::const_reference...>;
-        using iterator = zip_iterable<typename Iterables::iterator...>;
-        using const_iterator = zip_iterable<typename Iterables::const_iterator...>;
-        using difference_type = std::common_type_t<typename Iterables::difference_type...>;
-        using size_type = std::common_type_t<typename Iterables::size_type...>;
+        using value_type = std::tuple<typename std::decay_t<Iterables>::value_type...>;
+        using reference = zip_iterator<std::conditional_t<std::is_const_v<std::remove_reference_t<Iterables>>,
+            typename std::decay_t<Iterables>::const_reference,
+            typename std::decay_t<Iterables>::reference>...>;
+        using const_reference = std::tuple<typename std::decay_t<Iterables>::const_reference...>;
+        using iterator = zip_iterator<std::conditional_t<std::is_const_v<std::remove_reference_t<Iterables>>,
+            typename std::decay_t<Iterables>::const_iterator,
+            typename std::decay_t<Iterables>::iterator>...>;
+        using const_iterator = zip_iterator<typename std::decay_t<Iterables>::const_iterator...>;
+        using difference_type = std::common_type_t<typename std::decay_t<Iterables>::difference_type...>;
+        using size_type = std::common_type_t<typename std::decay_t<Iterables>::size_type...>;
         
         template<typename... IterablesR>
-        zip_iterable(IterablesR&&... iterables)
-        : _iterables(forward<IterablesR>(iterables)...) {
+        explicit zip(IterablesR&&... iterables)
+        : _iterables(std::forward<IterablesR>(iterables)...) {
         }
         
-        auto begin() {
+        iterator begin() {
             return std::apply([](auto&&... x){
-                return make_zip_iterator(forward<decltype(x)>(x).begin()...);
+                return zip_iterator(x.begin()...);
             }, _iterables);
         }
         
-        auto begin() const {
+        const_iterator begin() const {
             return std::apply([](auto&&... x){
-                return make_zip_iterator(forward<decltype(x)>(x).begin()...);
+                return zip_iterator(x.begin()...);
             }, _iterables);
         }
         
-        auto end() {
+        iterator end() {
             return std::apply([](auto&&... x){
-                return make_zip_iterator(forward<decltype(x)>(x).end()...);
+                return zip_iterator(x.end()...);
             }, _iterables);
         }
         
-        auto end() const {
+        const_iterator end() const {
             return std::apply([](auto&&... x){
-                return make_zip_iterator(forward<decltype(x)>(x).end()...);
+                return zip_iterator(x.end()...);
             }, _iterables);
         }
         
-        auto cbegin() const {
+        const_iterator cbegin() const {
             return std::apply([](auto&&... x){
-                return make_zip_iterator(forward<decltype(x)>(x).cbegin()...);
+                return zip_iterator(x.cbegin()...);
             }, _iterables);
         }
         
-        auto cend() const {
+        const_iterator cend() const {
             return std::apply([](auto&&... x){
-                return make_zip_iterator(forward<decltype(x)>(x).cend()...);
+                return zip_iterator(x.cend()...);
             }, _iterables);
         }
         
-    }; // class zip_iterable<Iterables...>
+    }; // class zip<Iterables...>
     
     template<typename... Iterables>
-    zip_iterable<std::decay_t<Iterables>...> zip(Iterables&&... iterables) {
-        return zip_iterable<std::decay_t<Iterables>...>(forward<Iterables>(iterables)...);
-    }
+    zip(Iterables&&... iterables) -> zip<Iterables...>;
     
 } // namespace zip
 

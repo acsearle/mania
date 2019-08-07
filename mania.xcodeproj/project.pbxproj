@@ -25,6 +25,8 @@
 		CA0EB16322347D1F00DAE8CF /* text.fsh in Resources */ = {isa = PBXBuildFile; fileRef = CA0EB16122347C5500DAE8CF /* text.fsh */; };
 		CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA284D7D1FFE361900565175 /* preprocessor.cpp */; };
 		CA3FF5E42079A828009F006F /* int.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA3FF5E22079A828009F006F /* int.cpp */; };
+		CA44D79722FAE466004B76D7 /* enumerate-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA44D79622FAE466004B76D7 /* enumerate-test.cpp */; };
+		CA44D79C22FAEF57004B76D7 /* zip-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA44D79B22FAEF57004B76D7 /* zip-test.cpp */; };
 		CA72B7A8221A7C5500AC9441 /* main-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72B7A7221A7C5500AC9441 /* main-test.cpp */; };
 		CA72B7AC221A7D0900AC9441 /* deque-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAE2F1BB2216B97000B832F6 /* deque-test.cpp */; };
 		CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA72B7B3221A7DB100AC9441 /* main.cpp */; };
@@ -119,6 +121,10 @@
 		CA284D7D1FFE361900565175 /* preprocessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = preprocessor.cpp; sourceTree = "<group>"; };
 		CA3FF5E22079A828009F006F /* int.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = int.cpp; sourceTree = "<group>"; };
 		CA3FF5E32079A828009F006F /* int.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = int.hpp; sourceTree = "<group>"; };
+		CA44D79422FAE449004B76D7 /* enumerate.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = enumerate.hpp; sourceTree = "<group>"; };
+		CA44D79622FAE466004B76D7 /* enumerate-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "enumerate-test.cpp"; sourceTree = "<group>"; };
+		CA44D79922FAEB5A004B76D7 /* capture.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = capture.hpp; sourceTree = "<group>"; };
+		CA44D79B22FAEF57004B76D7 /* zip-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "zip-test.cpp"; sourceTree = "<group>"; };
 		CA72B7A5221A7C5500AC9441 /* mania-test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "mania-test"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA72B7A7221A7C5500AC9441 /* main-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "main-test.cpp"; sourceTree = "<group>"; };
 		CA72B7B1221A7DB100AC9441 /* scratch */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = scratch; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -234,6 +240,8 @@
 				CA0EB14522229D1D00DAE8CF /* table2-test.cpp */,
 				CA0EB14A2222CBD700DAE8CF /* table3-test.cpp */,
 				CAE2F1BE2216EBAB00B832F6 /* catch.hpp */,
+				CA44D79622FAE466004B76D7 /* enumerate-test.cpp */,
+				CA44D79B22FAEF57004B76D7 /* zip-test.cpp */,
 			);
 			path = "mania-test";
 			sourceTree = "<group>";
@@ -294,6 +302,8 @@
 				CA0EB137222023F100DAE8CF /* stride_ptr.hpp */,
 				CA0EB13D22210F8000DAE8CF /* filter_iterator.hpp */,
 				CA0EB13E222113E400DAE8CF /* transform_iterator.hpp */,
+				CA44D79422FAE449004B76D7 /* enumerate.hpp */,
+				CA44D79922FAEB5A004B76D7 /* capture.hpp */,
 			);
 			name = utility;
 			sourceTree = "<group>";
@@ -469,7 +479,7 @@
 		CAF889991F14D618005956A9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1010;
+				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = "Antony Searle";
 				TargetAttributes = {
 					CA72B7A4221A7C5500AC9441 = {
@@ -488,7 +498,7 @@
 			};
 			buildConfigurationList = CAF8899C1F14D618005956A9 /* Build configuration list for PBXProject "mania" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -527,10 +537,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA44D79722FAE466004B76D7 /* enumerate-test.cpp in Sources */,
 				CA0EB14B2222CBD700DAE8CF /* table3-test.cpp in Sources */,
 				CA72B7AC221A7D0900AC9441 /* deque-test.cpp in Sources */,
 				CA72B7A8221A7C5500AC9441 /* main-test.cpp in Sources */,
 				CA0EB13C22208A6200DAE8CF /* table-test.cpp in Sources */,
+				CA44D79C22FAEF57004B76D7 /* zip-test.cpp in Sources */,
 				CA0EB143222254B600DAE8CF /* f8-test.cpp in Sources */,
 				CA0EB14622229D1D00DAE8CF /* table2-test.cpp in Sources */,
 			);
@@ -655,7 +667,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -716,7 +728,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";

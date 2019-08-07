@@ -73,9 +73,17 @@ namespace manic {
             operator*().~T();
         }
         
+        T const& get() const {
+            return reinterpret_cast<T const&>(*this);
+        }
+        
+        T& get() {
+            return reinterpret_cast<T&>(*this);
+        }
+        
         // Precondition: there is an object
         T& operator*() {
-            return reinterpret_cast<T&>(*this);
+            return get();
         }
         
         // Precondition: there is an object
