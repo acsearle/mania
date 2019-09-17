@@ -18,16 +18,16 @@ namespace manic {
     
     struct chunk {
         
-        ptrdiff_t _i;
-        ptrdiff_t _j;
-        static const ptrdiff_t _rows = 16;
-        static const ptrdiff_t _columns = 16;
+        isize _i;
+        isize _j;
+        static const isize _rows = 16;
+        static const isize _columns = 16;
         
-        matrix<uint8_t> _tiles;
+        matrix<u8> _tiles;
         
-        std::vector<gl::vec<float, 2>> _entities;
+        std::vector<gl::vec<f32, 2>> _entities;
         
-        chunk(ptrdiff_t i_, ptrdiff_t j_);
+        chunk(isize i_, isize j_);
         
     };
     

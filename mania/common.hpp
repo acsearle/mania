@@ -30,10 +30,14 @@ namespace manic {
     using f64 = std::double_t;
     using f32 = std::float_t;
     
+    static_assert(sizeof(f64)== 8);
     static_assert(sizeof(f32) == 4);
     
     using usize = std::uintptr_t;
     using isize = std::intptr_t;
+    
+    static_assert(sizeof(usize) == sizeof(std::size_t));
+    static_assert(sizeof(isize) == sizeof(std::ptrdiff_t));
 
 }
 

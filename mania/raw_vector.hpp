@@ -17,21 +17,24 @@
 
 namespace manic {
     
+    // raw_vector manages a slab of raw memory.  It can be combined with some
+    // external managment to control lifetimes.
+    
     template<typename T>
     struct raw_vector {
         
         T* _allocation;
-        ptrdiff_t _capacity;
+        isize _capacity;
         
         raw_vector() : _allocation(nullptr), _capacity(0) {}
         
         raw_vector(const raw_vector&) = delete;
         raw_vector(raw_vector&& v) : raw_vector() { swap(v); }
-        explicit raw_vector(ptrdiff_t capacity) {
+        explicit raw_vector(isize capacity) {
             _allocation = (T*) std::malloc(capacity * sizeof(T));
             _capacity = capacity;
         }
-        raw_vector(T* ptr, ptrdiff_t n) : _allocation(ptr), _capacity(n) {}
+        raw_vector(T* ptr, isize n) : _allocation(ptr), _capacity(n) {}
         
         ~raw_vector() { free(_allocation); }
         
@@ -67,6 +70,7 @@ namespace manic {
     }
     
     
+    // A basic vector that does not support
     
     template<typename T>
     struct basic_vector

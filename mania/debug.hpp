@@ -41,6 +41,7 @@ namespace mania {
      }
      return {};
      }*/
+    
     template<typename T>
     constexpr std::string_view type_to_string() {
         const char* a = __PRETTY_FUNCTION__; // type_to_string [T = ...]

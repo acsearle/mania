@@ -22,6 +22,11 @@
 
 namespace manic {
     
+    template<typename T>
+    void relocate(T& dest, const T& src) {
+        std::memcpy(&dest, &src, sizeof(T));
+    }
+    
     template<typename Key, typename Value>
     struct table3 {
         
@@ -38,8 +43,6 @@ namespace manic {
             : key(std::forward<Keylike>(k))
             , value(std::forward<Valuelike>(v)) {
             }
-            
-            ~entry() = default;
             
         };
         
@@ -60,12 +63,8 @@ namespace manic {
             : _hash(table_hash_hash_k)
             , _entry(std::forward<Keylike>(k),
                      std::forward<Valuelike>(v)) {
-                assert(_hash == _table_hash(hash(k)));
+                //assert(_hash == _table_hash(hash(k)));
             }
-            
-            // we choose not to zero ._hash in the destructor, which would be a
-            // pessimization for some paths
-            ~_raw_entry() = default;
             
         };
         
@@ -116,10 +115,10 @@ namespace manic {
         
         u64 _mask() const { return _vector._capacity - 1; }
         
+        static const u64 HIGH_BIT = u64(1) << 63;
+        
         static u64 _table_hash(u64 already_hashed) {
-            if (!already_hashed)
-                already_hashed = ~already_hashed;
-            return already_hashed;
+            return already_hashed | HIGH_BIT;
         }
 
         _raw_entry& _raw_entry_at(u64 h) const {
@@ -151,7 +150,7 @@ namespace manic {
             assert(!_vector._capacity || (_occupants < _vector._capacity));
             usize n = 0;
             for (usize i = 0; i != _vector._capacity; ++i) {
-                std::cout << i << " : " << (_hash_at(i) & _mask()) << std::endl;
+                //std::cout << i << " : " << (_hash_at(i) & _mask()) << std::endl;
                 if (_hash_at(i)) {
                     ++n;
                     assert(_hash_at(i) == _table_hash(hash(_key_at(i))));
@@ -242,20 +241,29 @@ namespace manic {
         }
         
         void reserve(usize n) {
+            auto m = n;
             n = _capacity_for_occupants(n);
             if (n > _vector._capacity) {
-                raw_vector<_raw_entry> v(n);
+                std::cout << "reserve " << n << " for " << m << std::endl;
+                // raw_vector<_raw_entry> v(n);
+                raw_vector<_raw_entry> v;
+                v._allocation = (_raw_entry*) calloc(n, sizeof(_raw_entry));
+                v._capacity = n;
                 v.swap(_vector);
-                _zero_all();
+                // _zero_all();
                 _occupants = 0;
+                std::cout << "start relocate\n";
                 for (auto& e : v)
                     if (e._hash)
                         _insert_relocate(e);
+                std::cout << "end relocate\n";
             }
         }
         
         template<typename Keylike>
         bool contains(const Keylike& k) {
+            if (!_vector.size())
+                return false;
             u64 h = _table_hash(hash(k));
             u64 i = h;
             for (;;) {
@@ -272,14 +280,14 @@ namespace manic {
         
         template<typename Keylike>
         value_type& get(const Keylike& k) {
-            _assert_invariant();
+            // _assert_invariant();
             u64 h = _table_hash(hash(k));
             u64 i = h;
             for (;;) {
-                if (_hash_at(i) == 0)
-                    assert(false);
-                if (_displacement_at(i) < (i - h))
-                    assert(false);
+                //if (_hash_at(i) == 0)
+                //    assert(false);
+                //if (_displacement_at(i) < (i - h))
+                //    assert(false);
                 if ((_hash_at(i) == h) && (_key_at(i) == k))
                     return _value_at(i);
                 ++i;
@@ -287,17 +295,19 @@ namespace manic {
         }
 
         _raw_entry& _insert_relocate(_raw_entry& e) {
-            assert(e._hash == _table_hash(hash(e._entry.key)));
+            //assert(e._hash == _table_hash(hash(e._entry.key)));
             u64 i = e._hash;
             for (;;) {
                 if (_hash_at(i) == 0) {
-                    std::memcpy(&_raw_entry_at(i), &e, sizeof(_raw_entry));
+                    //std::memcpy(&_raw_entry_at(i), &e, sizeof(_raw_entry));
+                    relocate(_raw_entry_at(i), e);
                     ++_occupants;
                     return _raw_entry_at(i);
                 } else if ((_hash_at(i) == e._hash) && (_key_at(i) == e._entry.key)) {
                     using std::swap;
                     _raw_entry_at(i).~_raw_entry();
-                    std::memcpy(&_raw_entry_at(i), &e, sizeof(_raw_entry));
+                    //std::memcpy(&_raw_entry_at(i), &e, sizeof(_raw_entry));
+                    relocate(_raw_entry_at(i), e);
                     return _raw_entry_at(i);
                 } else if (_displacement_at(i) < (i - e._hash)) {
                     using std::swap;
@@ -316,6 +326,21 @@ namespace manic {
             // e is not destroyed because it has been relocated
         }
         
+        
+        table3<u64, u64> histogram() const {
+            table3<u64, u64> x;
+            for (u64 i = 0; i != _vector._capacity; ++i) {
+                if (_hash_at(i)) {
+                    u64 j = _displacement_at(i);
+                    if (x.contains(j)) {
+                        ++x.get(j);
+                    } else {
+                        x.insert(j, 1);
+                    }
+                }
+            }
+            return x;
+        }
         
         
     }; // class table3

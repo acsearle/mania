@@ -25,16 +25,30 @@ namespace manic {
         
         SECTION("stress") {
             
+            const u64 N = 10'000'000;
+            
             table3<u64, u64> t;
-            for (u64 i = 0; i != 100; ++i) {
+            for (u64 i = 0; i != N; ++i) {
                 t.insert(i, hash(i));
             }
-            REQUIRE(t.size() == 100);
+            REQUIRE(t.size() == N);
             REQUIRE(t.capacity() >= t.size());
             
-            for (u64 i = 0; i != 100; ++i) {
+            for (u64 i = 0; i != N; ++i) {
                 u64 v = t.get(i);
                 REQUIRE(v == hash(i));
+            }
+            
+            u64 s = 0;
+            for (auto&& [k, v] : t) {
+                s += k;
+            }
+            REQUIRE(s == N * (N - 1) / 2);
+            
+            auto h = t.histogram();
+            
+            for (auto& [k, v] : h) {
+                std::cout << "(" << k << ", " << v << ")\n";
             }
             
             /*
@@ -54,6 +68,15 @@ namespace manic {
              */
             
             
+            
+        }
+        
+        SECTION("regression") {
+            
+            {
+                table3<u64, u64> x;
+                REQUIRE_FALSE(x.contains(0));
+            }
             
         }
         

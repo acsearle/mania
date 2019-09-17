@@ -48,7 +48,7 @@ namespace manic {
                          GL_UNSIGNED_BYTE, nullptr);
         }
         
-        sprite& operator[](ptrdiff_t i) {
+        sprite& operator[](isize i) {
             return _used[i];
         }
         

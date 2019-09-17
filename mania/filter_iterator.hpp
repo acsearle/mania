@@ -15,6 +15,11 @@ namespace manic {
     
     // Filters the underlying vector to skip over empty elements.
     //
+    // The iterator always points to either an element for which the predicate
+    // is true, or to the end of the underlying sequence.  It is undefined
+    // behaviour to increment an iterator equal to end(), or to decrement an
+    // iterator equal to begin().
+    //
     // The iterator is bidirectional.  Note that begin() may only
     // be dereferenced if begin() != end(), and
     //
@@ -28,7 +33,13 @@ namespace manic {
     //
     // We inherit from Predicate to facilitate empty base optimization in
     // the common case where it is stateless.
+    //
+    // BUG: When the wrapped iterator is smart, it will be dereferenced
+    // multiple times under typical usage.  Fix this by buffering the result,
+    // which will be tricky to make work in all cases.
 
+    // This implementation appropriate for dumb iterators
+    
     template<typename Iterator, typename Predicate>
     struct filter_iterator : private Predicate {
         
@@ -73,6 +84,7 @@ namespace manic {
         }
         
         filter_iterator& operator++() {
+            assert(_begin != _end);
             ++_begin;
             _fast_forward();
             return *this;
@@ -97,7 +109,7 @@ namespace manic {
         }
         
         reference operator*() const {
-            return *_begin;;
+            return *_begin;
         }
         
         pointer operator->() const {
@@ -117,6 +129,26 @@ namespace manic {
                     const filter_iterator<It2, Pr2>& b) {
         return a._begin != b._begin;
     }
+    
+    // filter a range with a predicate
+    
+    template<typename T, typename F>
+    class filter : F {
+        
+        T _t;
+        
+    public:
+        
+        filter(T&& t, F&& f)
+        : F(std::forward<F>(f))
+        , _t(std::forward<T>(t)) {
+        }
+    
+        auto begin() {
+            return filter_iterator(_t.begin(), *this);
+        }
+        
+    };
     
 }
 
