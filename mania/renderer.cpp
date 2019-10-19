@@ -29,7 +29,6 @@
 #include "surface.hpp"
 #include "text.hpp"
 
-
 class blenderer
 : public renderer {
     
@@ -43,6 +42,9 @@ class blenderer
     
     manic::atlas _atlas;
     
+    manic::atlas2<char> _font;
+    manic::table3<char, float> _advances;
+    
     //vector<vector<int>> _grid;
     //vector<gl::vec<GLfloat, 2>> _entities;
     
@@ -50,6 +52,7 @@ class blenderer
     
     gl::vec<double, 2> _camera_position;
     double             _camera_zoom;
+    std::string _text;
     
 public:
     
@@ -59,6 +62,9 @@ public:
     void render();
     void blit(ptrdiff_t i, float x, float y);
     void blit_twist(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y, double radians);
+    
+    void scribe(char const*, float x, float y);
+    void glyph(char i, float x, float y);
 
 };
 
@@ -82,11 +88,12 @@ std::unique_ptr<renderer> renderer::make() {
 // Tiles must supply border pixels as well to supply GL_LINEAR what it needs.
 
 blenderer::blenderer()
-: _program("text"), _atlas(1024) {
+: _program("text"), _atlas(1024), _font(1024) {
 
     //auto pattern2 = manic::image::from_png("/Users/acsearle/Downloads/basn6a08.png");
     //auto pattern = manic::image::from_png("/Users/acsearle/Downloads/tbrn2c08.png");
     
+    /*
     for (auto s : {
         "/Users/acsearle/Downloads/textures/sand.png",
         "/Users/acsearle/Downloads/textures/water.png",
@@ -100,8 +107,9 @@ blenderer::blenderer()
         auto pattern = manic::from_png(s);
         _atlas.push(pattern);
     }
+     */
     
-    manic::build_font(_atlas);
+    manic::build_font(_font, _advances);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -141,7 +149,7 @@ blenderer::blenderer()
     glPointSize(10.0);
     
     _camera_position = 0;
-    _camera_zoom = 8.0; //4.56789;
+    _camera_zoom = 1.0; //4.56789;
     
     
 }
@@ -239,6 +247,44 @@ void blenderer::blit(ptrdiff_t i, float x, float y) {
 }
 
 
+void blenderer::glyph(char i, float x, float y) {
+    auto& r = _font[i];
+    gl::vertex a = r.a;
+    gl::vertex b = r.b;
+    a.position.x += x;
+    a.position.y += y;
+    b.position.x += x;
+    b.position.y += y;
+    gl::vertex c = a;
+    gl::vertex d = b;
+    // a - c
+    // | / |
+    // d - b
+    using std::swap;
+    swap(c.position.x, d.position.x);
+    swap(c.texCoord.x, d.texCoord.x);
+    _vertices.push_back(a);
+    _vertices.push_back(c);
+    _vertices.push_back(d);
+    _vertices.push_back(d);
+    _vertices.push_back(c);
+    _vertices.push_back(b);
+}
+
+void blenderer::scribe(const char *p, float x, float y) {
+    float ox = x;
+    while (*p) {
+        if (*p == '\n') {
+            x = ox;
+            y += 128;
+        } else {
+            glyph(*p, x, y);
+            x += _advances[*p];
+        }
+        ++p;
+    }
+}
+
 
 void blenderer::render() {
     
@@ -246,7 +292,7 @@ void blenderer::render() {
     
     static auto old_t = mach_absolute_time();
     auto new_t = mach_absolute_time();
-    //std::cout << 1e9/(new_t - old_t) << std::endl;
+    std::cout << 1e9/(new_t - old_t) << std::endl;
     old_t = new_t;
     
     static gl::vec<GLfloat, 2> deltas[] = {
@@ -282,6 +328,7 @@ void blenderer::render() {
     _camera_position.x = sin(new_t * 1e-9) * 32;
     _camera_position.y = cos(new_t * 1e-9) * 18;
 
+    /*
     for (auto&& d : _surface) {
         auto&& c = d.value;
         for (ptrdiff_t i = 0; i != c._rows; ++i)
@@ -298,6 +345,13 @@ void blenderer::render() {
             if (k == 127)
                 k = 33;
         }
+    }
+     */
+    
+    scribe(_text.c_str(), -_width - _camera_position.x, -_height - _camera_position.y);
+    _text += (rand() % 95) + 32;
+    if (!(rand() % 41)) {
+        _text += '\n';
     }
     
     

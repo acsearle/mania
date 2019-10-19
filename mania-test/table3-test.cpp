@@ -6,33 +6,82 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
-#include "hash.hpp"
 #include "table3.hpp"
+#include "debug.hpp"
 
 #include "catch.hpp"
 
 namespace manic {
     
+    struct tattler {
+        static isize _live;
+        tattler() {
+            ++_live;
+        }
+        tattler(const tattler&) {
+            ++_live;
+        }
+        ~tattler() {
+            --_live;
+        }
+    };
+    
+    isize tattler::_live = 0;
+    
     TEST_CASE("table3") {
+        
+        SECTION("regression") {
+            
+            table3<u64, u64> x;
+            REQUIRE_FALSE(x.contains(0));
+            
+        }
         
         SECTION("default") {
             
             table3<u64, u64> t;
             REQUIRE(t.size() == 0);
-            REQUIRE(t.capacity() == 0);
-            
+            REQUIRE(t.capacity() >= 0);
+            REQUIRE_FALSE(t.contains(0));
+            REQUIRE_FALSE(t.try_get(1));
+            REQUIRE(t.begin() == t.end());
+        
+            SECTION("insert") {
+                
+                t.insert(1, 2);
+                REQUIRE(t.size() == 1);
+                REQUIRE(t.contains(1));
+                
+                SECTION("get") {
+                    REQUIRE(t.get(1) == 2);
+                }
+                
+                SECTION("erase") {
+                    t.erase(1);
+                    REQUIRE(t.size() == 0);
+                    REQUIRE_FALSE(t.contains(1));
+                }
+                
+            }
+
         }
+        
+        
         
         SECTION("stress") {
             
-            const u64 N = 10'000'000;
+            const u64 N = 1'000'000;
             
             table3<u64, u64> t;
             for (u64 i = 0; i != N; ++i) {
                 t.insert(i, hash(i));
             }
             REQUIRE(t.size() == N);
-            REQUIRE(t.capacity() >= t.size());
+            
+            for (u64 i = 0; i != N / 2; ++i) {
+                REQUIRE(t.contains(i));
+                REQUIRE_FALSE(t.contains(i + N));
+            }
             
             for (u64 i = 0; i != N; ++i) {
                 u64 v = t.get(i);
@@ -50,6 +99,15 @@ namespace manic {
             for (auto& [k, v] : h) {
                 std::cout << "(" << k << ", " << v << ")\n";
             }
+            
+            for (u64 i = 0; i != N; ++i) {
+                t.erase(i);
+                REQUIRE(t.size() == N - 1 - i);
+                t.shrink_to_fit();
+                REQUIRE(t.size() == N - 1 - i);
+            }
+            
+            REQUIRE(t.size() == 0);
             
             /*
              
@@ -71,12 +129,19 @@ namespace manic {
             
         }
         
-        SECTION("regression") {
+        SECTION("lifetimes") {
             
-            {
-                table3<u64, u64> x;
-                REQUIRE_FALSE(x.contains(0));
+            const int N = 1'000'000;
+            
+            table3<int, tattler> t;
+            for (int i = 0; i != N; ++i) {
+                t.insert(i, tattler());
             }
+            REQUIRE(tattler::_live == N);
+            for (int i = 0; i != N; ++i) {
+                t.erase(i);
+            }
+            REQUIRE(tattler::_live == 0);
             
         }
         

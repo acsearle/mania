@@ -6,11 +6,13 @@
 //  Copyright © 2017 Antony Searle. All rights reserved.
 //
 
+
 #include "image.hpp"
+
+#include <numeric>
 
 #include <png.h>
 
-#include <numeric>
 
 namespace manic {
     

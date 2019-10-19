@@ -62,6 +62,8 @@ namespace mania {
         return std::forward<T>(value);
     }
     
+#define DUMP(X) std::cout << #X " = " << (X) << "\n";
+    
 } // namespace mania
 
 

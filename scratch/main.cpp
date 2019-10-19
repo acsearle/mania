@@ -1,11 +1,30 @@
 //
 //  main.cpp
-//  prius
 //
 //  Created by Antony Searle on 15/12/18.
 //  Copyright © 2018 Antony Searle. All rights reserved.
 //
 
+#include <iostream>
+
+struct pin {
+    pin() = default;
+    pin(const pin&) = delete;
+    pin(pin&&) = delete;
+};
+
+pin get() {
+    return pin{};
+}
+
+int main( int argc, char** argv) {
+    pin p = get();
+    printf("ello\n");
+    return 0;
+}
+
+
+/*
 #include <cassert>
 #include <iostream>
 
@@ -62,3 +81,4 @@ int main(int argc, char** argv) {
     return 0;
 }
 
+ */

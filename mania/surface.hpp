@@ -13,13 +13,13 @@
 #include <memory>
 
 #include "chunk.hpp"
-#include "table.hpp"
+#include "table3.hpp"
 #include "vec.hpp"
 
 namespace manic {
     
     struct surface
-    : table<gl::vec<ptrdiff_t, 2>, chunk> {
+    : table3<gl::vec<ptrdiff_t, 2>, chunk> {
         
         void instantiate(ptrdiff_t i, ptrdiff_t j);
         
