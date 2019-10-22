@@ -7,20 +7,15 @@
 
 #include <iostream>
 
-struct pin {
-    pin() = default;
-    pin(const pin&) = delete;
-    pin(pin&&) = delete;
-};
-
-pin get() {
-    return pin{};
-}
+#include "thing.hpp"
 
 int main( int argc, char** argv) {
-    pin p = get();
-    printf("ello\n");
-    return 0;
+    using namespace manic;
+    
+    world w;
+    
+    w.simulate();
+    
 }
 
 

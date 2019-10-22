@@ -13,7 +13,7 @@
 
 namespace manic {
     
-void build_font(atlas2<char>& font_atlas, table3<char, float>& advances);
+short build_font(atlas2<unsigned long>& font_atlas, table3<unsigned long, float>& advances);
 
 }
 

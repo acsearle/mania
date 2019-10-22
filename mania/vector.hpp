@@ -151,13 +151,14 @@ namespace manic {
             T t(std::move(*this->_begin));
             this->_begin->~T();
             ++this->_begin;
+            --this->_size;
             return t;
         }
         
         T pop_back() {
-            --this->_end;
-            T t(std::move(*this->_end));
-            this->_end->~T();
+            --this->_size;
+            T t(std::move(*(this->_begin + this->_size)));
+            (this->_begin + this->_size)->~T();
             return t;
         }
         
@@ -196,6 +197,14 @@ namespace manic {
             using std::swap;
             swap((*this)[i], this->back());
             return pop_back();
+        }
+    
+        void erase(ptrdiff_t i) {
+            assert(0 <= i);
+            assert(i < this->_size);
+            (this->_begin + i)->~T();
+            std::memmove(this->_begin + i, this->_begin + i + 1, (this->_size - i - 1) * sizeof(T));
+            --this->_size;
         }
         
     };

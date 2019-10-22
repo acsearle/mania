@@ -18,10 +18,51 @@
 
 namespace manic {
     
+
+struct font {
+    
+    FT_Library _library;
+    FT_Face _face;
+    
+    explicit font(char const* filename) {
+        FT_Error e;
+        e = FT_Init_FreeType(&_library);
+        assert(!e);
+        e = FT_New_Face(_library, filename, 0, &_face);
+        assert(!e);
+        FT_Set_Pixel_Sizes(_face, 0, 64);
+    }
+    
+    ~font() {
+        FT_Done_Face(_face);
+        FT_Done_FreeType(_library);
+    }
+    
+    i32 kerning(u32 left, u32 right) {
+        FT_Error e;
+        FT_Vector k;
+        e = FT_Get_Kerning(_face,
+                           FT_Get_Char_Index(_face, left),
+                           FT_Get_Char_Index(_face, right),
+                           FT_KERNING_DEFAULT,
+                           &k);
+        assert(!e);
+        assert(!(k.x & 0x3F));
+        return (i32) (k.x >> 6);
+    }
+    
+    i32 advance(u32 character) {
+        FT_Error e;
+        e = FT_Load_Char(_face, character, FT_LOAD_DEFAULT);
+        assert(!e);
+        return (i32) (_face->glyph->advance.x >> 6);
+    }
+    
+};
+
     
     
-    
-    void build_font(atlas2<char>& font_atlas, table3<char, float>& advances) {
+    short build_font(atlas2<unsigned long>& font_atlas, table3<unsigned long, float>& advances) {
         
         FT_Library ft;
         FT_Error e = FT_Init_FreeType(&ft);
@@ -34,13 +75,19 @@ namespace manic {
                         &face);
         assert(!e);
         
-        FT_Set_Pixel_Sizes(face, 0, 128);
+        FT_Set_Pixel_Sizes(face, 0, 64);
+        // FT_Set_Char_Size(face, 0, 24 * 64, 220, 220);
         
-        for (FT_ULong c = 32; c != 127; ++c) {
+        FT_UInt gindex = 0;
+        FT_ULong charcode = FT_Get_First_Char(face, &gindex);
         
-            FT_Load_Char(face, c, FT_LOAD_RENDER);
+        while (gindex) {
             
-            font_atlas.push(c,
+            DUMP(charcode);
+            
+            FT_Load_Glyph(face, gindex, FT_LOAD_RENDER);
+            
+            font_atlas.push(charcode,
                             const_matrix_view<GLubyte>(face->glyph->bitmap.buffer,
                                                        face->glyph->bitmap.width,
                                                        face->glyph->bitmap.pitch,
@@ -48,14 +95,22 @@ namespace manic {
                             face->glyph->bitmap_left,
                             face->glyph->bitmap_top);
             
-            advances.insert(c, face->glyph->advance.x * 0.015625f);
+            advances.insert(charcode, face->glyph->advance.x * 0.015625f);
             
+            charcode = FT_Get_Next_Char(face, charcode, &gindex);
         }
+        
+        auto h = face->size->metrics.height;
         
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
         
-        DUMP(advances[' ']);
+        //DUMP(advances[' ']);
+        DUMP(h);
+        
+        DUMP(font_atlas._used.size());
+        
+        return h * 0.015625f;
         
     }
     

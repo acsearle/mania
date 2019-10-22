@@ -42,8 +42,8 @@ class blenderer
     
     manic::atlas _atlas;
     
-    manic::atlas2<char> _font;
-    manic::table3<char, float> _advances;
+    manic::atlas2<unsigned long> _font;
+    manic::table3<unsigned long, float> _advances;
     
     //vector<vector<int>> _grid;
     //vector<gl::vec<GLfloat, 2>> _entities;
@@ -53,6 +53,8 @@ class blenderer
     gl::vec<double, 2> _camera_position;
     double             _camera_zoom;
     std::string _text;
+    
+    short _lineheight;
     
 public:
     
@@ -64,7 +66,8 @@ public:
     void blit_twist(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y, double radians);
     
     void scribe(char const*, float x, float y);
-    void glyph(char i, float x, float y);
+    void glyph(unsigned long i, float x, float y);
+    void show_atlas(size_t n);
 
 };
 
@@ -109,7 +112,7 @@ blenderer::blenderer()
     }
      */
     
-    manic::build_font(_font, _advances);
+    _lineheight = manic::build_font(_font, _advances);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -247,7 +250,7 @@ void blenderer::blit(ptrdiff_t i, float x, float y) {
 }
 
 
-void blenderer::glyph(char i, float x, float y) {
+void blenderer::glyph(unsigned long i, float x, float y) {
     auto& r = _font[i];
     gl::vertex a = r.a;
     gl::vertex b = r.b;
@@ -271,18 +274,59 @@ void blenderer::glyph(char i, float x, float y) {
     _vertices.push_back(b);
 }
 
+void blenderer::show_atlas(size_t n) {
+    gl::vertex a, b;
+    a.position.x = 0;
+    a.position.y = 0;
+    a.texCoord.x = 0;
+    a.texCoord.y = 0;
+    b.position.x = n;
+    b.position.y = n;
+    b.texCoord.x = 1;
+    b.texCoord.y = 1;
+    gl::vertex c = a;
+    gl::vertex d = b;
+    // a - c
+    // | / |
+    // d - b
+    using std::swap;
+    swap(c.position.x, d.position.x);
+    swap(c.texCoord.x, d.texCoord.x);
+    _vertices.push_back(a);
+    _vertices.push_back(c);
+    _vertices.push_back(d);
+    _vertices.push_back(d);
+    _vertices.push_back(c);
+    _vertices.push_back(b);
+}
+
 void blenderer::scribe(const char *p, float x, float y) {
     float ox = x;
     while (*p) {
         if (*p == '\n') {
             x = ox;
-            y += 128;
+            y += _lineheight;
         } else {
-            glyph(*p, x, y);
-            x += _advances[*p];
+            glyph((unsigned char) *p, x, y);
+            x += _advances[(unsigned char) *p];
         }
         ++p;
     }
+    /*
+    int i = 0;
+    std::set<manic::u64> _sorted;
+    for (auto c : manic::keys(_font._used)) {
+        _sorted.insert(c);
+    }
+    for (auto c : _sorted) {
+        glyph(c, x, y);
+        x += _advances[c];
+        if (!((++i) & 31)) {
+            x = ox;
+            y += _lineheight;
+        }
+    }
+     */
 }
 
 
@@ -308,6 +352,8 @@ void blenderer::render() {
 
     glViewport(0, 0, _width, _height);
 
+    _camera_zoom = 1.0;
+    
     GLfloat transform[16] = {
         (float) _camera_zoom/_width, 0, 0, 0,
         0, - (float) _camera_zoom/_height, 0, 0,
@@ -324,7 +370,7 @@ void blenderer::render() {
     
     
     _vertices.clear();
-
+    
     _camera_position.x = sin(new_t * 1e-9) * 32;
     _camera_position.y = cos(new_t * 1e-9) * 18;
 
@@ -348,12 +394,24 @@ void blenderer::render() {
     }
      */
     
-    scribe(_text.c_str(), -_width - _camera_position.x, -_height - _camera_position.y);
+    //scribe(_text.c_str(), -_width - _camera_position.x, -_height - _camera_position.y);
+    scribe(_text.c_str(), 0, 0);
+    
+    //show_atlas(1024);
+    
+    {
+        unsigned char i = rand();
+        if (_font._used.contains(i)) {
+            _text += i;
+        }
+    }
+    /*
     _text += (rand() % 95) + 32;
+     */
     if (!(rand() % 41)) {
         _text += '\n';
     }
-    
+
     
 
     

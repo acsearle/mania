@@ -35,6 +35,12 @@
 		CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF80221C091C00D8B4B2 /* povtools.cpp */; };
 		CAC2FF85221D2DCC00D8B4B2 /* chunk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF83221D2DCC00D8B4B2 /* chunk.cpp */; };
 		CAC2FF88221D2DED00D8B4B2 /* surface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF86221D2DED00D8B4B2 /* surface.cpp */; };
+		CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
+		CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
+		CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
+		CAEECE02235EE674002D1E2F /* thing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECE00235EE674002D1E2F /* thing.cpp */; };
+		CAEECE03235EE674002D1E2F /* thing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECE00235EE674002D1E2F /* thing.cpp */; };
+		CAEECE04235EE674002D1E2F /* thing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECE00235EE674002D1E2F /* thing.cpp */; };
 		CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A51F14D618005956A9 /* AppDelegate.m */; };
 		CAF889A91F14D618005956A9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889A81F14D618005956A9 /* main.m */; };
 		CAF889AC1F14D618005956A9 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAF889AB1F14D618005956A9 /* ViewController.m */; };
@@ -146,6 +152,10 @@
 		CAE2F1BC2216B97000B832F6 /* deque.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = deque.hpp; sourceTree = "<group>"; };
 		CAE2F1BE2216EBAB00B832F6 /* catch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = catch.hpp; sourceTree = "<group>"; };
 		CAEECDFA235A5ABD002D1E2F /* sentinel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sentinel.h; sourceTree = "<group>"; };
+		CAEECDFB235BD649002D1E2F /* unicode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = unicode.cpp; sourceTree = "<group>"; };
+		CAEECDFC235BD649002D1E2F /* unicode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = unicode.hpp; sourceTree = "<group>"; };
+		CAEECE00235EE674002D1E2F /* thing.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = thing.cpp; sourceTree = "<group>"; };
+		CAEECE01235EE674002D1E2F /* thing.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = thing.hpp; sourceTree = "<group>"; };
 		CAF889A11F14D618005956A9 /* mania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mania.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF889A41F14D618005956A9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CAF889A51F14D618005956A9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -391,6 +401,10 @@
 				CA72B7BC221A8EE200AC9441 /* utility */,
 				CAA183C7233224FE00BF4472 /* offset_ptr.hpp */,
 				CAA646C0233C9E33006C460E /* relocate.hpp */,
+				CAEECDFB235BD649002D1E2F /* unicode.cpp */,
+				CAEECDFC235BD649002D1E2F /* unicode.hpp */,
+				CAEECE00235EE674002D1E2F /* thing.cpp */,
+				CAEECE01235EE674002D1E2F /* thing.hpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -536,8 +550,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA44D79722FAE466004B76D7 /* enumerate-test.cpp in Sources */,
+				CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */,
 				CA0EB14B2222CBD700DAE8CF /* table3-test.cpp in Sources */,
 				CA72B7AC221A7D0900AC9441 /* deque-test.cpp in Sources */,
+				CAEECE03235EE674002D1E2F /* thing.cpp in Sources */,
 				CA72B7A8221A7C5500AC9441 /* main-test.cpp in Sources */,
 				CA44D79C22FAEF57004B76D7 /* zip-test.cpp in Sources */,
 				CA0EB143222254B600DAE8CF /* f8-test.cpp in Sources */,
@@ -550,8 +566,10 @@
 			files = (
 				CAB75875221D528900043768 /* image.cpp in Sources */,
 				CA0EB12C22201ADB00DAE8CF /* terrain.cpp in Sources */,
+				CAEECE04235EE674002D1E2F /* thing.cpp in Sources */,
 				CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */,
 				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
+				CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,9 +596,11 @@
 				CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */,
 				CA0EB14E222F9BA000DAE8CF /* text.cpp in Sources */,
 				CAF889CA1F150490005956A9 /* vao.cpp in Sources */,
+				CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */,
 				CAF889DB1F1AD842005956A9 /* image.cpp in Sources */,
 				CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */,
 				CAF889D31F150E21005956A9 /* vertex.cpp in Sources */,
+				CAEECE02235EE674002D1E2F /* thing.cpp in Sources */,
 				CAF889BA1F14D67C005956A9 /* MyOpenGLView.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
