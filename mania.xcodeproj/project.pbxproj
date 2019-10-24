@@ -35,6 +35,12 @@
 		CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF80221C091C00D8B4B2 /* povtools.cpp */; };
 		CAC2FF85221D2DCC00D8B4B2 /* chunk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF83221D2DCC00D8B4B2 /* chunk.cpp */; };
 		CAC2FF88221D2DED00D8B4B2 /* surface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC2FF86221D2DED00D8B4B2 /* surface.cpp */; };
+		CAD3B21A236064FD001DA73B /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B218236064FD001DA73B /* json.cpp */; };
+		CAD3B21B236064FD001DA73B /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B218236064FD001DA73B /* json.cpp */; };
+		CAD3B21C236064FD001DA73B /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B218236064FD001DA73B /* json.cpp */; };
+		CAD3B21F2360FE94001DA73B /* asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B21D2360FE94001DA73B /* asset.cpp */; };
+		CAD3B2202360FE94001DA73B /* asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B21D2360FE94001DA73B /* asset.cpp */; };
+		CAD3B2212360FE94001DA73B /* asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B21D2360FE94001DA73B /* asset.cpp */; };
 		CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
@@ -144,6 +150,10 @@
 		CAC2FF84221D2DCC00D8B4B2 /* chunk.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = chunk.hpp; sourceTree = "<group>"; };
 		CAC2FF86221D2DED00D8B4B2 /* surface.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = surface.cpp; sourceTree = "<group>"; };
 		CAC2FF87221D2DED00D8B4B2 /* surface.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = surface.hpp; sourceTree = "<group>"; };
+		CAD3B218236064FD001DA73B /* json.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = json.cpp; sourceTree = "<group>"; };
+		CAD3B219236064FD001DA73B /* json.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = json.hpp; sourceTree = "<group>"; };
+		CAD3B21D2360FE94001DA73B /* asset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = asset.cpp; sourceTree = "<group>"; };
+		CAD3B21E2360FE94001DA73B /* asset.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = asset.hpp; sourceTree = "<group>"; };
 		CADB9B44202C282000415C1B /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		CADB9B4A203596D400415C1B /* object.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = object.hpp; sourceTree = "<group>"; };
 		CAE2F1B4220E952A00B832F6 /* graveyard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = graveyard.cpp; sourceTree = "<group>"; };
@@ -405,6 +415,10 @@
 				CAEECDFC235BD649002D1E2F /* unicode.hpp */,
 				CAEECE00235EE674002D1E2F /* thing.cpp */,
 				CAEECE01235EE674002D1E2F /* thing.hpp */,
+				CAD3B218236064FD001DA73B /* json.cpp */,
+				CAD3B219236064FD001DA73B /* json.hpp */,
+				CAD3B21D2360FE94001DA73B /* asset.cpp */,
+				CAD3B21E2360FE94001DA73B /* asset.hpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -551,6 +565,8 @@
 			files = (
 				CA44D79722FAE466004B76D7 /* enumerate-test.cpp in Sources */,
 				CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */,
+				CAD3B2202360FE94001DA73B /* asset.cpp in Sources */,
+				CAD3B21B236064FD001DA73B /* json.cpp in Sources */,
 				CA0EB14B2222CBD700DAE8CF /* table3-test.cpp in Sources */,
 				CA72B7AC221A7D0900AC9441 /* deque-test.cpp in Sources */,
 				CAEECE03235EE674002D1E2F /* thing.cpp in Sources */,
@@ -566,8 +582,10 @@
 			files = (
 				CAB75875221D528900043768 /* image.cpp in Sources */,
 				CA0EB12C22201ADB00DAE8CF /* terrain.cpp in Sources */,
+				CAD3B2212360FE94001DA73B /* asset.cpp in Sources */,
 				CAEECE04235EE674002D1E2F /* thing.cpp in Sources */,
 				CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */,
+				CAD3B21C236064FD001DA73B /* json.cpp in Sources */,
 				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
 				CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */,
 			);
@@ -594,10 +612,12 @@
 				CAF889BD1F14DFCF005956A9 /* renderer.cpp in Sources */,
 				CA0EB12B22201ADB00DAE8CF /* terrain.cpp in Sources */,
 				CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */,
+				CAD3B21A236064FD001DA73B /* json.cpp in Sources */,
 				CA0EB14E222F9BA000DAE8CF /* text.cpp in Sources */,
 				CAF889CA1F150490005956A9 /* vao.cpp in Sources */,
 				CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */,
 				CAF889DB1F1AD842005956A9 /* image.cpp in Sources */,
+				CAD3B21F2360FE94001DA73B /* asset.cpp in Sources */,
 				CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */,
 				CAF889D31F150E21005956A9 /* vertex.cpp in Sources */,
 				CAEECE02235EE674002D1E2F /* thing.cpp in Sources */,

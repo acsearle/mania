@@ -12,6 +12,7 @@
 #include "bit.hpp" // <bit>
 #include <iostream>
 #include <utility>
+#include <string>
 
 #include "common.hpp"
 #include "filter_iterator.hpp"
@@ -22,10 +23,21 @@
 #include "transform_iterator.hpp"
 
 namespace manic {
-    
+
+inline u64 hash(std::string_view v) {
+    return hash_combine(v.data(), v.size(), 0);
+}
+
+inline u64 hash(const char* c) {
+    return hash(std::string_view(c));
+}
+
+
+
     // table3 relies on manic::hash being high-quality; it is not defensive
     // against bad hashes.  We do not prevent users from mutating keys, which
     // violates the invariant.
+
     
     template<typename Key, typename Value>
     struct table3 {
@@ -211,8 +223,8 @@ namespace manic {
             return _vector._capacity ? std::max(a & _mask(), ~a & _mask()) : 0;
             
         }
-        usize size() { return _occupants; }
-        bool empty() { return !_occupants; }
+        usize size() const { return _occupants; }
+        bool empty() const { return !_occupants; }
 
         void swap(table3& r) {
             using std::swap;
@@ -268,7 +280,7 @@ namespace manic {
 
         
         template<typename Keylike>
-        bool contains(const Keylike& k) {
+        bool contains(const Keylike& k) const {
             if (!_occupants)
                 return false;
             const u64 h = _table_hash(hash(k));

@@ -25,7 +25,8 @@ namespace manic {
     void divide_alpha(image& img) {
         for (auto&& row : img)
             for (auto&& px : row)
-                px.rgb = px.rgb * 255 / px.a;
+                if (px.a)
+                    px.rgb = px.rgb * 255 / px.a;
     }
     
     image from_png(const char * filename) {
@@ -43,13 +44,17 @@ namespace manic {
     }
     
     void to_png(const image& img, const char* filename) {
+        
+        image img2(img);
+        divide_alpha(img2);
+        
         png_image a;
         memset(&a, 0, sizeof(a));
         a.format = PNG_FORMAT_RGBA;
-        a.height = (png_uint_32) img.rows();
+        a.height = (png_uint_32) img2.rows();
         a.version =  PNG_IMAGE_VERSION;
-        a.width = (png_uint_32) img.columns();
-        png_image_write_to_file(&a, filename, 0, img.data(), (png_int_32) img.stride() * sizeof(pixel), nullptr);
+        a.width = (png_uint_32) img2.columns();
+        png_image_write_to_file(&a, filename, 0, img2.data(), (png_int_32) img2.stride() * sizeof(pixel), nullptr);
         std::cout << a.message << std::endl;
         png_image_free(&a);
     }
@@ -123,6 +128,31 @@ namespace manic {
             }
     }
 
-    
-    
+bool is_blank(const_matrix_view<pixel> v) {
+    for (i64 i = 0; i != v.rows(); ++i) {
+        for (i64 j = 0; j != v.columns(); ++j) {
+            if (v(i, j).a)
+                return false;
+        }
+    }
+    return true;
+}
+
+gl::vec<i64, 2> prune(matrix_view<pixel>& v) {
+    gl::vec<i64, 2> o(0, 0);
+    while (v.rows() && is_blank(v.sub(0, 0, 1, v.columns()))) {
+        ++o.y;
+        v = v.sub(1, 0, v.rows() - 1, v.columns());
+    }
+    while (v.rows() && is_blank(v.sub(v.rows() - 1, 0, 1, v.columns())))
+        v = v.sub(0, 0, v.rows() - 1, v.columns());
+    while (v.columns() && is_blank(v.sub(0, 0, v.rows(), 1))) {
+        ++o.x;
+        v = v.sub(0, 1, v.rows(), v.columns() - 1);
+    }
+    while (v.columns() && is_blank(v.sub(0, v.columns() - 1, v.rows(), 1)))
+        v = v.sub(0, 0, v.rows(), v.columns() - 1);
+    return o;
+}
+
 }

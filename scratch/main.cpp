@@ -7,6 +7,47 @@
 
 #include <iostream>
 
+#include "image.hpp"
+#include "json.hpp"
+
+namespace manic {
+
+void foo() {
+    auto n = 1024;
+    image a(n, n);
+    
+    pixel purple(255, 0, 255, 255);
+    
+    auto m = 64;
+    for (int i = 0; i != n; i += m)
+        for (int j = 0; j != n; j += 2) {
+            a(i, j) = purple;
+            a(j, i) = purple;
+        }
+    
+    // to_png(a, "/Users/acsearle/Downloads/textures/scaffold.png");
+    auto s = _string_from_file(fopen("/Users/acsearle/Downloads/textures/symbols.json", "rb"));
+    auto b = json::from(s.data(), s.data() + s.size());
+    b._ptr->debug();
+    printf("\n");
+    
+    for (int i = 0; i != b["names"].size(); ++i) {
+        json const& c = b["names"][i];
+        for (int j = 0; j != c.size(); ++j) {
+            printf("%s ", c[j].as_string());
+        }
+        printf("\n");
+    }
+    
+}
+}
+
+int main(int argc, char** argv) {
+    manic::foo();
+}
+
+
+/*
 #include "thing.hpp"
 
 int main( int argc, char** argv) {
@@ -17,7 +58,7 @@ int main( int argc, char** argv) {
     w.simulate();
     
 }
-
+*/
 
 /*
 #include <cassert>

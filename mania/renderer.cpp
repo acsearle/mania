@@ -16,6 +16,7 @@
 #include <OpenGL/gl3.h>
 
 #include <mach/mach_time.h>
+#include <string>
 
 #include "program.hpp"
 #include "vao.hpp"
@@ -28,6 +29,7 @@
 #include "atlas.hpp"
 #include "surface.hpp"
 #include "text.hpp"
+#include "thing.hpp"
 
 class blenderer
 : public renderer {
@@ -44,6 +46,10 @@ class blenderer
     
     manic::atlas2<unsigned long> _font;
     manic::table3<unsigned long, float> _advances;
+    
+    manic::atlas3 _tiles;
+    
+    manic::world _thing;
     
     //vector<vector<int>> _grid;
     //vector<gl::vec<GLfloat, 2>> _entities;
@@ -68,6 +74,8 @@ public:
     void scribe(char const*, float x, float y);
     void glyph(unsigned long i, float x, float y);
     void show_atlas(size_t n);
+    void blit3(std::string_view v, float x, float y);
+
 
 };
 
@@ -91,7 +99,10 @@ std::unique_ptr<renderer> renderer::make() {
 // Tiles must supply border pixels as well to supply GL_LINEAR what it needs.
 
 blenderer::blenderer()
-: _program("text"), _atlas(1024), _font(1024) {
+: _program("basic")
+, _atlas(1024)
+, _font(1024)
+, _tiles("/Users/acsearle/Downloads/textures/symbols") {
 
     //auto pattern2 = manic::image::from_png("/Users/acsearle/Downloads/basn6a08.png");
     //auto pattern = manic::image::from_png("/Users/acsearle/Downloads/tbrn2c08.png");
@@ -112,7 +123,9 @@ blenderer::blenderer()
     }
      */
     
-    _lineheight = manic::build_font(_font, _advances);
+    // _lineheight = manic::build_font(_font, _advances);
+    
+    
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -300,6 +313,31 @@ void blenderer::show_atlas(size_t n) {
     _vertices.push_back(b);
 }
 
+void blenderer::blit3(std::string_view v, float x, float y) {
+    if (!_tiles.contains(v))
+        return;
+    auto& r = _tiles[v];
+    gl::vertex a = r.a;
+    gl::vertex b = r.b;
+    a.position.x += x;
+    a.position.y += y;
+    b.position.x += x;
+    b.position.y += y;
+    gl::vertex c = a;
+    gl::vertex d = b;
+    // a - c
+    // | / |
+    // d - b
+    using std::swap;
+    swap(c.position.x, d.position.x);
+    swap(c.texCoord.x, d.texCoord.x);
+    _vertices.push_back(a);
+    _vertices.push_back(c);
+    _vertices.push_back(d);
+    _vertices.push_back(d);
+    _vertices.push_back(c);
+    _vertices.push_back(b);
+}
 void blenderer::scribe(const char *p, float x, float y) {
     float ox = x;
     while (*p) {
@@ -333,6 +371,7 @@ void blenderer::scribe(const char *p, float x, float y) {
 void blenderer::render() {
     
     static int frame = 0;
+    frame += 1;
     
     static auto old_t = mach_absolute_time();
     auto new_t = mach_absolute_time();
@@ -352,7 +391,7 @@ void blenderer::render() {
 
     glViewport(0, 0, _width, _height);
 
-    _camera_zoom = 1.0;
+    _camera_zoom = 2.0;
     
     GLfloat transform[16] = {
         (float) _camera_zoom/_width, 0, 0, 0,
@@ -395,22 +434,100 @@ void blenderer::render() {
      */
     
     //scribe(_text.c_str(), -_width - _camera_position.x, -_height - _camera_position.y);
-    scribe(_text.c_str(), 0, 0);
+    //scribe(_text.c_str(), 0, 0);
     
+    static const char* translate[] = {
+        "noop",
+        "load",
+        "store",
+        "add",
+        "sub",
+        "and",
+        "or",
+        "xor",
+        "conditional-turn",
+        "swap",
+        "unused",
+        "inc",
+        "dec",
+        "die",
+        "unused",
+        "fork",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+    };
+    
+    using namespace manic;
+    
+    for (i64 i = 0; i != _thing._board.rows(); ++i) {
+        for (i64 j = 0; j != _thing._board.columns(); ++j) {
+            u8 k = _thing._board(i, j);
+            
+            std::string_view v(translate[k > 15 ? (k >> 4) : (k + 16)]);
+            blit3(v, i * 64 - 512, j * 64 - 512);
+            
+        }
+    }
+    
+    for (auto&& a : _thing._mcus) {
+        auto u = a.x * 64 - 512;
+        auto v = a.y * 64 - 512;
+        auto f = (-frame) & 63;
+        switch (a.d & 3) {
+            case 0: v += f; break;
+            case 1: u -= f; break;
+            case 2: v -= f; break;
+            case 3: u += f; break;
+        }
+        blit3("house", u, v);
+        char z[32];
+        sprintf(z, "%X", (int) a.d);
+        blit3(z, u, v);
+    }
+    
+    if (!(frame & 63))
+        _thing.tick();
+    
+    printf("%d\n", frame & 63);
+    
+    //blit3("store", 0, 0);
+    //blit3("load", 64, 0);
+    //blit3("fork", 64, 64);
+    //blit3("flop", 64, 128);
+    //blit3("house", 64, 192);
+
     //show_atlas(1024);
     
+    /*
     {
         unsigned char i = rand();
         if (_font._used.contains(i)) {
             _text += i;
         }
     }
+     */
     /*
     _text += (rand() % 95) + 32;
      */
+    /*
     if (!(rand() % 41)) {
         _text += '\n';
     }
+     */
 
     
 

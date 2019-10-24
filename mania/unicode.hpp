@@ -141,7 +141,14 @@ struct utf8iterator {
         abort();
     }
     
-    
+    friend bool operator==(utf8iterator a, utf8iterator b) {
+        return a._ptr == b._ptr;
+    }
+
+    friend bool operator!=(utf8iterator a, utf8iterator b) {
+        return a._ptr == b._ptr;
+    }
+
 };
 
 
@@ -201,6 +208,26 @@ struct string {
         _bytes.clear();
     }
 
+};
+
+struct string_view {
+    
+    utf8iterator a, b;
+    
+    string_view() = delete;
+    string_view(char const* p) : a(p), b(p + strlen(p)) {}
+    string_view(string_view const&) = default;
+    ~string_view() = default;
+    
+    u32 operator*() const { return *a; }
+    string_view& operator++() { ++a; return *this; }
+    bool is_empty() const { return a == b; }
+    
+    u32 front() const {
+        return *a;
+    }
+    
+    
 };
 
         

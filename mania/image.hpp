@@ -120,6 +120,8 @@ namespace manic {
     }
 */
 
+gl::vec<i64, 2> prune(matrix_view<pixel>& a);
+
 }
 
 
