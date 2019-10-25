@@ -42,7 +42,7 @@ world::world() {
     
     _board(14, 6) = 0xD0; // terminate last wild run
     
-    
+    // simulate();
     
     
     
@@ -54,12 +54,12 @@ void world::exec(mcu& x) {
     // target for operation may be the cell NE SE SW NW or the register
     // itself, or ignored
     
-    u8 u = x.x & 0xF;
-    u8 v = x.y & 0xF;
-    u8 instruction = _board(u, v);
-    u8 opcode = instruction >> 4;
-    u8 target = instruction & 15;
-    u8* p = nullptr;
+    i64 u = x.x;
+    i64 v = x.y;
+    u64 instruction = _board(u, v);
+    u64 opcode = instruction >> 4;
+    u64 target = instruction & 15;
+    u64* p = nullptr;
     
     // resolve what we are operating on - a nearby cell or a register
     switch (target) {
@@ -116,7 +116,7 @@ void world::exec(mcu& x) {
             break;
         case 0x9: // flip
             ++x.d;
-            _board(x.x & 0xF, x.y & 0xF) = 0xE0;
+            _board(x.x, x.y) = 0xE0;
             break;
         case 0xA: // SWAP
             std::swap(x.d, *p);
@@ -132,7 +132,7 @@ void world::exec(mcu& x) {
             break;
         case 0xE: // flop
             --x.d;
-            _board(x.x & 0xF, x.y & 0xF) = 0x90;
+            _board(x.x, x.y) = 0x90;
             break;
         case 0xF: { // FORK INTO DIAGONALLY ADJACENT CELL
             mcu y(x); y.x = u; y.y = v; _born.push_back(y);
@@ -181,7 +181,7 @@ void world::tick() {
 void world::print_world() {
     for (ptrdiff_t j = 0; j != 16; ++j) {
         for (ptrdiff_t i = 0; i != 16; ++i) {
-            printf("%2X ", _board(i, j));
+            printf("%2llX ", _board(i, j));
         }
         printf("\n");
     }

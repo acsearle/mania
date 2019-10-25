@@ -19,13 +19,13 @@ struct mcu {
     // MCU has a 2d location in a plane of memory cells, instead of a function
     // pointer into 1d memory
     
-    u8 x;
-    u8 y;
+    i64 x;
+    i64 y;
     
     // MCU has a single register currently.  Last two bits encode direction it
     // moves (NESW).  One register (and 8 bit opcodes) may not be sufficient
     
-    u8 d;
+    u64 d;
     
     // Each tick, the MCU reads its instruction from the cell it is "at".  The
     // instruction may address only the diagonally adjacent cells for read write
@@ -34,7 +34,7 @@ struct mcu {
     // Code and data are mingled together, but diagonal access means it is easy
     // to keep them locally separate on two complementary grids.
     
-    mcu(u8 x_, u8 y_, u8 d_)
+    mcu(u64 x_, u64 y_, u64 d_)
     : x(x_)
     , y(y_)
     , d(d_) {
@@ -50,10 +50,10 @@ struct world {
     
     // State of world
     
-    matrix<u8> _board; // 2d grid of memory cells
+    matrix<u64> _board; // 2d grid of memory cells
     vector<mcu> _mcus; // list of entities
     
-    // The world is a 2d grid of 8-bit memory locations.
+    // The world is a 2d grid of 64-bit memory locations.
     
     // Impl. details
     
