@@ -135,6 +135,7 @@ struct atlas3 {
         
         std::string t(asset_name);
         image a = from_png((t + ".png").c_str());
+        clean_image(a);
         FILE* fp = fopen((t + ".json").c_str(), "rb");
         auto z = _string_from_file(fp);
         fclose(fp);
@@ -176,6 +177,18 @@ struct atlas3 {
     
     bool contains(std::string_view v) const {
         return _table.contains(v);
+    }
+    
+    
+    void clean_image(image& a) {
+        for (i64 i = a.rows() - 1; i--;)
+            for (i64 j = 0; j != a.columns(); ++j)
+                if ((i & 63) && (j & 63)) {
+                    a(i + 1, j).a = std::max(a(i + 1, j).a, a(i, j).a);
+                } else {
+                    //a(i, j) = pixel(0,0,0,0);
+                }
+            
     }
         
         

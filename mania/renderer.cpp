@@ -437,22 +437,31 @@ void blenderer::render() {
     //scribe(_text.c_str(), 0, 0);
     
     static const char* translate[] = {
-        "noop",
-        "load",
-        "store",
-        "add",
-        "sub",
-        "and",
-        "or",
-        "xor",
-        "conditional-turn",
-        "flip",
-        "swap",
-        "turn",
-        "turn",
-        "die",
-        "flop",
-        "fork",
+            "noop",
+            "load",
+            "store",
+            "add",
+            "sub",
+            "bitwise_and",
+            "bitwise_or",
+            "bitwise_xor",
+            "decrement",
+            "decrement_saturate",
+            "increment",
+            "increment_saturate",
+            "flip_increment",
+            "flip_decrement",
+            "swap",
+            "kill",
+            "fork",
+            "conservative_or",
+            "conservative_and",
+            "less_than",
+            "equal_to",
+            "clear",
+            "compare",
+            "and_complement_of",
+            "opcode_enum_size",
         "0",
         "1",
         "2",
@@ -469,16 +478,30 @@ void blenderer::render() {
         "D",
         "E",
         "F",
+        "northeast", "southeast", "southwest", "northwest", "register_a", "register_b", "register_c", "register_d",
     };
     
     using namespace manic;
     
     for (i64 i = 0; i != _thing._board.rows(); ++i) {
         for (i64 j = 0; j != _thing._board.columns(); ++j) {
-            u8 k = _thing._board(i, j);
+            u64 k = _thing._board(i, j);
+            u64 z = k;
+            using namespace instruction;
+            if (k & INSTRUCTION_FLAG) {
+                k = (k & OPCODE_MASK) >> OPCODE_SHIFT;
+            } else {
+                if (k) {
+                    k = 25 + (k & 0xF);
+                }
+            }
             
-            std::string_view v(translate[k > 15 ? (k >> 4) : (k + 16)]);
+            std::string_view v(translate[k]);
             blit3(v, i * 64 - 512, j * 64 - 512);
+            if (z & INSTRUCTION_FLAG) {
+                std::string_view u(translate[(z & 0x7) + 25 + 16]);
+                blit3(u, i * 64 - 512, j * 64 - 512);
+            }
             
         }
     }
@@ -495,8 +518,12 @@ void blenderer::render() {
         }
         blit3("house", u, v);
         char z[32];
-        sprintf(z, "%X", (int) a.d);
-        blit3(z, u, v);
+        sprintf(z, "%llX", a.d);
+        blit3(z, u+32, v+32);
+
+        sprintf(z, "%llX", a.a);
+        blit3(z, u-32, v-32);
+
     }
     
     if (!(frame & 63))
@@ -532,7 +559,7 @@ void blenderer::render() {
     
 
     
-    //glClearColor(0, 0, 0, 0);
+    glClearColor(0.9, 0.9, 0.9, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     
     gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);

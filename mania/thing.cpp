@@ -14,33 +14,27 @@ world::world() {
     
     _board.resize(16, 16);
     
-    _mcus.push_back(mcu(8, 8, 0x10)); // mcu at centre, heading north, primed for 4 loops
+    _mcus.push_back(mcu(8, 8, 0xA, 0x10)); // mcu at centre, heading north, primed for 4 loops
     
-    _board(8, 7) = 0xF0; // fork
-    _board(8, 6) = 0x80; // conditional ccw
-    _board(6, 6) = 0x41; // sub sw, turning ccw
-    _board(7, 7) = 0x01; // value to sub
-    _board(6, 9) = 0x41; // sub se, turning ccw
-    _board(7, 10) = 0x01; // value to sub
-    _board(8, 9) = 0x42; // sub sw, turning ccw
+    using namespace instruction;
     
-    _board(8, 1) = 0xD0; // terminate after escaping loop
+    _board(8, 7) = opcode(fork); // fork
+    _board(8, 6) = opcode(decrement_saturate, register_d);
+    _board(6, 6) = opcode(decrement_saturate, register_d);
+    _board(6, 9) = opcode(decrement_saturate, register_d);
+    _board(8, 9) = opcode(decrement_saturate, register_d);
     
-    _board(9, 4) = 0xE0; // flip-flop branches the spawns
-    _board(7, 4) = 0xBD; // turn
-    _board(7, 3) = 0x32; // add
-    _board(6, 4) = 0x08; // add
-    _board(7, 2) = 0x21; // store
-    _board(7, 1) = 0xCD; // turn
+    _board(8, 1) = opcode(kill); // terminate after escaping loop
     
-    _board(7, 1) = 0xD0; // terminate spawns
-    _board(14, 4) = 0xD0; // terminate spawns
+    _board(9, 4) = opcode(flip_decrement, register_d);
+
+    _board(7, 4) = opcode(load, register_d);
+    _board(6, 4) = opcode(and_complement_of, southeast);
+    _board(7, 5) = 0xC;
+    _board(5, 4) = opcode(store, register_d);
     
-    _board(12, 3) = 0x020; // store
-    
-    _board(9, 2) = 0x02; // store
-    
-    _board(14, 6) = 0xD0; // terminate last wild run
+    _board(2, 4) = opcode(kill);
+    _board(14, 4) = opcode(kill);
     
     // simulate();
     
@@ -54,29 +48,33 @@ void world::exec(mcu& x) {
     // target for operation may be the cell NE SE SW NW or the register
     // itself, or ignored
     
+    using namespace instruction;
+    
     i64 u = x.x;
     i64 v = x.y;
-    u64 instruction = _board(u, v);
-    u64 opcode = instruction >> 4;
-    u64 target = instruction & 15;
+    u64 instruction_ = _board(u, v);
+    u64 opcode_ = (instruction_ & OPCODE_MASK) >> OPCODE_SHIFT;
+    u64 target = instruction_ & ADDRESS_MASK;
     u64* p = nullptr;
     
     // resolve what we are operating on - a nearby cell or a register
     switch (target) {
             // a diagonally adjacent cell of the board
-        case 0x0:
+        case northeast:
             ++u; --v; p = &_board(u, v); // NE
             break;
-        case 0x1:
+        case southeast:
             ++u; ++v; p = &_board(u, v); // SE
             break;
-        case 0x2:
+        case southwest:
             --u; ++v; p = &_board(u, v); // SW
             break;
-        case 0x3:
+        case northwest:
             --u; --v; p = &_board(u, v); // NW
             break;
-        case 0xD:
+        case register_a:
+            p = &x.a;
+        case register_d:
             p = &x.d;
             break;
         default:
@@ -85,58 +83,82 @@ void world::exec(mcu& x) {
     }
     
     // perform the operation
-    switch (opcode) {
-        case 0x0: // NOOP
+    switch (opcode_) {
+        case noop: // NOOP
             
             break;
-        case 0x1: // LOAD
-            x.d = *p;
+        case load: // LOAD
+            x.a = *p;
             break;
-        case 0x2: // STORE
-            *p = x.d;
+        case store: // STORE
+            *p = x.a;
             break;
-        case 0x3: // ADD
-            x.d += *p;
+        case add: // ADD
+            x.a += *p;
             break;
-        case 0x4: // SUB
-            x.d -= *p;
+        case sub: // SUB
+            x.a -= *p;
             break;
-        case 0x5: // AND
-            x.d &= *p;
+        case bitwise_and: // AND
+            x.a &= *p;
             break;
-        case 0x6: // OR
-            x.d |= *p;
+        case bitwise_or: // OR
+            x.a |= *p;
             break;
-        case 0x7: // XOR
-            x.d ^= *p;
+        case bitwise_xor: // XOR
+            x.a ^= *p;
             break;
-        case 0x8: // SATURATING DECREMENT (TURN CCW IF DIRECTION NONZERO)
-            if (x.d)
-                --x.d;
+        case decrement_saturate: // SATURATING DECREMENT (TURN CCW IF DIRECTION NONZERO)
+            if (*p)
+                --*p;
             break;
-        case 0x9: // flip
-            ++x.d;
-            _board(x.x, x.y) = 0xE0;
+        case increment_saturate: // SATURATING DECREMENT (TURN CCW IF DIRECTION NONZERO)
+            if (~*p)
+                ++*p;
             break;
-        case 0xA: // SWAP
-            std::swap(x.d, *p);
+        case and_complement_of:
+            x.a &= ~*p;
             break;
-        case 0xB: // INC
+        case flip_decrement: // flip
+            --*p;
+            _board(x.x, x.y) = opcode(flip_increment, register_d);
+            break;
+        case flip_increment: // flip
+            ++*p;
+            _board(x.x, x.y) = opcode(flip_decrement, register_d);
+            break;
+        case instruction::swap:
+            std::swap(x.a, *p);
+            break;
+        case increment: // INC
             ++*p;
             break;
-        case 0xC: // DEC
+        case decrement: // DEC
             --*p;
             break;
-        case 0xD: // DIE
+        case kill: // DIE
             _died.push_back(&x - _mcus.begin());
             break;
-        case 0xE: // flop
-            --x.d;
-            _board(x.x, x.y) = 0x90;
-            break;
-        case 0xF: { // FORK INTO DIAGONALLY ADJACENT CELL
+        case fork: { // FORK INTO DIAGONALLY ADJACENT CELL
             mcu y(x); y.x = u; y.y = v; _born.push_back(y);
         } break;
+        case conservative_or:
+            x.a |= std::exchange(*p, x.a & *p);
+            break;
+        case conservative_and:
+            x.a &= std::exchange(*p, x.a | *p);
+            break;
+        case less_than:
+            x.d = x.a < *p;
+            break;
+        case equal_to:
+            x.d = (x.a == *p);
+            break;
+        case clear:
+            *p = 0;
+            break;
+        case compare:
+            x.d = (*p < x.a) - (x.a < *p);
             
     }
 }
