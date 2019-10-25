@@ -10,6 +10,7 @@
 #include <utility>
 #include <string>
 #include <cstdlib>
+#include <sstream>
 #include "json.hpp"
 #include "table3.hpp"
 #include "vector.hpp"
@@ -25,75 +26,152 @@ std::string _string_from_file(FILE* f) {
     return s;
 }
 
+struct _json_value {
+    
+    [[noreturn]] static void unimplemented() { throw 0; }
+    
+    virtual ~_json_value() = default;
+    virtual size_t size() const { unimplemented(); }
+    virtual json const& at(size_t) const { unimplemented(); }
+    virtual json const& at(std::string_view) const { unimplemented(); }
+    virtual std::string_view as_string() const  { unimplemented(); }
+    virtual double as_number() const  { unimplemented(); }
+    virtual table3<std::string, json> const& as_object() const { unimplemented(); }
+    virtual vector<json> const& as_array() const { unimplemented(); }
+    virtual bool is_string() const { unimplemented(); }
+    virtual bool is_number() const { unimplemented(); }
+    virtual bool is_array() const { unimplemented(); }
+    virtual bool is_object() const { unimplemented(); }
+    static _json_value* from(std::string_view&);
+    virtual std::string debug() const = 0;
+    virtual _json_value* clone() const = 0;
+    
+}; // _json_value
 
-json json::from(const char* b, const char* e) {
-    
-    return json(value::from(b, e));
-    
+json::json(json const& x)
+: _ptr(x._ptr ? x._ptr->clone() : nullptr) {
+}
+
+json::~json() { delete _ptr; }
+
+json& json::operator=(json const& x) {
+    json tmp(x);
+    using std::swap;
+    swap(*this, tmp);
+    return *this;
+}
+
+size_t json::size() const { return _ptr->size(); }
+
+json const& json::operator[](size_t i) const { return _ptr->at(i); }
+json const& json::operator[](std::string_view s) const { return _ptr->at(s); }
+
+std::string_view json::as_string() const { return _ptr->as_string(); }
+double json::as_number() const { return _ptr->as_number(); }
+
+i64 json::as_i64() const {
+    double a = _ptr->as_number();
+    i64 b = (i64) a;
+    assert(((double) b) == a);
+    return b;
 }
 
 
-std::string _string_from(const char*& b, const char* e) {
-    while (isspace(*b))
-        ++b;
-    assert(*b == '"');
-    ++b;
-    const char* c = b;
+json json::from(std::string_view& v) {
+    
+    return json(_json_value::from(v));
+    
+}
+
+json json::from(std::string_view&& v) {
+    std::string_view u{v};
+    _json_value* p = _json_value::from(u);
+    while (u.size() && isspace(u.front()))
+        u.remove_prefix(1);
+    assert(u.empty());
+    return json(p);
+}
+
+
+std::string _string_from(std::string_view& v) {
+    while (isspace(v.front()))
+        v.remove_prefix(1);
+    assert(v.front() == '"');
+    v.remove_prefix(1);
+    auto c = v.begin();
     while (*c != '"') {
-        assert(c != e);
+        assert(c != v.end());
         ++c; // bug: account for escape characters
     }
-    std::string s(b, c);
-    b = c + 1;
+    std::string s(v.begin(), c);
+    v.remove_prefix(c - v.begin() + 1);
     return s;
 }
 
-struct json_object : json::value {
+double _number_from(std::string_view& v) {
+    char* q;
+    double d = std::strtod(v.data(), &q);
+    v.remove_prefix(q - v.data());
+    return d;
+}
+
+struct _json_object : _json_value {
     
     table3<std::string, json> _table;
     
-    virtual size_t size() const {
+    virtual size_t size() const override {
         return _table.size();
     }
     
-    virtual json const& at(char const* key) const {
+    virtual json const& at(std::string_view key) const override {
         return _table.get(key);
     }
     
-    static json_object* from(const char*& b, const char* e) {
-        json_object* p = new json_object;
-        while (isspace(*b)) ++b;
-        assert(*b == '{'); ++b;
-        while (isspace(*b)) ++b;
-        while (*b != '}') {
-            auto s = _string_from(b, e);
-            while (isspace(*b)) ++b;
-            assert(*b == ':'); ++b;
-            p->_table.insert(s, json(json::value::from(b, e)));
-            while (isspace(*b)) ++b;
-            assert((*b == ',') || (*b == '}'));
-            if (*b == ',') {
-                ++b; while (isspace(*b)) ++b;
+    static _json_object* from(std::string_view& v) {
+        _json_object* p = new _json_object;
+        while (isspace(v.front())) v.remove_prefix(1);
+        assert(v.front() == '{'); v.remove_prefix(1);
+        while (isspace(v.front())) v.remove_prefix(1);
+        while (v.front() != '}') {
+            auto s = _string_from(v);
+            while (isspace(v.front())) v.remove_prefix(1);
+            assert(v.front() == ':'); v.remove_prefix(1);
+            p->_table.insert(s, json(_json_value::from(v)));
+            while (isspace(v.front())) v.remove_prefix(1);
+            assert((v.front() == ',') || (v.front() == '}'));
+            if (v.front() == ',') {
+                v.remove_prefix(1); while (isspace(v.front())) v.remove_prefix(1);
             }
         }
-        ++b;
+        v.remove_prefix(1);
         return p;
     }
     
-    virtual void debug() const {
-        printf("{ ");
+    virtual std::string debug() const override {
+        std::string s;
+        s.append("{ ");
         for (auto const& [k, v] : _table) {
-            puts(k.c_str());
-            printf(" : ");
-            v._ptr->debug();
-            printf(", ");
+            s.append(k);
+            s.append(" : ");
+            s.append(v._ptr->debug());
+            s.append(", ");
         }
-        printf("}");
+        s.append("}");
+        return s;
+    }
+    
+    virtual _json_object* clone() const override {
+        auto p = new _json_object;
+        p->_table.reserve(_table.size());
+        for (auto&& [key, value] : _table) {
+            p->_table.insert(key, value);
+        }
+        return p;
     }
     
 };
 
-struct json_array : json::value {
+struct _json_array : _json_value {
     
     vector<json> _array;
     
@@ -105,91 +183,112 @@ struct json_array : json::value {
         return _array.size();
     }
     
-    static json_array* from(const char*& b, const char* e) {
-        json_array* p = new json_array;
-        while (isspace(*b)) ++b;
-        assert(*b == '['); ++b;
-        while (isspace(*b)) ++b;
-        while (*b != ']') {
-            p->_array.push_back(json(json::value::from(b, e)));
-            while (isspace(*b)) ++b;
-            assert((*b == ',') || (*b == ']'));
-            if (*b == ',') {
-                ++b; while (isspace(*b)) ++b;
+    static _json_array* from(std::string_view& v) {
+        _json_array* p = new _json_array;
+        while (isspace(v.front())) v.remove_prefix(1);
+        assert(v.front() == '['); v.remove_prefix(1);
+        while (isspace(v.front())) v.remove_prefix(1);
+        while (v.front() != ']') {
+            p->_array.push_back(json(_json_value::from(v)));
+            while (isspace(v.front())) v.remove_prefix(1);
+            assert((v.front() == ',') || (v.front() == ']'));
+            if (v.front() == ',') {
+                v.remove_prefix(1); while (isspace(v.front())) v.remove_prefix(1);
             }
         }
-        ++b;
+        v.remove_prefix(1);
         return p;
     }
     
-    virtual void debug() const override {
-        printf("[ ");
+    virtual std::string debug() const override {
+        std::string s;
+        s.append("[ ");
         for (auto const& v : _array) {
-            v._ptr->debug();
-            printf(", ");
+            s.append(v._ptr->debug());
+            s.append(", ");
         }
-        printf("]");
+        s.append("]");
+        return s;
     }
-
+    
+    virtual _json_array* clone() const override {
+        _json_array* p = new _json_array;
+        p->_array = _array;
+        return p;
+    }
+    
     
 };
 
-struct json_string : json::value {
+struct _json_string : _json_value {
     
     std::string _string;
     
-    virtual char const* as_string() const {
+    explicit _json_string(std::string_view v) : _string(v) {}
+    explicit _json_string(std::string&& s) : _string(std::move(s)) {}
+    
+    virtual std::string_view as_string() const override {
         return _string.c_str();
     }
     
-    static json_string* from(const char*& b, const char* e) {
-        json_string* p = new json_string;
-        p->_string = _string_from(b, e);
-        return p;
+    static _json_string* from(std::string_view& v) {
+        return new _json_string(_string_from(v));
     }
     
-    virtual void debug() const {
-        printf("\"%s\"", _string.c_str());
+    virtual std::string debug() const override {
+        std::string s;
+        s.append("\"");
+        s.append(_string);
+        s.append("\"");
+        return s;
+    }
+    
+    _json_string* clone() const override {
+        return new _json_string(_string);
     }
     
 };
 
-struct json_number : json::value {
+struct _json_number : _json_value {
     
     double _number;
     
-    virtual double as_number() const {
+    explicit _json_number(double d) : _number(d) {}
+    
+    virtual double as_number() const override {
         return _number;
     }
     
-    static json_number* from(const char*& b, const char* e) {
-        json_number* p = new json_number;
-        char* q;
-        p->_number = std::strtod(b, &q);
-        b = q;
-        return p;
+    static _json_number* from(std::string_view& v) {
+        return new _json_number(_number_from(v));
     }
     
-    virtual void debug() const {
-        printf("%g", _number);
+    virtual std::string debug() const override {
+        std::stringstream s;
+        s << _number;
+        return s.str();
     }
-
+    
+    virtual _json_number* clone() const override {
+        return new _json_number(_number);
+    }
+    
     
 };
 
 
-json::value* json::value::from(const char*& b, const char* e) {
+
+_json_value* _json_value::from(std::string_view& v) {
     
-    while (isspace(*b))
-        ++b;
+    while (isspace(v.front())) v.remove_prefix(1);
     
-    switch (*b) {
+    switch (v.front()) {
         case '{': // object
-            return json_object::from(b, e);
+            return _json_object::from(v);
         case '[': // array
-            return json_array::from(b, e);
+            return _json_array::from(v);
         case '"': // string
-            return json_string::from(b, e);
+            return _json_string::from(v);
         case '0':
         case '1':
         case '2':
@@ -201,16 +300,17 @@ json::value* json::value::from(const char*& b, const char* e) {
         case '8':
         case '9':
         case '-':
-            return json_number::from(b, e);
+            return _json_number::from(v);
         case 't': // true
         case 'f': // false
         case 'n': // null
         default:
             assert(false);
     }
-
+    
     return nullptr;
-
+    
 }
+
 
 }

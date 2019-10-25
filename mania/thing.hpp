@@ -74,20 +74,25 @@ struct world {
         _board(8, 9) = 0x42; // sub sw, turning ccw
         
         _board(8, 1) = 0xD0; // terminate after escaping loop
-        _board(9, 1) = 0xD0; // terminate spawns
+        
+        _board(9, 4) = 0xE0; // flip-flop branches the spawns
+        _board(7, 4) = 0xBD; // turn
+        _board(7, 3) = 0x32; // add
+        _board(6, 4) = 0x08; // add
+        _board(7, 2) = 0x21; // store
+        _board(7, 1) = 0xCD; // turn
+
+        _board(7, 1) = 0xD0; // terminate spawns
+        _board(14, 4) = 0xD0; // terminate spawns
+        
+        _board(12, 3) = 0x020; // store
+
+        _board(9, 2) = 0x02; // store
+
+        _board(14, 6) = 0xD0; // terminate last wild run
         
         
-        //               dd
-        //
-        //
-        //             - ?
-        //              1F
-        //               m
-        //             - -
-        //              1
-        //
-        
-        
+       
         
         
     }
@@ -158,6 +163,10 @@ struct world {
                 if (x.d)
                     --x.d;
                 break;
+            case 0x9: // flip
+                ++x.d;
+                _board(x.x & 0xF, x.y & 0xF) = 0xE0;
+                break;
             case 0xA: // SWAP
                 std::swap(x.d, *p);
                 break;
@@ -169,6 +178,10 @@ struct world {
                 break;
             case 0xD: // DIE
                 _died.push_back(&x - _mcus.begin());
+                break;
+            case 0xE: // flop
+                --x.d;
+                _board(x.x & 0xF, x.y & 0xF) = 0x90;
                 break;
             case 0xF: { // FORK INTO DIAGONALLY ADJACENT CELL
                 mcu y(x); y.x = u; y.y = v; _born.push_back(y);

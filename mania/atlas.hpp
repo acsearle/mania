@@ -138,7 +138,7 @@ struct atlas3 {
         FILE* fp = fopen((t + ".json").c_str(), "rb");
         auto z = _string_from_file(fp);
         fclose(fp);
-        json b = json::from(z.data(), z.data() + z.size());
+        json b = json::from(z);
         
         _n = (GLsizei) std::max(a.rows(), a.columns());
         _texture.bind(GL_TEXTURE_2D);

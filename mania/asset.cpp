@@ -21,7 +21,7 @@ namespace manic {
         FILE* fp = fopen((t + ".json").c_str(), "rb");
         auto z = _string_from_file(fp);
         fclose(fp);
-        json b = json::from(z.data(), z.data() + z.size());
+        json b = json::from(z);
         
         ptrdiff_t c = b["tile_size"].as_i64();
         json const& d = b["names"];
