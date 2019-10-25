@@ -14,11 +14,11 @@ world::world() {
     
     _board.resize(16, 16);
     
-    _mcus.push_back(mcu(8, 8, 0xA, 0x10)); // mcu at centre, heading north, primed for 4 loops
+    _mcus.push_back(mcu(8, 8, 0x3, 0x10)); // mcu at centre, heading north, primed for 4 loops
     
     using namespace instruction;
     
-    _board(8, 7) = opcode(fork); // fork
+    _board(8, 7) = opcode(fork, northeast); // fork
     _board(8, 6) = opcode(decrement_saturate, register_d);
     _board(6, 6) = opcode(decrement_saturate, register_d);
     _board(6, 9) = opcode(decrement_saturate, register_d);
@@ -28,10 +28,10 @@ world::world() {
     
     _board(9, 4) = opcode(flip_decrement, register_d);
 
-    _board(7, 4) = opcode(load, register_d);
+    //_board(7, 4) = opcode(load, register_d);
     _board(6, 4) = opcode(and_complement_of, southeast);
-    _board(7, 5) = 0xC;
-    _board(5, 4) = opcode(store, register_d);
+    _board(7, 5) = 0x1;
+    //_board(5, 4) = opcode(store, register_d);
     
     _board(2, 4) = opcode(kill);
     _board(14, 4) = opcode(kill);

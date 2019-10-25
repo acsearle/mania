@@ -13,6 +13,9 @@
 #include <string>
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gltypes.h>
+#include "common.hpp"
+#include "table3.hpp"
+#include "vec.hpp"
 
 std::string load(std::string name, std::string ext);
 
@@ -27,6 +30,15 @@ public:
     virtual void resize(GLsizei width, GLsizei height) = 0;
     virtual void render() = 0;
     static std::unique_ptr<renderer> make();
+    
+    void key_down(manic::u32);
+    void key_up(manic::u32);
+    
+    manic::table3<manic::u32, bool> _keyboard_map;
+    
+    void mouse_moved(double x, double y);
+    gl::vec<double, 2> _mouse;
+    
 };
 
 #endif /* renderer_hpp */

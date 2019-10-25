@@ -44,6 +44,12 @@
 		CAD3B2242362CDC6001DA73B /* elements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B2222362CDC6001DA73B /* elements.cpp */; };
 		CAD3B2252362CDC6001DA73B /* elements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B2222362CDC6001DA73B /* elements.cpp */; };
 		CAD3B2262362CDC6001DA73B /* elements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B2222362CDC6001DA73B /* elements.cpp */; };
+		CAD3B2292363A2E5001DA73B /* rleq.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B2272363A2E5001DA73B /* rleq.cpp */; };
+		CAD3B22A2363A2E5001DA73B /* rleq.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B2272363A2E5001DA73B /* rleq.cpp */; };
+		CAD3B22B2363A2E5001DA73B /* rleq.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B2272363A2E5001DA73B /* rleq.cpp */; };
+		CAD3B22E2363A6C0001DA73B /* bag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B22C2363A6C0001DA73B /* bag.cpp */; };
+		CAD3B22F2363A6C0001DA73B /* bag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B22C2363A6C0001DA73B /* bag.cpp */; };
+		CAD3B2302363A6C0001DA73B /* bag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B22C2363A6C0001DA73B /* bag.cpp */; };
 		CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
@@ -159,6 +165,10 @@
 		CAD3B21E2360FE94001DA73B /* asset.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = asset.hpp; sourceTree = "<group>"; };
 		CAD3B2222362CDC6001DA73B /* elements.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = elements.cpp; sourceTree = "<group>"; };
 		CAD3B2232362CDC6001DA73B /* elements.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = elements.hpp; sourceTree = "<group>"; };
+		CAD3B2272363A2E5001DA73B /* rleq.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = rleq.cpp; sourceTree = "<group>"; };
+		CAD3B2282363A2E5001DA73B /* rleq.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = rleq.hpp; sourceTree = "<group>"; };
+		CAD3B22C2363A6C0001DA73B /* bag.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bag.cpp; sourceTree = "<group>"; };
+		CAD3B22D2363A6C0001DA73B /* bag.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bag.hpp; sourceTree = "<group>"; };
 		CADB9B44202C282000415C1B /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		CADB9B4A203596D400415C1B /* object.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = object.hpp; sourceTree = "<group>"; };
 		CAE2F1B4220E952A00B832F6 /* graveyard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = graveyard.cpp; sourceTree = "<group>"; };
@@ -426,6 +436,10 @@
 				CAD3B21E2360FE94001DA73B /* asset.hpp */,
 				CAD3B2222362CDC6001DA73B /* elements.cpp */,
 				CAD3B2232362CDC6001DA73B /* elements.hpp */,
+				CAD3B2272363A2E5001DA73B /* rleq.cpp */,
+				CAD3B2282363A2E5001DA73B /* rleq.hpp */,
+				CAD3B22C2363A6C0001DA73B /* bag.cpp */,
+				CAD3B22D2363A6C0001DA73B /* bag.hpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -575,11 +589,13 @@
 				CAD3B2202360FE94001DA73B /* asset.cpp in Sources */,
 				CAD3B21B236064FD001DA73B /* json.cpp in Sources */,
 				CA0EB14B2222CBD700DAE8CF /* table3-test.cpp in Sources */,
+				CAD3B22A2363A2E5001DA73B /* rleq.cpp in Sources */,
 				CA72B7AC221A7D0900AC9441 /* deque-test.cpp in Sources */,
 				CAEECE03235EE674002D1E2F /* thing.cpp in Sources */,
 				CA72B7A8221A7C5500AC9441 /* main-test.cpp in Sources */,
 				CAD3B2252362CDC6001DA73B /* elements.cpp in Sources */,
 				CA44D79C22FAEF57004B76D7 /* zip-test.cpp in Sources */,
+				CAD3B22F2363A6C0001DA73B /* bag.cpp in Sources */,
 				CA0EB143222254B600DAE8CF /* f8-test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -591,12 +607,14 @@
 				CAD3B2262362CDC6001DA73B /* elements.cpp in Sources */,
 				CAB75875221D528900043768 /* image.cpp in Sources */,
 				CA0EB12C22201ADB00DAE8CF /* terrain.cpp in Sources */,
+				CAD3B22B2363A2E5001DA73B /* rleq.cpp in Sources */,
 				CAD3B2212360FE94001DA73B /* asset.cpp in Sources */,
 				CAEECE04235EE674002D1E2F /* thing.cpp in Sources */,
 				CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */,
 				CAD3B21C236064FD001DA73B /* json.cpp in Sources */,
 				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
 				CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */,
+				CAD3B2302363A6C0001DA73B /* bag.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -610,6 +628,7 @@
 				CAF889AC1F14D618005956A9 /* ViewController.m in Sources */,
 				CA0EB15C2233C32800DAE8CF /* option.cpp in Sources */,
 				CAC2FF85221D2DCC00D8B4B2 /* chunk.cpp in Sources */,
+				CAD3B22E2363A6C0001DA73B /* bag.cpp in Sources */,
 				CA3FF5E42079A828009F006F /* int.cpp in Sources */,
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
 				CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */,
@@ -626,6 +645,7 @@
 				CAF889CA1F150490005956A9 /* vao.cpp in Sources */,
 				CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */,
 				CAF889DB1F1AD842005956A9 /* image.cpp in Sources */,
+				CAD3B2292363A2E5001DA73B /* rleq.cpp in Sources */,
 				CAD3B21F2360FE94001DA73B /* asset.cpp in Sources */,
 				CA72C7691F20AC66006FEDF1 /* cg.cpp in Sources */,
 				CAF889D31F150E21005956A9 /* vertex.cpp in Sources */,

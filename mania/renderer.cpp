@@ -61,7 +61,7 @@ class blenderer
     std::string _text;
     
     short _lineheight;
-    
+        
 public:
     
     blenderer();
@@ -317,6 +317,8 @@ void blenderer::blit3(std::string_view v, float x, float y) {
     if (!_tiles.contains(v))
         return;
     auto& r = _tiles[v];
+    x -= _camera_position.x;
+    y -= _camera_position.y;
     gl::vertex a = r.a;
     gl::vertex b = r.b;
     a.position.x += x;
@@ -375,7 +377,7 @@ void blenderer::render() {
     
     static auto old_t = mach_absolute_time();
     auto new_t = mach_absolute_time();
-    std::cout << 1e9/(new_t - old_t) << std::endl;
+    // std::cout << 1e9/(new_t - old_t) << std::endl;
     old_t = new_t;
     
     static gl::vec<GLfloat, 2> deltas[] = {
@@ -410,8 +412,27 @@ void blenderer::render() {
     
     _vertices.clear();
     
-    _camera_position.x = sin(new_t * 1e-9) * 32;
-    _camera_position.y = cos(new_t * 1e-9) * 18;
+    //_camera_position.x = sin(new_t * 1e-9) * 32;
+    //_camera_position.y = cos(new_t * 1e-9) * 18;
+    if (_keyboard_map.contains('w')) {
+        _camera_position.y -= 2;
+    }
+    if (_keyboard_map.contains('a')) {
+        _camera_position.x -= 2;
+    }
+    if (_keyboard_map.contains('s')) {
+        _camera_position.y += 2;
+    }
+    if (_keyboard_map.contains('d')) {
+        _camera_position.x += 2;
+    }
+
+    {
+        blit3("northwest",
+              _mouse.x * 2 - _width / 2 + _camera_position.x,
+              - _mouse.y * 2 + _height / 2 + _camera_position.y);
+    }
+
 
     /*
     for (auto&& d : _surface) {
@@ -529,7 +550,7 @@ void blenderer::render() {
     if (!(frame & 63))
         _thing.tick();
     
-    printf("%d\n", frame & 63);
+    // printf("%d\n", frame & 63);
     
     //blit3("store", 0, 0);
     //blit3("load", 64, 0);
@@ -559,7 +580,7 @@ void blenderer::render() {
     
 
     
-    glClearColor(0.9, 0.9, 0.9, 0);
+    glClearColor(0.5, 0.6, 0.4, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     
     gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
@@ -616,4 +637,20 @@ void blenderer::blit_twist(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y, double radians
     _vertices.push_back(d);
     _vertices.push_back(c);
     _vertices.push_back(b);
+}
+
+void renderer::key_up(manic::u32 c) {
+    // we need a hash_set, clearly (or a bound on key things)
+    if (_keyboard_map.contains(c)) {
+        _keyboard_map.erase(c);
+    }
+}
+
+void renderer::key_down(manic::u32 c) {
+    _keyboard_map.insert(c, true);
+}
+
+void renderer::mouse_moved(double x, double y) {
+    _mouse.x = x;
+    _mouse.y = y;
 }

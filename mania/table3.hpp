@@ -105,6 +105,9 @@ inline u64 hash(const char* c) {
         raw_vector<_raw_entry> _vector;
         usize _occupants;
         
+        _raw_entry* _front;
+        _raw_entry* _back;
+        
         u64 _mask() const { return _vector._capacity - 1; }
         
         static const u64 HIGH_BIT = u64(1) << 63;
@@ -167,9 +170,14 @@ inline u64 hash(const char* c) {
             u64 i = e._hash;
             for (;;) {
                 if (_hash_at(i) == 0) {
-                    relocate(&_raw_entry_at(i), &e);
+                    _raw_entry* p = &_raw_entry_at(i);
+                    relocate(p, &e);
                     ++_occupants;
-                    return _raw_entry_at(i);
+                    if (p < _front)
+                        _front = p;
+                    if (p > _back)
+                        _back = p;
+                    return *p;
                 } else if ((_hash_at(i) == e._hash) && (_key_at(i) == e._entry.key)) {
                     _raw_entry_at(i).~_raw_entry();
                     relocate(&_raw_entry_at(i), &e);
@@ -192,7 +200,9 @@ inline u64 hash(const char* c) {
         
         table3()
         : _vector()
-        , _occupants(0) {
+        , _occupants(0)
+        , _front(nullptr)
+        , _back(nullptr) {
         }
         
         table3(const table3&) = delete;
@@ -230,6 +240,8 @@ inline u64 hash(const char* c) {
             using std::swap;
             swap(_vector, r._vector);
             swap(_occupants, r._occupants);
+            swap(_front, r._front);
+            swap(_back, r._back);
         }
 
         void clear() {
@@ -239,6 +251,8 @@ inline u64 hash(const char* c) {
                     e._hash = 0; // would block memset be better?
                 }
             _occupants = 0;
+            _front = nullptr;
+            _back = nullptr;
         }
         
         void clear_and_reserve(usize n) {
@@ -249,6 +263,8 @@ inline u64 hash(const char* c) {
                 _destroy_all();
                 _occupants = 0;
                 _vector = raw_vector<_raw_entry>(n);
+                _front = _vector.end();
+                _back = _vector.begin();
             }
         }
         
@@ -258,6 +274,8 @@ inline u64 hash(const char* c) {
                 raw_vector<_raw_entry> v(n);
                 v.swap(_vector);
                 _occupants = 0;
+                _front = _vector.end();
+                _back = _vector.begin();
                 for (auto& e : v) {
                     if (e._hash)
                         _insert_relocate(e);
@@ -271,6 +289,8 @@ inline u64 hash(const char* c) {
                 raw_vector<_raw_entry> v(n);
                 v.swap(_vector);
                 _occupants = 0;
+                _front = _vector.end();
+                _back = _vector.begin();
                 for (auto& e : v) {
                     if (e._hash)
                         _insert_relocate(e);
@@ -364,6 +384,15 @@ inline u64 hash(const char* c) {
                     }
                     _raw_entry_at(i)._hash = 0;
                     --_occupants;
+                    if (_occupants) {
+                        while (!_back->_hash)
+                            --_back;
+                        while (!_front->_hash)
+                            ++_front;
+                    } else {
+                        _back = _vector.begin();
+                        _front = _vector.end();
+                    }
                     return;
                 } else if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))) {
                     return;
@@ -387,27 +416,51 @@ inline u64 hash(const char* c) {
         }
         
         iterator begin() {
-            return iterator(_raw_entry_iterator(_vector.begin(), _vector.end()));
+            _raw_entry* p = _occupants ? (_back + 1) : _front;
+            return iterator(_raw_entry_iterator(_front, p));
         }
         
         iterator end() {
-            return iterator(_raw_entry_iterator(_vector.end(), _vector.end()));
+            _raw_entry* p = _occupants ? (_back + 1) : _front;
+            return iterator(_raw_entry_iterator(p, p));
         }
         
         const_iterator begin() const {
-            return const_iterator(_const_raw_entry_iterator(_vector.begin(), _vector.end()));
+            _raw_entry* p = _occupants ? (_back + 1) : _front;
+            return const_iterator(_const_raw_entry_iterator(_front, p));
         }
         
         const_iterator end() const {
-            return const_iterator(_const_raw_entry_iterator(_vector.end(), _vector.end()));
+            _raw_entry* p = _occupants ? (_back + 1) : _front;
+            return const_iterator(_const_raw_entry_iterator(_front, p));
         }
         
         const_iterator cbegin() const {
-            return const_iterator(_const_raw_entry_iterator(_vector.begin(), _vector.end()));
+            return begin();
         }
         
         const_iterator cend() const {
-            return const_iterator(_const_raw_entry_iterator(_vector.end(), _vector.end()));
+            return end();
+        }
+
+        entry& front() {
+            assert(_occupants);
+            return _front->_entry;
+        }
+        
+        entry const& front() const {
+            assert(_occupants);
+            return _front->_entry;
+        }
+        
+        entry& back() {
+            assert(_occupants);
+            return _back->_entry;
+        }
+        
+        entry const& back() const {
+            assert(_occupants);
+            return _back->_entry;
         }
 
         
@@ -480,7 +533,7 @@ inline u64 hash(const char* c) {
         auto end() {
             return transform_iterator(_perfect_capture.end(), _dot_value());
         }
-        
+                
     };
     
     template<typename T>
@@ -488,6 +541,9 @@ inline u64 hash(const char* c) {
         return _value_range<T>(std::forward<T>(r));
     }
     
+        
+        
+        
     
 } // namespace manic
 

@@ -28,5 +28,15 @@
     return YES;
 }
 
+- (void)applicationWillResignActive:(NSNotification *)notification {
+    NSLog(@"applicationWillResignActive");
+    // Insert code here to clear cached key states?
+}
+
+- (void)applicationDidResignActive:(NSNotification *)notification {
+    NSLog(@"applicationDidResignActive");
+}
+
+
 
 @end

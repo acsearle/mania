@@ -29,29 +29,6 @@ std::string load(std::string name, std::string ext) {
     return load(path_for_resource(name, ext));
 }
 
-
-void fontStuff(void) {
- 
-    /*
-    size_t width = 1024;
-    size_t height = width;
-    CGContextRef context = CGBitmapContextCreate(nullptr, width, height, 8, width * 4, nullptr, kCGImageAlphaLast);
-    assert(context);
-    
-    
-    
-    
-    CTFontGetGlyphsForCharacters(<#CTFontRef  _Nonnull font#>, <#const UniChar *characters#>, <#CGGlyph *glyphs#>, <#CFIndex count#>)
-    
-    CGContextShowGlyphsAtPositions(context, <#const CGGlyph * _Nullable glyphs#>, <#const CGPoint * _Nullable Lpositions#>, <#size_t count#>)
-    
-    
-    CGLReleaseContext(context);
-    */
-    
-}
-
-
 @implementation MyOpenGLView {
     std::unique_ptr<renderer> _renderer;
 }
@@ -184,9 +161,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     // Init our renderer.  Use 0 for the defaultFBO which is appropriate for
     // OSX (but not iOS since iOS apps must create their own FBO)
     _renderer = renderer::make();
-    
-    fontStuff();
-    
+        
 }
 
 - (void)reshape
@@ -278,17 +253,20 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 
 - (BOOL)resignFirstResponder
 {
-    return YES;
+    NSLog(@"Will resignFirstResponder");
+    return [super resignFirstResponder];
 }
 
 - (void) keyDown:(NSEvent *)event
 {
-    NSLog(@"%@\n", event.characters);
+    NSLog(@"%@\n", event.charactersIgnoringModifiers);
+    _renderer->key_down([event.charactersIgnoringModifiers characterAtIndex:0]);
 }
 
 - (void) keyUp:(NSEvent*) event
 {
-    NSLog(@"%@\n", event.characters);
+    NSLog(@"%@\n", event.charactersIgnoringModifiers);
+    _renderer->key_up([event.charactersIgnoringModifiers characterAtIndex:0]);
 }
 
 -(void) flagsChanged:(NSEvent *)event
@@ -297,18 +275,17 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 }
 
 -(void) mouseUp:(NSEvent *)event {
-    
-    
+    //_renderer->mouse_down(event.pressedMouseButtons);
 }
 
 -(void) mouseDown:(NSEvent *)event {
-    
-    
+    //_renderer->mouse_up(event.pressedMouseButtons);
 }
 
 -(void) mouseMoved:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
     NSLog(@"Mouse %g %g\n", p.x, p.y);
+    _renderer->mouse_moved(p.x, p.y);
 }
 
 -(void) mouseEntered:(NSEvent *)event {
