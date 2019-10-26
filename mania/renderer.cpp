@@ -527,6 +527,16 @@ void blenderer::render() {
         }
     }
     
+    for (auto&& a : _thing._chests) {
+        auto u = a.x * 64 - 512;
+        auto v = a.y * 64 - 512;
+        blit3("chest1", u - 64, v);
+        blit3("chest2", u, v);
+        blit3("chest3", u - 64, v + 64);
+        blit3("chest4", u, v + 64);
+        
+    }
+    
     for (auto&& a : _thing._mcus) {
         auto u = a.x * 64 - 512;
         auto v = a.y * 64 - 512;

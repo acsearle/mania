@@ -12,6 +12,8 @@
 #include "matrix.hpp"
 #include "vector.hpp"
 
+#include "rleq.hpp"
+
 namespace manic {
 
 struct mcu {
@@ -44,6 +46,15 @@ struct mcu {
     
 };
 
+struct chest {
+    
+    i64 x;
+    i64 y;
+    
+    rleq<u64> _queue;
+    
+};
+
 inline std::ostream& operator<<(std::ostream& s, const manic::mcu& x) {
     return (s << "{ " << (int) x.x << ", " << (int)x.y << ", " << (int) x.d << " }");
     }
@@ -54,6 +65,7 @@ struct world {
     
     matrix<u64> _board; // 2d grid of memory cells
     vector<mcu> _mcus; // list of entities
+    vector<chest> _chests; // list of chests
     
     // The world is a 2d grid of 64-bit memory locations.
     

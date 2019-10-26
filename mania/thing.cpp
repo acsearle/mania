@@ -35,7 +35,33 @@ world::world() {
     
     _board(2, 4) = opcode(kill);
     _board(14, 4) = opcode(kill);
-    
+
+    {
+        chest c;
+        c.x = 12;
+        c.y = 12;
+        c._queue.push_back(1);
+        c._queue.push_back(2);
+        c._queue.push_back(3);
+        c._queue.push_back(4);
+        c._queue.push_back(5);
+        _chests.push_back(c);
+        
+        _board(13, 11) = opcode(decrement, register_d);
+        _board(10, 11) = opcode(decrement, register_d);
+        _board(10, 14) = opcode(decrement, register_d);
+        _board(13, 14) = opcode(decrement, register_d);
+        
+        _mcus.push_back(mcu{13, 12, 0, 0});
+        
+        _board(11, 11) = opcode(instruction::swap, southeast);
+        _board(12, 14) = opcode(instruction::swap, northwest);
+
+        _mcus.push_back(mcu{10, 12, 0, (~0ull << 1)});
+
+
+    }
+
     // simulate();
     
     
@@ -164,6 +190,15 @@ void world::exec(mcu& x) {
 }
 
 void world::tick() {
+    
+    for (auto& c : _chests) {
+        if (_board(c.x - 1, c.y + 1)) {
+            c._queue.push_back(_board(c.x - 1, c.y + 1));
+            _board(c.x - 1, c.y + 1) = 0;
+        }
+        if (c._queue.size() && !_board(c.x, c.y))
+            _board(c.x, c.y) = c._queue.pop_front();
+    }
     
     for (mcu& x : _mcus) {
         exec(x);

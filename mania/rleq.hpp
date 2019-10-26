@@ -29,14 +29,18 @@ struct rleq {
     usize _size = 0;
     
     void push_back(T x) {
-        if (!_array.size() || (_array.back() != x)) {
-            _array.push_back(entry{x, 1});
+        push_back(x, 1);
+    }
+    
+    void push_back(T x, N n) {
+        if (!_array.size() || (_array.back().value != x)) {
+            _array.push_back(entry{x, n});
         } else {
             assert(_array.back().count);
-            ++_array.back().count;
+            _array.back().count += n;
             assert(_array.back().count); // we have overflowed the counter
         }
-        ++_size;
+        _size += n;
     }
     
     T pop_front() {
@@ -47,6 +51,7 @@ struct rleq {
             _array.pop_front();
         }
         --_size;
+        return x;
     }
     
     T pop_back() {
