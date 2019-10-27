@@ -42,7 +42,7 @@ class blenderer
     
     GLsizei _width, _height;
     
-    manic::atlas _atlas;
+    manic::atlas1 _atlas;
     
     manic::atlas2<unsigned long> _font;
     manic::table3<unsigned long, float> _advances;

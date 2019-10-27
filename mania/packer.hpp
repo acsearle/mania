@@ -77,6 +77,10 @@ namespace manic {
             
         }
         
+        void release(gl::vec<T, 2> a, gl::vec<T, 2> b) {
+            _free.emplace(a, b);
+        }
+        
     }; // class packer<T>
     
     

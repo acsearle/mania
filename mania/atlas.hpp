@@ -20,6 +20,9 @@
 #include "table3.hpp"
 #include "image.hpp"
 #include "json.hpp"
+#include "vao.hpp"
+#include "vbo.hpp"
+
 
 namespace manic {
 
@@ -35,7 +38,7 @@ struct sprite {
 
 
 
-struct atlas {
+struct atlas1 {
     
     gl::texture _texture;
     std::vector<sprite> _used;
@@ -44,7 +47,7 @@ struct atlas {
     packer<GLint> _packer;
     
     
-    explicit atlas(GLsizei n) : _packer(n) {
+    explicit atlas1(GLsizei n) : _packer(n) {
         _n = n;
         _texture.bind(GL_TEXTURE_2D);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, n, n, 0, GL_RGBA,
@@ -193,6 +196,111 @@ struct atlas3 {
         
         
 }; // atlas3
+
+
+struct atlas_base {
+
+    gl::texture _texture;
+    GLsizei _size;
+    gl::vao _vao;
+    gl::vbo _vbo;
+
+    std::vector<gl::vertex> _vertices;
+    
+    // We cannot resize a texture without invalidating the texture coordinates
+    // of all current sprites
+    packer<GLsizei> _packer;
+    
+    atlas_base(GLsizei n = 1024) : _packer(n), _size(n) {
+        _vao.bind();
+        _vbo.bind(GL_ARRAY_BUFFER);
+        gl::vertex::bind();
+        _texture.bind(GL_TEXTURE_2D);
+        glTexImage2D(GL_TEXTURE_2D, 0,
+                     gl::format<pixel>,
+                     n, n,
+                     0,
+                     gl::format<pixel>, gl::type<pixel>,
+                     nullptr);
+    }
+
+    void push_sprite(sprite s) {
+        // a - x
+        // | \ | => abx axb
+        // x - b
+        _vertices.push_back(s.a);
+        _vertices.push_back(s.b);
+        _vertices.push_back({{s.b.position.x, s.a.position.y}, {s.b.texCoord.x, s.a.texCoord.y}});
+        _vertices.push_back(s.a);
+        _vertices.push_back({{s.a.position.x, s.b.position.y}, {s.a.texCoord.x, s.b.texCoord.y}});
+        _vertices.push_back(s.b);
+    }
+    
+    void push_texture() {
+        // Draw the whole texture, for debugging purposes
+        push_sprite({{{0, 0}, {0, 0}}, {{_size, _size}, {1, 1}}});
+    }
+    
+    void push_quad(gl::vertex v[]) {
+        // Draw an arbitrary quad, such as one resulting from a rotation
+        _vertices.push_back(v[0]);
+        _vertices.push_back(v[1]);
+        _vertices.push_back(v[2]);
+        _vertices.push_back(v[0]);
+        _vertices.push_back(v[2]);
+        _vertices.push_back(v[3]);
+    }
+    
+    void push_sprite_translated(sprite s, gl::vec2 v) {
+        s.a.position += v;
+        s.b.position += v;
+        push_sprite(s);
+    }
+        
+    void commit() {
+        // Upload the vertices
+        _vbo.bind(GL_ARRAY_BUFFER);
+        gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
+        // Bind the texture atlas
+        _texture.bind(GL_TEXTURE_2D);
+        // Bind the vertex array
+        _vao.bind();
+        // Draw from the vertex array
+        glDrawArrays(GL_TRIANGLES, 0, (GLsizei) _vertices.size());
+        // Discard the vertices ready for next cycle
+        _vertices.clear();        
+    }
+    
+    void discard() {
+        _vertices.clear();
+    }
+    
+    sprite place(const_matrix_view<pixel> v, gl::vec2 origin = { 0, 0 }) {
+        auto tl = _packer.place({v.columns(), v.rows()});
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) v.stride());
+        glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
+        _texture.bind(GL_TEXTURE_2D);
+        glTexSubImage2D(GL_TEXTURE_2D, 0,
+                        tl.x, tl.y,
+                        (GLsizei) v.columns(), (GLsizei) v.rows(),
+                        gl::format<pixel>,
+                        gl::type<pixel>,
+                        v.data());
+        sprite s;
+        s.a.position = - origin;
+        s.a.texCoord = tl / _size;
+        s.b.position = { v.columns() - origin.x, v.rows() - origin.y };
+        s.b.texCoord = gl::vec2{ tl.x + v.columns(), tl.y + v.rows() } / _size;
+        return s;
+    }
+    
+    void release(sprite s) {
+        gl::vec<GLint, 2> a = s.a.texCoord * _size;
+        gl::vec<GLint, 2> b = s.b.texCoord * _size;
+        _packer.release(a, b);
+    }
+    
+};
     
 
 
