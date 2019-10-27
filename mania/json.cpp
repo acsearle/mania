@@ -17,12 +17,15 @@
 
 namespace manic {
 
-std::string _string_from_file(FILE* f) {
-    // Bug: peformance
-    std::string s;
+std::string _string_from_file(std::string_view v) {
+    std::string s(v);
+    FILE* f = fopen(s.c_str(), "rb");
+    assert(f);
+    s.clear();
     int c;
     while ((c = fgetc(f)) != EOF)
         s.push_back(c);
+    fclose(f);
     return s;
 }
 

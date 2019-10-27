@@ -13,7 +13,7 @@
 
 namespace manic {
     
-short build_font(atlas2<unsigned long>& font_atlas, table3<unsigned long, float>& advances);
+std::pair<table3<u32, std::pair<sprite, float>>, float> build_font(atlas&);
 
 }
 

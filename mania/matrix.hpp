@@ -44,7 +44,7 @@ namespace manic {
             assert(this->_rows >= 0);
             assert(this->_begin >= this->_allocation);
             assert(this->_stride >= this->_columns);
-            assert(this->_begin + (this->_rows - 1) * this->_stride + this->_columns
+            assert(this->_begin + (this->_rows - 1) * this->_stride + (this->_columns)
                    <= this->_allocation + this->_capacity);
             return true;
         }
@@ -101,6 +101,7 @@ namespace manic {
         }
         
         matrix& operator=(const_matrix_view<T> r) {
+            assert(_invariant());
             _destroy_all();
             if (this->_capacity < r.rows() * r.columns()) {
                 raw_vector<T> v(std::max(r.rows() * r.columns(), this->_capacity * 2));
@@ -108,7 +109,7 @@ namespace manic {
             }
             this->_begin = this->_allocation;
             this->_columns = r._columns;
-            this->_stride = r._stride;
+            this->_stride = r._columns;
             this->_rows = r._rows;
             for (ptrdiff_t i = 0; i != this->_rows; ++i)
                 std::uninitialized_copy_n(r._begin + i * r._stride, r._columns, this->_begin + i * this->_stride);
@@ -124,6 +125,8 @@ namespace manic {
         
         using matrix_view<T>::swap;
         void swap(matrix& r) {
+            assert(_invariant());
+            assert(r._invariant());
             using std::swap;
             swap(this->_begin, r._begin);
             swap(this->_columns, r._columns);
@@ -202,10 +205,12 @@ namespace manic {
         
         // Resizes preserving values, and padding with x
         void resize(ptrdiff_t r, ptrdiff_t c, const T& x = T()) {
+            assert(_invariant());
             matrix<T> a(r, c, x);
             r = std::min(r, this->_rows);
             c = std::min(c, this->_columns);
-            a.sub(0, 0, r, c) = this->sub(0, 0, r ,c);
+            a.sub(0, 0, r, c) = this->sub(0, 0, r, c);
+            assert(_invariant());
             a.swap(*this);
         }
         

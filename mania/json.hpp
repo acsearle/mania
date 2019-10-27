@@ -17,7 +17,7 @@
 
 namespace manic {
 
-std::string _string_from_file(FILE* f);
+std::string _string_from_file(std::string_view);
 
 struct _json_value;
 

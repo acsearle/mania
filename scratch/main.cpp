@@ -26,7 +26,7 @@ void foo() {
         }
     
     // to_png(a, "/Users/acsearle/Downloads/textures/scaffold.png");
-    auto s = _string_from_file(fopen("/Users/acsearle/Downloads/textures/symbols.json", "rb"));
+    auto s = _string_from_file("/Users/acsearle/Downloads/textures/symbols.json");
     auto b = json::from(s.data(), s.data() + s.size());
     b._ptr->debug();
     printf("\n");

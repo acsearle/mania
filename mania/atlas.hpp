@@ -83,6 +83,7 @@ struct atlas1 {
 }; // atlas
 
 
+/*
 template<typename Key>
 struct atlas2 {
     
@@ -126,79 +127,9 @@ struct atlas2 {
        }
        
 }; // atlas2
+*/
 
-struct atlas3 {
-    
-    gl::texture _texture;
-    table3<std::string, sprite> _table;
-    
-    GLsizei _n;
-    
-    explicit atlas3(std::string_view asset_name) {
-        
-        std::string t(asset_name);
-        image a = from_png((t + ".png").c_str());
-        clean_image(a);
-        FILE* fp = fopen((t + ".json").c_str(), "rb");
-        auto z = _string_from_file(fp);
-        fclose(fp);
-        json b = json::from(z);
-        
-        _n = (GLsizei) std::max(a.rows(), a.columns());
-        _texture.bind(GL_TEXTURE_2D);
-
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) a.stride());
-        glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _n, _n, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, a.data());
-        
-        ptrdiff_t c = b["tile_size"].as_i64();
-        json const& d = b["names"];
-        for (size_t i = 0; i != d.size(); ++i) {
-            json const& e = d[i];
-            for (size_t j = 0; j != e.size(); ++j) {
-                // matrix_view<pixel> e = a.sub(i * c, j * c, c, c);
-                sprite z;
-                float n = _n;
-                z.a.position.x = - c / 2;
-                z.a.position.y = - c / 2;
-                z.a.texCoord.x = (j * c) / n;
-                z.a.texCoord.y = (i * c) / n;
-                z.b.position.x = + c / 2;
-                z.b.position.y = + c / 2;
-                z.b.texCoord.x = ((j + 1) * c) / n;
-                z.b.texCoord.y = ((i + 1) * c) / n;
-                _table.insert(e[j].as_string(), z);
-            }
-            
-        }
-    }
-        
-    sprite const& operator[](std::string_view v) const {
-        return _table[v];
-    }
-    
-    bool contains(std::string_view v) const {
-        return _table.contains(v);
-    }
-    
-    
-    void clean_image(image& a) {
-        for (i64 i = a.rows() - 1; i--;)
-            for (i64 j = 0; j != a.columns(); ++j)
-                if ((i & 63) && (j & 63)) {
-                    a(i + 1, j).a = std::max(a(i + 1, j).a, a(i, j).a);
-                } else {
-                    //a(i, j) = pixel(0,0,0,0);
-                }
-            
-    }
-        
-        
-}; // atlas3
-
-
-struct atlas_base {
+struct atlas {
 
     gl::texture _texture;
     GLsizei _size;
@@ -211,7 +142,7 @@ struct atlas_base {
     // of all current sprites
     packer<GLsizei> _packer;
     
-    atlas_base(GLsizei n = 1024) : _packer(n), _size(n) {
+    atlas(GLsizei n = 1024) : _packer(n), _size(n) {
         _vao.bind();
         _vbo.bind(GL_ARRAY_BUFFER);
         gl::vertex::bind();
@@ -288,7 +219,7 @@ struct atlas_base {
                         v.data());
         sprite s;
         s.a.position = - origin;
-        s.a.texCoord = tl / _size;
+        s.a.texCoord = tl / (float) _size;
         s.b.position = { v.columns() - origin.x, v.rows() - origin.y };
         s.b.texCoord = gl::vec2{ tl.x + v.columns(), tl.y + v.rows() } / _size;
         return s;
@@ -302,6 +233,12 @@ struct atlas_base {
     
 };
     
+
+
+
+
+
+table3<std::string, sprite> load_asset(std::string_view, atlas& atl);
 
 
 } // manic

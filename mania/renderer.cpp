@@ -30,26 +30,26 @@
 #include "surface.hpp"
 #include "text.hpp"
 #include "thing.hpp"
+#include "debug.hpp"
+
+namespace manic {
 
 class blenderer
 : public renderer {
     
     gl::program _program;
-    gl::vao _vao;
-    gl::vbo _vbo;
-    
-    std::vector<gl::vertex> _vertices;
     
     GLsizei _width, _height;
+        
+    // manic::atlas2<unsigned long> _font;
+    // manic::table3<unsigned long, float> _advances;
+    std::pair<table3<u32, std::pair<sprite, float>>, float> _font;
     
-    manic::atlas1 _atlas;
+    // manic::atlas3 _tiles;
+    atlas _atlas;
+    table3<std::string, sprite> _tiles;
     
-    manic::atlas2<unsigned long> _font;
-    manic::table3<unsigned long, float> _advances;
-    
-    manic::atlas3 _tiles;
-    
-    manic::world _thing;
+    world _thing;
     
     //vector<vector<int>> _grid;
     //vector<gl::vec<GLfloat, 2>> _entities;
@@ -79,9 +79,11 @@ public:
 
 };
 
-std::unique_ptr<renderer> renderer::make() {
-    return std::make_unique<blenderer>();
 }
+std::unique_ptr<renderer> renderer::make() {
+    return std::make_unique<manic::blenderer>();
+}
+namespace manic {
 
 // As a general principle, we want to use nested local coordinates as much as
 // possible, because we access and copy lots of coordinates.  Using doubles
@@ -100,38 +102,21 @@ std::unique_ptr<renderer> renderer::make() {
 
 blenderer::blenderer()
 : _program("basic")
-, _atlas(1024)
-, _font(1024)
-, _tiles("/Users/acsearle/Downloads/textures/symbols") {
+, _atlas(1024) {
 
-    //auto pattern2 = manic::image::from_png("/Users/acsearle/Downloads/basn6a08.png");
-    //auto pattern = manic::image::from_png("/Users/acsearle/Downloads/tbrn2c08.png");
-    
-    /*
-    for (auto s : {
-        "/Users/acsearle/Downloads/textures/sand.png",
-        "/Users/acsearle/Downloads/textures/water.png",
-        "/Users/acsearle/Downloads/textures/grass.png",
-        "/Users/acsearle/Downloads/textures/right.png",
-        "/Users/acsearle/Downloads/textures/up.png",
-        "/Users/acsearle/Downloads/textures/left.png",
-        "/Users/acsearle/Downloads/textures/down.png",
-        "/Users/acsearle/Downloads/textures/plate.png",
-    }) {
-        auto pattern = manic::from_png(s);
-        _atlas.push(pattern);
-    }
-     */
+    // _tiles("/Users/acsearle/Downloads/textures/symbols")
+    _tiles = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
+    _font = build_font(_atlas);
     
     // _lineheight = manic::build_font(_font, _advances);
     
-    
-    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
@@ -140,30 +125,11 @@ blenderer::blenderer()
     glBindAttribLocation(_program, (GLuint) gl::attribute::texCoord, "texCoord");
     _program.link();
     
-    _vao.bind();
-    _vbo.bind(GL_ARRAY_BUFFER);
-    
-    gl::vertex::bind();
-
-    
     _program.validate();
     _program.use();
     
     _program.assign("sampler", 0);
-    
-    
-    _surface.instantiate(0, 0);
-    _surface.instantiate(0, -1);
-    _surface.instantiate(-1, -1);
-
-    for (auto&& e : _surface) {
-        auto& c = e.value;
-        for (ptrdiff_t i = 0; i != c._rows * c._columns; ++i)
-            c._entities.emplace_back(rand() / (double) RAND_MAX * c._rows, rand() / (double) RAND_MAX * c._columns);
-    }
-    
-    glPointSize(10.0);
-    
+        
     _camera_position = 0;
     _camera_zoom = 1.0; //4.56789;
     
@@ -238,159 +204,50 @@ void blenderer::resize(GLsizei width, GLsizei height) {
     
 }
 
-void blenderer::blit(ptrdiff_t i, float x, float y) {
-    auto& r = _atlas[i];
-    gl::vertex a = r.a;
-    gl::vertex b = r.b;
-    a.position.x += x;
-    a.position.y += y;
-    b.position.x += x;
-    b.position.y += y;
-    gl::vertex c = a;
-    gl::vertex d = b;
-    // a - c
-    // | / |
-    // d - b
-    using std::swap;
-    swap(c.position.x, d.position.x);
-    swap(c.texCoord.x, d.texCoord.x);
-    _vertices.push_back(a);
-    _vertices.push_back(c);
-    _vertices.push_back(d);
-    _vertices.push_back(d);
-    _vertices.push_back(c);
-    _vertices.push_back(b);
-}
-
-
 void blenderer::glyph(unsigned long i, float x, float y) {
-    auto& r = _font[i];
-    gl::vertex a = r.a;
-    gl::vertex b = r.b;
-    a.position.x += x;
-    a.position.y += y;
-    b.position.x += x;
-    b.position.y += y;
-    gl::vertex c = a;
-    gl::vertex d = b;
-    // a - c
-    // | / |
-    // d - b
-    using std::swap;
-    swap(c.position.x, d.position.x);
-    swap(c.texCoord.x, d.texCoord.x);
-    _vertices.push_back(a);
-    _vertices.push_back(c);
-    _vertices.push_back(d);
-    _vertices.push_back(d);
-    _vertices.push_back(c);
-    _vertices.push_back(b);
-}
-
-void blenderer::show_atlas(size_t n) {
-    gl::vertex a, b;
-    a.position.x = 0;
-    a.position.y = 0;
-    a.texCoord.x = 0;
-    a.texCoord.y = 0;
-    b.position.x = n;
-    b.position.y = n;
-    b.texCoord.x = 1;
-    b.texCoord.y = 1;
-    gl::vertex c = a;
-    gl::vertex d = b;
-    // a - c
-    // | / |
-    // d - b
-    using std::swap;
-    swap(c.position.x, d.position.x);
-    swap(c.texCoord.x, d.texCoord.x);
-    _vertices.push_back(a);
-    _vertices.push_back(c);
-    _vertices.push_back(d);
-    _vertices.push_back(d);
-    _vertices.push_back(c);
-    _vertices.push_back(b);
+    if (!_font.first.contains(i)) {
+        assert(false); // font should be complete for our ascii uses
+        return;
+    }
+    _atlas.push_sprite_translated(_font.first.get(i).first, gl::vec2(x, y));
 }
 
 void blenderer::blit3(std::string_view v, float x, float y) {
     if (!_tiles.contains(v))
         return;
-    auto& r = _tiles[v];
     x -= _camera_position.x;
     y -= _camera_position.y;
-    gl::vertex a = r.a;
-    gl::vertex b = r.b;
-    a.position.x += x;
-    a.position.y += y;
-    b.position.x += x;
-    b.position.y += y;
-    gl::vertex c = a;
-    gl::vertex d = b;
-    // a - c
-    // | / |
-    // d - b
-    using std::swap;
-    swap(c.position.x, d.position.x);
-    swap(c.texCoord.x, d.texCoord.x);
-    _vertices.push_back(a);
-    _vertices.push_back(c);
-    _vertices.push_back(d);
-    _vertices.push_back(d);
-    _vertices.push_back(c);
-    _vertices.push_back(b);
+    _atlas.push_sprite_translated(_tiles[v], gl::vec2(x, y));
+    //scribe(std::string(v).c_str(), x, y);
 }
+ 
+
 void blenderer::scribe(const char *p, float x, float y) {
     float ox = x;
     while (*p) {
         if (*p == '\n') {
             x = ox;
-            y += _lineheight;
+            y += _font.second;
         } else {
-            glyph((unsigned char) *p, x, y);
-            x += _advances[(unsigned char) *p];
+            u32 c = (unsigned char) *p;
+            glyph(c, x, y);
+            x += _font.first.get(c).second;
         }
         ++p;
     }
-    /*
-    int i = 0;
-    std::set<manic::u64> _sorted;
-    for (auto c : manic::keys(_font._used)) {
-        _sorted.insert(c);
-    }
-    for (auto c : _sorted) {
-        glyph(c, x, y);
-        x += _advances[c];
-        if (!((++i) & 31)) {
-            x = ox;
-            y += _lineheight;
-        }
-    }
-     */
 }
+        
 
 
 void blenderer::render() {
-    
+
+    auto old_t = mach_absolute_time();
+
     static int frame = 0;
     frame += 1;
-    
-    static auto old_t = mach_absolute_time();
-    auto new_t = mach_absolute_time();
-    // std::cout << 1e9/(new_t - old_t) << std::endl;
-    old_t = new_t;
-    
-    static gl::vec<GLfloat, 2> deltas[] = {
-        {0, 0},
-        {0, 0},
-        {0, 0},
-        {2, 0},
-        {0, -1},
-        {-2, 0},
-        {0, +1},
-    };
-    
 
+    
+    
     glViewport(0, 0, _width, _height);
 
     _camera_zoom = 2.0;
@@ -401,19 +258,12 @@ void blenderer::render() {
         0, 0, 1, 0,
         0, 0, 0, 1
     };
-    
-    //std::cout << _width << ", " << _height << std::endl;
-    
+        
     glUniformMatrix4fv(glGetUniformLocation(_program, "transform"), 1, GL_TRUE, transform);
     
     static double angle = 0.0;
     angle += 0.01;
     
-    
-    _vertices.clear();
-    
-    //_camera_position.x = sin(new_t * 1e-9) * 32;
-    //_camera_position.y = cos(new_t * 1e-9) * 18;
     if (_keyboard_map.contains('w')) {
         _camera_position.y -= 2;
     }
@@ -427,62 +277,38 @@ void blenderer::render() {
         _camera_position.x += 2;
     }
 
-    {
-        blit3("northwest",
-              _mouse.x * 2 - _width / 2 + _camera_position.x,
-              - _mouse.y * 2 + _height / 2 + _camera_position.y);
-    }
-
-
     /*
-    for (auto&& d : _surface) {
-        auto&& c = d.value;
-        for (ptrdiff_t i = 0; i != c._rows; ++i)
-            for (ptrdiff_t j = 0; j != c._columns; ++j)
-                blit(c._tiles(i, j),
-                     (c._j * c._columns + j) * 32 - _camera_position.x,
-                     (c._i * c._rows + i) * 18 - _camera_position.y);
-        
-        int k = 33;
-        for (auto&& e : c._entities) {
-            blit(k++,
-                 (c._j * c._columns + e.x) * 32  - _camera_position.x,
-                 (c._i * c._rows + e.y) * 18 - _camera_position.y);
-            if (k == 127)
-                k = 33;
-        }
-    }
+     blit3("northwest",
+        _mouse.x * 2 - _width / 2 + _camera_position.x,
+        - _mouse.y * 2 + _height / 2 + _camera_position.y);
      */
     
-    //scribe(_text.c_str(), -_width - _camera_position.x, -_height - _camera_position.y);
-    //scribe(_text.c_str(), 0, 0);
-    
     static const char* translate[] = {
-            "noop",
-            "load",
-            "store",
-            "add",
-            "sub",
-            "bitwise_and",
-            "bitwise_or",
-            "bitwise_xor",
-            "decrement",
-            "decrement_saturate",
-            "increment",
-            "increment_saturate",
-            "flip_increment",
-            "flip_decrement",
-            "swap",
-            "kill",
-            "fork",
-            "conservative_or",
-            "conservative_and",
-            "less_than",
-            "equal_to",
-            "clear",
-            "compare",
-            "and_complement_of",
-            "opcode_enum_size",
+        "noop",
+        "load",
+        "store",
+        "add",
+        "sub",
+        "bitwise_and",
+        "bitwise_or",
+        "bitwise_xor",
+        "decrement",
+        "decrement_saturate",
+        "increment",
+        "increment_saturate",
+        "flip_increment",
+        "flip_decrement",
+        "swap",
+        "kill",
+        "fork",
+        "conservative_or",
+        "conservative_and",
+        "less_than",
+        "equal_to",
+        "clear",
+        "compare",
+        "and_complement_of",
+        "opcode_enum_size",
         "0",
         "1",
         "2",
@@ -499,10 +325,15 @@ void blenderer::render() {
         "D",
         "E",
         "F",
-        "northeast", "southeast", "southwest", "northwest", "register_a", "register_b", "register_c", "register_d",
+        "northeast",
+        "southeast",
+        "southwest",
+        "northwest",
+        "register_a",
+        "register_b",
+        "register_c",
+        "register_d",
     };
-    
-    using namespace manic;
     
     for (i64 i = 0; i != _thing._board.rows(); ++i) {
         for (i64 j = 0; j != _thing._board.columns(); ++j) {
@@ -551,103 +382,32 @@ void blenderer::render() {
         char z[32];
         sprintf(z, "%llX", a.d);
         blit3(z, u+32, v+32);
-
         sprintf(z, "%llX", a.a);
         blit3(z, u-32, v-32);
 
     }
-    
+
+     
     if (!(frame & 63))
         _thing.tick();
-    
-    // printf("%d\n", frame & 63);
-    
-    //blit3("store", 0, 0);
-    //blit3("load", 64, 0);
-    //blit3("fork", 64, 64);
-    //blit3("flop", 64, 128);
-    //blit3("house", 64, 192);
-
-    //show_atlas(1024);
-    
-    /*
-    {
-        unsigned char i = rand();
-        if (_font._used.contains(i)) {
-            _text += i;
-        }
-    }
-     */
-    /*
-    _text += (rand() % 95) + 32;
-     */
-    /*
-    if (!(rand() % 41)) {
-        _text += '\n';
-    }
-     */
-
-    
-
-    
+        
     glClearColor(0.5, 0.6, 0.4, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     
-    gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
+    auto n = _atlas._vertices.size() / 6;
     
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) _vertices.size());
-    
+    _atlas.commit();
+
+    {
+        char s[64];
+        auto new_t = mach_absolute_time();
+        sprintf(s, "%.1f ms | %d quads\n%dx%d\nFrm %d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
+        scribe(s, -_width/2 + _font.first[' '].second, -_height/2 + _font.second);
+    }
     
 }
 
-
-
-
-
-
-void blenderer::blit_twist(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y, double radians) {
-    auto& r = _atlas[i];
-    
-    gl::vertex a = r.a;
-    gl::vertex b = r.b;
-    gl::vertex c = a;
-    gl::vertex d = b;
-    using std::swap;
-    swap(c.position.x, d.position.x);
-    swap(c.texCoord.x, d.texCoord.x);
-    // a - c
-    // | / |
-    // d - b
-    
-    float cos_ = cos(radians);
-    float sin_ = sin(radians);
-    // rotate in ground plane
-    gl::mat<GLfloat, 2> m(cos_, -sin_ * 16.0/9.0,
-                      sin_ * 9.0/16.0, cos_);
-    a.position = dot(m, a.position);
-    b.position = dot(m, b.position);
-    c.position = dot(m, c.position);
-    d.position = dot(m, d.position);
-    
-    
-    a.position.x += x;
-    a.position.y += y;
-    b.position.x += x;
-    b.position.y += y;
-    c.position.x += x;
-    c.position.y += y;
-    d.position.x += x;
-    d.position.y += y;
-    
-    
-    
-    _vertices.push_back(a);
-    _vertices.push_back(c);
-    _vertices.push_back(d);
-    _vertices.push_back(d);
-    _vertices.push_back(c);
-    _vertices.push_back(b);
-}
+} // namespace::manic
 
 void renderer::key_up(manic::u32 c) {
     // we need a hash_set, clearly (or a bound on key things)
@@ -664,3 +424,5 @@ void renderer::mouse_moved(double x, double y) {
     _mouse.x = x;
     _mouse.y = y;
 }
+
+

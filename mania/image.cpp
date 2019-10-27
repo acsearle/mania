@@ -9,9 +9,12 @@
 
 #include "image.hpp"
 
+#include <string_view>
 #include <numeric>
 
 #include <png.h>
+
+#include "debug.hpp"
 
 
 namespace manic {
@@ -29,11 +32,11 @@ namespace manic {
                     px.rgb = px.rgb * 255 / px.a;
     }
     
-    image from_png(const char * filename) {
+    image from_png(std::string_view v) {
         png_image a;
         memset(&a, 0, sizeof(a));
         a.version = PNG_IMAGE_VERSION;
-        png_image_begin_read_from_file(&a, filename);
+        png_image_begin_read_from_file(&a, std::string(v).c_str());
         a.format = PNG_FORMAT_RGBA;
         image c(a.height, a.width);
         png_image_finish_read(&a, nullptr, c.data(), (png_int_32) c.stride() * sizeof(pixel), nullptr);
@@ -155,4 +158,24 @@ gl::vec<i64, 2> prune(matrix_view<pixel>& v) {
     return o;
 }
 
+void dilate(image& a) {
+    DUMP(a.rows());
+    image b(a.rows() + 4, a.columns() + 4);
+    b.sub(2, 2, a.rows(), a.columns()) = a;
+    swap(a, b);
+    b = a.sub(1, 1, a.rows() - 2, a.columns() - 2);
+    for (ptrdiff_t i = 0; i != b.rows(); ++i)
+        for (ptrdiff_t j = 0; j != b.columns(); ++j) {
+            u8 c = 0;
+            for (ptrdiff_t k = 0; k != 3; ++k)
+                for (ptrdiff_t l = 0; l != 3; ++l) {
+                    c = std::max(c, a(i + k, j + l).a);
+                }
+            b(i, j).a = c;
+        }
+    swap(a, b);
+    DUMP(a.rows());
 }
+
+}
+
