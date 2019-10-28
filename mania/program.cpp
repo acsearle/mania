@@ -38,7 +38,7 @@ namespace gl {
         return *this;
     }
     
-    program::program(const std::string& name)
+    program::program(const string& name)
     : program() {
         attach(shader(GL_VERTEX_SHADER).source(load(name, "vsh")).compile());
         attach(shader(GL_FRAGMENT_SHADER).source(load(name, "fsh")).compile());

@@ -11,10 +11,10 @@
 
 #include <cstdlib>
 #include <utility>
-#include <string_view>
 
 #include "vec.hpp"
 #include "matrix.hpp"
+#include "string.hpp"
 
 namespace manic {
     
@@ -80,7 +80,7 @@ namespace manic {
         }
          */
         
-        image from_png(std::string_view);
+        image from_png(string_view);
         //static image with_size(ptrdiff_t width, ptrdiff_t height);
         void to_png(const image&, const char*);
         

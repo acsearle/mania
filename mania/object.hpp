@@ -13,7 +13,6 @@
 #include <cassert>
 #include <utility>
 #include <unordered_map>
-#include <string>
 #include <iostream>
 #include <vector>
 #include <map>
@@ -333,7 +332,7 @@ namespace mania {
     }
     
     template<class T>
-    constexpr std::string_view get_name()
+    constexpr string_view get_name()
     {
         char const* p = __PRETTY_FUNCTION__;
         while (*p++ != '=');
@@ -619,7 +618,7 @@ namespace mania {
     
     class string
     : public representation {
-        std::string _value;
+        string _value;
     public:
         string() = delete;
         explicit string(const char* zstr) : _value(zstr) {}
@@ -628,7 +627,7 @@ namespace mania {
             return new string(*this);
         }
         virtual std::size_t hash() const override {
-            return std::hash<std::string>()(_value);
+            return std::hash<string>()(_value);
         }
         virtual bool equals(const object& r) const override {
             auto p = dynamic_cast<string*>(r.get());

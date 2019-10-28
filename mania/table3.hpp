@@ -12,7 +12,6 @@
 #include "bit.hpp" // <bit>
 #include <iostream>
 #include <utility>
-#include <string>
 
 #include "common.hpp"
 #include "filter_iterator.hpp"
@@ -20,16 +19,17 @@
 #include "maybe.hpp"
 #include "raw_vector.hpp"
 #include "relocate.hpp"
+#include "string.hpp"
 #include "transform_iterator.hpp"
 
 namespace manic {
 
-inline u64 hash(std::string_view v) {
-    return hash_combine(v.data(), v.size(), 0);
+inline u64 hash(string_view v) {
+    return hash_combine(v.as_bytes().begin(), v.as_bytes().size(), 0);
 }
 
 inline u64 hash(const char* c) {
-    return hash(std::string_view(c));
+    return hash(string_view(c));
 }
 
 // table3 relies on manic::hash being high-quality; it is not defensive
@@ -371,7 +371,7 @@ struct table3 {
         const u64 h = _table_hash(hash(k));
         u64 i = h;
         while ((_hash_at(i) != h) || (_key_at(i) != k)) {
-            assert(!((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))));
+            //assert(!((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))));
             ++i;
         }
         return _value_at(i);

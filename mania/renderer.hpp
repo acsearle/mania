@@ -10,14 +10,14 @@
 #define renderer_hpp
 
 #include <memory>
-#include <string>
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gltypes.h>
 #include "common.hpp"
 #include "table3.hpp"
 #include "vec.hpp"
+#include "string.hpp"
 
-std::string load(std::string name, std::string ext);
+manic::string load(manic::string_view name, manic::string_view ext);
 
 class renderer {
 public:

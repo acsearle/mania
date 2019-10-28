@@ -207,6 +207,43 @@ namespace manic {
             --this->_size;
         }
         
+        void _reserve_back(isize n) {
+            if (_capacity_back() < n) {
+                // this->_begin
+                // this->_size
+                // this->_allocation
+                // this->_capacity
+                if ((_capacity_front() >= this->_size) && (this->_capacity >= (this->_size + n))) {
+                    // copy forward
+                    std::memcpy(this->_allocation, this->_begin, this->_size * sizeof(T));
+                    this->_begin = this->_allocation;
+                } else {
+                    // reallocate
+                    raw_vector<T> v(std::max(this->_size + n, this->_capacity * 2));
+                    std::memcpy(v._allocation, this->_begin, this->_size * sizeof(T));
+                    v.swap(*this);
+                    this->_begin = this->_allocation;
+                }
+                assert(_capacity_back() >= n);
+            }
+        }
+        
+        void append(T const* a, T const* b) {
+            auto n = b - a;
+            _reserve_back(n);
+            std::memcpy(this->_begin + this->_size, a, n * sizeof(T));
+            this->_size += n;
+        }
+        
+        template<typename It>
+        void assign(It a, It b) {
+            clear();
+            while (a != b) {
+                push_back(*a);
+                ++a;
+            }
+        }
+        
     };
     
     template<typename T>

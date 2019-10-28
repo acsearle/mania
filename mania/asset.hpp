@@ -9,14 +9,12 @@
 #ifndef asset_hpp
 #define asset_hpp
 
-#include <string_view>
-
 #include "atlas.hpp"
 #include "table3.hpp"
 
 namespace manic {
 
-table3<std::string, sprite> load_asset(std::string_view, atlas& atl);
+table3<string, sprite> load_asset(string_view, atlas& atl);
 
 } // namespace manic
 

@@ -7,11 +7,12 @@
 //
 
 #include "asset.hpp"
+#include "debug.hpp"
 #include "json.hpp"
 
 namespace manic {
 
-table3<std::string, sprite> load_asset(std::string_view asset_name, atlas& atl) {
+table3<string, sprite> load_asset(string_view asset_name, atlas& atl) {
     
     auto clean_image = [](image& a) {
         for (i64 i = a.rows() - 1; i--;)
@@ -20,17 +21,15 @@ table3<std::string, sprite> load_asset(std::string_view asset_name, atlas& atl) 
                     a(i + 1, j).a = std::max(a(i + 1, j).a, a(i, j).a);
     };
     
-    
-    std::string t(asset_name);
-    image a = from_png((t + ".png").c_str());
+    image a = from_png(asset_name + ".png");
     clean_image(a);
     
-    auto z = _string_from_file(t + ".json");
+    auto z = _string_from_file(asset_name + ".json");
     json b = json::from(z);
-    
-    table3<std::string, sprite> result;
-        
+
     ptrdiff_t c = b["tile_size"].as_i64();
+
+    table3<string, sprite> result;
     json const& d = b["names"];
     for (size_t i = 0; i != d.size(); ++i) {
         json const& e = d[i];

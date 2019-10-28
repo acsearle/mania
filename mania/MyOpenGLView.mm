@@ -8,24 +8,27 @@
 #define GL_SILENCE_DEPRECATION
 #import "MyOpenGLView.h"
 
-#include <string>
 #include <fstream>
 #include <iterator>
 #include <OpenGL/gl3.h>
 
 #include "renderer.hpp"
 
-std::string path_for_resource(std::string name, std::string ext) {
-    return [[[NSBundle mainBundle] pathForResource:[NSString stringWithUTF8String:name.c_str()]
-                                            ofType:[NSString stringWithUTF8String:ext.c_str()]] UTF8String];
+using manic::string;
+using manic::string_view;
+
+string path_for_resource(string_view name, string_view ext) {
+    return [[[NSBundle mainBundle] pathForResource:[NSString stringWithUTF8String:string(name).c_str()]
+                                            ofType:[NSString stringWithUTF8String:string(ext).c_str()]] UTF8String];
 }
 
-std::string load(std::string name) {
-    std::ifstream ifs(name);
-    return std::string(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
+string load(string name) {
+    std::ifstream ifs(name.c_str());
+    std::string s{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
+    return string(s.c_str());
 }
 
-std::string load(std::string name, std::string ext) {
+string load(string_view name, string_view ext) {
     return load(path_for_resource(name, ext));
 }
 
@@ -157,7 +160,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     // Synchronize buffer swaps with vertical refresh rate
     GLint swapInt = 1;
     [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
-    
+        
     // Init our renderer.  Use 0 for the defaultFBO which is appropriate for
     // OSX (but not iOS since iOS apps must create their own FBO)
     _renderer = renderer::make();

@@ -10,14 +10,12 @@
 #define json_hpp
 
 #include <utility>
-#include <string>
-#include <string_view>
 #include "table3.hpp"
 #include "vector.hpp"
 
 namespace manic {
 
-std::string _string_from_file(std::string_view);
+string _string_from_file(string_view);
 
 struct _json_value;
 
@@ -33,21 +31,25 @@ struct json {
     json& operator=(json const&);
     json& operator=(json&& x) { json tmp(std::move(x)); std::swap(_ptr, tmp._ptr); return *this; }
     
-    static json from(std::string_view&);
-    static json from(std::string_view&&);
+    static json from(string_view&);
+    static json from(string_view&&);
     static json from_file(FILE*);
     
     size_t size() const;
     
     json const& operator[](size_t i) const;
-    json const& operator[](std::string_view s) const;
+    json const& operator[](string_view s) const;
     
-    std::string_view as_string() const;
+    string_view as_string() const;
     double as_number() const;
+    table3<string, json> const& as_object() const;
+    vector<json> const& as_array() const;
     
     i64 as_i64() const;
     
 }; // json
+
+std::ostream& operator<<(std::ostream&, json const&);
 
 } // namespace manic
 

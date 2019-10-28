@@ -9,7 +9,6 @@
 
 #include "image.hpp"
 
-#include <string_view>
 #include <numeric>
 
 #include <png.h>
@@ -32,11 +31,12 @@ namespace manic {
                     px.rgb = px.rgb * 255 / px.a;
     }
     
-    image from_png(std::string_view v) {
+    image from_png(string_view v) {
         png_image a;
         memset(&a, 0, sizeof(a));
         a.version = PNG_IMAGE_VERSION;
-        png_image_begin_read_from_file(&a, std::string(v).c_str());
+        printf("%s\n", string(v).c_str());
+        png_image_begin_read_from_file(&a, string(v).c_str());
         a.format = PNG_FORMAT_RGBA;
         image c(a.height, a.width);
         png_image_finish_read(&a, nullptr, c.data(), (png_int_32) c.stride() * sizeof(pixel), nullptr);

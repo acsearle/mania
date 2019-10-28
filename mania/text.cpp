@@ -112,7 +112,7 @@ std::pair<table3<u32, std::pair<sprite, float>>, float> build_font(atlas& atl) {
                                       +face->glyph->bitmap_top));
         
         float advance = face->glyph->advance.x * 0.015625f;
-        result.first.insert(charcode, std::make_pair(s, advance));
+        result.first.insert((u32) charcode, std::make_pair(s, advance));
         
         charcode = FT_Get_Next_Char(face, charcode, &gindex);
     }
