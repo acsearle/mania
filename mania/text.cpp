@@ -98,18 +98,18 @@ std::pair<table3<u32, std::pair<sprite, float>>, float> build_font(atlas& atl) {
         
         // Unfortunately we can't tell OpenGL to load one channel into all
         // channels so we have to expand in memory
-        u.resize(v.rows(), v.columns());
+        u.discard_and_resize(v.rows(), v.columns());
         for (ptrdiff_t i = 0; i != v.rows(); ++i)
             for (ptrdiff_t j = 0; j != v.columns(); ++j) {
                 u8 a = v(i, j);
                 u(i, j) = pixel(a, a, a, a); // white, premultiplied alpha
             }
         
-        dilate(u);
+        //dilate(u);
         
         sprite s = atl.place(u,
-                             gl::vec2(1-face->glyph->bitmap_left,
-                                      1+face->glyph->bitmap_top));
+                             gl::vec2(-face->glyph->bitmap_left,
+                                      +face->glyph->bitmap_top));
         
         float advance = face->glyph->advance.x * 0.015625f;
         result.first.insert(charcode, std::make_pair(s, advance));

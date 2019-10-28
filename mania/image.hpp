@@ -100,6 +100,8 @@ namespace manic {
         //void clear(pixel c);
 
 void dilate(image&);
+
+void compose(matrix_view<pixel> background, const_matrix_view<pixel> foreground);
         
 
     //};

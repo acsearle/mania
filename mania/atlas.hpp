@@ -14,15 +14,12 @@
 #include <vector>
 
 #include "const_matrix_view.hpp"
+#include "image.hpp"
 #include "packer.hpp"
 #include "texture.hpp"
-#include "vertex.hpp"
-#include "table3.hpp"
-#include "image.hpp"
-#include "json.hpp"
 #include "vao.hpp"
 #include "vbo.hpp"
-
+#include "vertex.hpp"
 
 namespace manic {
 
@@ -36,99 +33,6 @@ struct sprite {
     gl::vertex b;
 };
 
-
-
-struct atlas1 {
-    
-    gl::texture _texture;
-    std::vector<sprite> _used;
-    GLsizei _n;
-    
-    packer<GLint> _packer;
-    
-    
-    explicit atlas1(GLsizei n) : _packer(n) {
-        _n = n;
-        _texture.bind(GL_TEXTURE_2D);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, n, n, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, nullptr);
-    }
-    
-    sprite& operator[](isize i) {
-        return _used[i];
-    }
-    
-    template<typename T>
-    void push(const_matrix_view<T> const& img) {
-        
-        gl::vec<GLint, 2> xy = _packer.place(gl::vec<GLint, 2>(img.columns(), img.rows()) + 1);
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) img.stride());
-        glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, xy.x, xy.y,
-                        (GLsizei) img.columns(), (GLsizei) img.rows(), gl::format<T>,
-                        gl::type<T>, img.data());
-        sprite s;
-        s.a.position.x = -img.columns() / 2;
-        s.a.position.y = -img.rows() / 2;
-        s.a.texCoord.s = xy.x / (float) _n;
-        s.a.texCoord.t = xy.y / (float) _n;
-        s.b.position.x = s.a.position.x + img.columns();
-        s.b.position.y = s.a.position.y + img.rows();
-        s.b.texCoord.s = (xy.x + img.columns()) / (float) _n;
-        s.b.texCoord.t = (xy.y + img.rows()) / (float) _n;
-        _used.push_back(s);
-        
-    }
-    
-}; // atlas
-
-
-/*
-template<typename Key>
-struct atlas2 {
-    
-       gl::texture _texture;
-       table3<Key, sprite> _used;
-       GLsizei _n;
-       
-       packer<GLint> _packer;
-       
-       explicit atlas2(GLsizei n) : _packer(n) {
-           _n = n;
-           _texture.bind(GL_TEXTURE_2D);
-           glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, n, n, 0, GL_RGBA,
-                        GL_UNSIGNED_BYTE, nullptr);
-       }
-       
-       sprite& operator[](Key const& k) {
-           return _used[k];
-       }
-       
-       template<typename T>
-       void push(Key const& k, const_matrix_view<T> const& img, int x, int y) {
-           
-           gl::vec<GLint, 2> xy = _packer.place(gl::vec<GLint, 2>(img.columns(), img.rows()) + 1);
-           glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) img.stride());
-           glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
-           glTexSubImage2D(GL_TEXTURE_2D, 0, xy.x, xy.y,
-                           (GLsizei) img.columns(), (GLsizei) img.rows(), gl::format<T>,
-                           gl::type<T>, img.data());
-           sprite s;
-           s.a.position.x = x;
-           s.a.position.y = -y;
-           s.a.texCoord.s = xy.x / (float) _n;
-           s.a.texCoord.t = xy.y / (float) _n;
-           s.b.position.x = s.a.position.x + img.columns();
-           s.b.position.y = s.a.position.y + img.rows();
-           s.b.texCoord.s = (xy.x + img.columns()) / (float) _n;
-           s.b.texCoord.t = (xy.y + img.rows()) / (float) _n;
-           _used.insert(k, s);
-           
-       }
-       
-}; // atlas2
-*/
-
 struct atlas {
 
     gl::texture _texture;
@@ -138,22 +42,9 @@ struct atlas {
 
     std::vector<gl::vertex> _vertices;
     
-    // We cannot resize a texture without invalidating the texture coordinates
-    // of all current sprites
     packer<GLsizei> _packer;
     
-    atlas(GLsizei n = 1024) : _packer(n), _size(n) {
-        _vao.bind();
-        _vbo.bind(GL_ARRAY_BUFFER);
-        gl::vertex::bind();
-        _texture.bind(GL_TEXTURE_2D);
-        glTexImage2D(GL_TEXTURE_2D, 0,
-                     gl::format<pixel>,
-                     n, n,
-                     0,
-                     gl::format<pixel>, gl::type<pixel>,
-                     nullptr);
-    }
+    atlas(GLsizei n = 1024);
 
     void push_sprite(sprite s) {
         // a - x
@@ -161,15 +52,15 @@ struct atlas {
         // x - b
         _vertices.push_back(s.a);
         _vertices.push_back(s.b);
-        _vertices.push_back({{s.b.position.x, s.a.position.y}, {s.b.texCoord.x, s.a.texCoord.y}});
+        _vertices.push_back({{s.b.position.x, s.a.position.y}, {s.b.texCoord.x, s.a.texCoord.y}, s.a.color});
         _vertices.push_back(s.a);
-        _vertices.push_back({{s.a.position.x, s.b.position.y}, {s.a.texCoord.x, s.b.texCoord.y}});
+        _vertices.push_back({{s.a.position.x, s.b.position.y}, {s.a.texCoord.x, s.b.texCoord.y}, s.b.color});
         _vertices.push_back(s.b);
     }
     
-    void push_texture() {
-        // Draw the whole texture, for debugging purposes
-        push_sprite({{{0, 0}, {0, 0}}, {{_size, _size}, {1, 1}}});
+    void push_atlas_translated(gl::vec2 v) {
+        // Draw the whole texture, typically for debugging
+        push_sprite({{{v.x, v.y}, {0, 0}}, {{v.x + _size, v.y + _size}, {1, 1}}});
     }
     
     void push_quad(gl::vertex v[]) {
@@ -188,60 +79,16 @@ struct atlas {
         push_sprite(s);
     }
         
-    void commit() {
-        // Upload the vertices
-        _vbo.bind(GL_ARRAY_BUFFER);
-        gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
-        // Bind the texture atlas
-        _texture.bind(GL_TEXTURE_2D);
-        // Bind the vertex array
-        _vao.bind();
-        // Draw from the vertex array
-        glDrawArrays(GL_TRIANGLES, 0, (GLsizei) _vertices.size());
-        // Discard the vertices ready for next cycle
-        _vertices.clear();        
-    }
+    void commit();
     
-    void discard() {
-        _vertices.clear();
-    }
+    void discard();
     
-    sprite place(const_matrix_view<pixel> v, gl::vec2 origin = { 0, 0 }) {
-        auto tl = _packer.place({v.columns(), v.rows()});
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) v.stride());
-        glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
-        _texture.bind(GL_TEXTURE_2D);
-        glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        tl.x, tl.y,
-                        (GLsizei) v.columns(), (GLsizei) v.rows(),
-                        gl::format<pixel>,
-                        gl::type<pixel>,
-                        v.data());
-        sprite s;
-        s.a.position = - origin;
-        s.a.texCoord = tl / (float) _size;
-        s.b.position = { v.columns() - origin.x, v.rows() - origin.y };
-        s.b.texCoord = gl::vec2{ tl.x + v.columns(), tl.y + v.rows() } / _size;
-        return s;
-    }
+    sprite place(const_matrix_view<pixel>, gl::vec2 origin = { 0, 0 });
     
-    void release(sprite s) {
-        gl::vec<GLint, 2> a = s.a.texCoord * _size;
-        gl::vec<GLint, 2> b = s.b.texCoord * _size;
-        _packer.release(a, b);
-    }
+    void release(sprite);
     
 };
-    
-
-
-
-
-
-table3<std::string, sprite> load_asset(std::string_view, atlas& atl);
-
 
 } // manic
-
 
 #endif /* atlas_hpp */

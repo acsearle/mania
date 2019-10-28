@@ -10,40 +10,63 @@
 
 namespace manic {
 
-table3<std::string, sprite> load_asset(std::string_view asset_name, atlas& atl) {
-    
-    auto clean_image = [](image& a) {
-        for (i64 i = a.rows() - 1; i--;)
-            for (i64 j = 0; j != a.columns(); ++j)
-                if ((i & 63) && (j & 63))
-                    a(i + 1, j).a = std::max(a(i + 1, j).a, a(i, j).a);
-    };
-    
-    
-    std::string t(asset_name);
-    image a = from_png((t + ".png").c_str());
-    clean_image(a);
-    
-    auto z = _string_from_file(t + ".json");
-    json b = json::from(z);
-    
-    table3<std::string, sprite> result;
-        
-    ptrdiff_t c = b["tile_size"].as_i64();
-    json const& d = b["names"];
-    for (size_t i = 0; i != d.size(); ++i) {
-        json const& e = d[i];
-        for (size_t j = 0; j != e.size(); ++j) {
-            result.insert(e[j].as_string(),
-                          atl.place(a.sub(i * c, j * c, c, c),
-                                    gl::vec2(c / 2.0f, c / 2.0f)));
-        }
-        
-    }
-    return result;
+atlas::atlas(GLsizei n) : _packer(n), _size(n) {
+    _vao.bind();
+    _vbo.bind(GL_ARRAY_BUFFER);
+    gl::vertex::bind();
+    _texture.bind(GL_TEXTURE_2D);
+    glTexImage2D(GL_TEXTURE_2D, 0,
+                 gl::format<pixel>,
+                 n, n,
+                 0,
+                 gl::format<pixel>, gl::type<pixel>,
+                 nullptr);
 }
 
 
+void atlas::commit() {
+    // Upload the vertices
+    _vbo.bind(GL_ARRAY_BUFFER);
+    gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
+    // Bind the texture atlas
+    _texture.bind(GL_TEXTURE_2D);
+    // Bind the vertex array
+    _vao.bind();
+    // Draw from the vertex array
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) _vertices.size());
+    // Discard the vertices ready for next cycle
+    _vertices.clear();
+}
 
+void atlas::discard() {
+    _vertices.clear();
+}
+
+sprite atlas::place(const_matrix_view<pixel> v, gl::vec2 origin) {
+    auto tl = _packer.place({v.columns(), v.rows()});
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) v.stride());
+    glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
+    _texture.bind(GL_TEXTURE_2D);
+    glTexSubImage2D(GL_TEXTURE_2D, 0,
+                    tl.x, tl.y,
+                    (GLsizei) v.columns(), (GLsizei) v.rows(),
+                    gl::format<pixel>,
+                    gl::type<pixel>,
+                    v.data());
+    sprite s;
+    s.a.position = - origin;
+    s.a.texCoord = tl / (float) _size;
+    s.a.color = {255, 255, 255, 255};
+    s.b.position = { v.columns() - origin.x, v.rows() - origin.y };
+    s.b.texCoord = gl::vec2{ tl.x + v.columns(), tl.y + v.rows() } / _size;
+    s.b.color = s.a.color;
+    return s;
+}
+
+void atlas::release(sprite s) {
+    gl::vec<GLint, 2> a = s.a.texCoord * _size;
+    gl::vec<GLint, 2> b = s.b.texCoord * _size;
+    _packer.release(a, b);
+}
 
 } // namespace manic

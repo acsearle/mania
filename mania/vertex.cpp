@@ -26,8 +26,16 @@ namespace gl {
                               sizeof(vertex),
                               (void*) offsetof(vertex, texCoord));
         
+        glVertexAttribPointer((GLuint) attribute::color,
+                              size<decltype(vertex::color)>,
+                              type<decltype(vertex::color)>,
+                              GL_TRUE,
+                              sizeof(vertex),
+                              (void*) offsetof(vertex, color));
+        
         glEnableVertexAttribArray((GLuint) attribute::position);
         glEnableVertexAttribArray((GLuint) attribute::texCoord);
+        glEnableVertexAttribArray((GLuint) attribute::color);
         
     }
 

@@ -32,438 +32,473 @@ inline u64 hash(const char* c) {
     return hash(std::string_view(c));
 }
 
+// table3 relies on manic::hash being high-quality; it is not defensive
+// against bad hashes.  We do not prevent users from mutating keys, which
+// violates the invariant.
+
+//template<typename Key, typename Value>
+//struct table3 {
+//
+//    struct entry { Key key; Value value; };
+//
+//    explicit table3(usize n); // set capacity
+//
+//    usize capacity() const;
+//    usize size() const;
+//    bool empty() const;
+//
+//    void clear();
+//    void reserve(usize n);
+//    void clear_and_reserve(usize n);
+//    void shrink_to_fit();
+//
+//    bool contains(Key) const;
+//    
+//    Value* try_get();
+//    Value const* try_get() const;
+//
+//    Value& get();
+//    Value const& get() const;
+//
+//    Value& operator[](Key);
+//    Value const& operator[](Key) const;
+//
+//    void insert(Key, Value);
+//
+//    void erase(Key);
+//
+//    iterator begin();
+//    iterator end();
+//
+//};
+ 
 
 
-    // table3 relies on manic::hash being high-quality; it is not defensive
-    // against bad hashes.  We do not prevent users from mutating keys, which
-    // violates the invariant.
-
+template<typename Key, typename Value>
+struct table3 {
     
-    template<typename Key, typename Value>
-    struct table3 {
+    using key_type = Key;
+    using value_type = Value;
+    
+    struct entry {
         
-        using key_type = Key;
-        using value_type = Value;
+        key_type key;
+        value_type value;
         
-        struct entry {
-            
-            key_type key;
-            value_type value;
-            
-            template<typename Keylike, typename Valuelike>
-            entry(Keylike&& k, Valuelike&& v)
-            : key(std::forward<Keylike>(k))
-            , value(std::forward<Valuelike>(v)) {
-            }
-            
-        };
+        template<typename Keylike, typename Valuelike>
+        entry(Keylike&& k, Valuelike&& v)
+        : key(std::forward<Keylike>(k))
+        , value(std::forward<Valuelike>(v)) {
+        }
         
-        struct _raw_entry {
+    };
+    
+    struct _raw_entry {
         
-            u64 _hash;
-            entry _entry;
-
-            template<typename Keylike, typename Valuelike>
-            _raw_entry(Keylike&& k, Valuelike&& v)
-            : _raw_entry(_table_hash(hash(k)),
-                         std::forward<Keylike>(k),
-                         std::forward<Valuelike>(v)) {
-            }
-            
-            template<typename Keylike, typename Valuelike>
-            _raw_entry(u64 table_hash_hash_k, Keylike&& k, Valuelike&& v)
-            : _hash(table_hash_hash_k)
-            , _entry(std::forward<Keylike>(k),
+        u64 _hash;
+        entry _entry;
+        
+        template<typename Keylike, typename Valuelike>
+        _raw_entry(Keylike&& k, Valuelike&& v)
+        : _raw_entry(_table_hash(hash(k)),
+        std::forward<Keylike>(k),
                      std::forward<Valuelike>(v)) {
-                // assert(_hash == _table_hash(hash(k)));
-            }
-            
-        };
-        
-        struct _is_occupied {
-            bool operator()(const _raw_entry& r) const {
-                return static_cast<bool>(r._hash);
-            }
-        };
-        
-        using _raw_entry_iterator = filter_iterator<_raw_entry*, _raw_entry*, _is_occupied>;
-        using _const_raw_entry_iterator = filter_iterator<const _raw_entry*, const _raw_entry*, _is_occupied>;
-        
-        struct _dot_entry {
-            entry& operator()(_raw_entry& r) const {
-                return r._entry;
-            }
-            const entry& operator()(const _raw_entry& r) const {
-                return r._entry;
-            }
-        };
-        
-        using iterator = transform_iterator<_raw_entry_iterator, _dot_entry>;
-        using const_iterator = transform_iterator<_const_raw_entry_iterator, _dot_entry>;
-        
-        
-        raw_vector<_raw_entry> _vector;
-        usize _occupants;
-        
-        _raw_entry* _front;
-        _raw_entry* _back;
-        
-        u64 _mask() const { return _vector._capacity - 1; }
-        
-        static const u64 HIGH_BIT = u64(1) << 63;
-        
-        static u64 _table_hash(u64 already_hashed) {
-            // We need a cheap way to rule out the hash ever being zero.  The
-            // high bit will never contribute to the index, and merely doubles
-            // the negligible rate of hash collisions.
-            return already_hashed | HIGH_BIT;
-        }
-
-        _raw_entry& _raw_entry_at(u64 h) const {
-            return _vector[h & _mask()];
-        }
-
-        u64 _hash_at(u64 h) const {
-            return _raw_entry_at(h)._hash;
-        }
-
-        entry& _entry_at(u64 h) const {
-            return _raw_entry_at(h)._entry;
-        }
-        
-        key_type& _key_at(u64 h) const {
-            return _entry_at(h).key;
-        }
-        
-        value_type& _value_at(u64 h) const {
-            return _entry_at(h).value;
-        }
-        
-        u64 _displacement_at(u64 h) const {
-            return (h - _hash_at(h)) & _mask();
-        }
-        
-        usize _capacity_for_occupants(usize n) {
-            // table resizes when 2/3 full.  tuning point.
-            return n ? std::ceil2(n + (n >> 1) + 1) : 0;
-        }
-        
-        void _assert_invariant() const {
-            assert(std::ispow2(_vector._capacity));
-            assert(!_vector._capacity || (_occupants < _vector._capacity));
-            usize n = 0;
-            for (usize i = 0; i != _vector._capacity; ++i) {
-                if (_hash_at(i)) {
-                    ++n;
-                    assert(_hash_at(i) == _table_hash(hash(_key_at(i))));
-                    if (_hash_at(i - 1)) {
-                        assert(_displacement_at(i) <= (_displacement_at(i - 1) + 1));
-                    } else {
-                        assert(_displacement_at(i) == 0);
-                    }
-                }
-            }
-            assert(_occupants == n);
-        }
-        
-        _raw_entry& _insert_relocate(_raw_entry& e) {
-            u64 i = e._hash;
-            for (;;) {
-                if (_hash_at(i) == 0) {
-                    _raw_entry* p = &_raw_entry_at(i);
-                    relocate(p, &e);
-                    ++_occupants;
-                    if (p < _front)
-                        _front = p;
-                    if (p > _back)
-                        _back = p;
-                    return *p;
-                } else if ((_hash_at(i) == e._hash) && (_key_at(i) == e._entry.key)) {
-                    _raw_entry_at(i).~_raw_entry();
-                    relocate(&_raw_entry_at(i), &e);
-                    return _raw_entry_at(i);
-                } else if (_displacement_at(i) < ((i - e._hash) & _mask())) {
-                    using std::swap;
-                    swap(e, _raw_entry_at(i));
-                }
-                ++i;
-            }
-        }
-
-        void _destroy_all() {
-            for (_raw_entry& e : _vector) {
-                if (e._hash)
-                    e.~_raw_entry();
-            }
-        }
-
-        
-        table3()
-        : _vector()
-        , _occupants(0)
-        , _front(nullptr)
-        , _back(nullptr) {
-        }
-        
-        table3(const table3&) = delete;
-        
-        table3(table3&& r)
-        : table3() {
-            r.swap(*this);
-        }
-        
-        explicit table3(usize n)
-        : _vector(_capacity_for_occupants(n))
-        , _occupants(0) {
-        }
-        
-        ~table3() {
-            _destroy_all();
-        }
-        
-        table3& operator=(const table3& r) = delete;
-        
-        table3& operator=(table3&& r) {
-            table3(std::move(r)).swap(*this);
-            return *this;
-        }
-        
-        usize capacity() {
-            constexpr usize a = 0x5555555555555555;
-            return _vector._capacity ? std::max(a & _mask(), ~a & _mask()) : 0;
-            
-        }
-        usize size() const { return _occupants; }
-        bool empty() const { return !_occupants; }
-
-        void swap(table3& r) {
-            using std::swap;
-            swap(_vector, r._vector);
-            swap(_occupants, r._occupants);
-            swap(_front, r._front);
-            swap(_back, r._back);
-        }
-
-        void clear() {
-            for (_raw_entry& e : _vector)
-                if (e._hash) {
-                    e.~_raw_entry();
-                    e._hash = 0; // would block memset be better?
-                }
-            _occupants = 0;
-            _front = nullptr;
-            _back = nullptr;
-        }
-        
-        void clear_and_reserve(usize n) {
-            n = _capacity_for_occupants(n);
-            if (n <= _vector._capacity) {
-                clear();
-            } else {
-                _destroy_all();
-                _occupants = 0;
-                _vector = raw_vector<_raw_entry>(n);
-                _front = _vector.end();
-                _back = _vector.begin();
-            }
-        }
-        
-        void reserve(usize n) {
-            n = _capacity_for_occupants(n);
-            if (n > _vector._capacity) {
-                raw_vector<_raw_entry> v(n);
-                v.swap(_vector);
-                _occupants = 0;
-                _front = _vector.end();
-                _back = _vector.begin();
-                for (auto& e : v) {
-                    if (e._hash)
-                        _insert_relocate(e);
-                }
-            }
-        }
-        
-        void shrink_to_fit() {
-            usize n = _capacity_for_occupants(_occupants);
-            if (n < _vector._capacity) {
-                raw_vector<_raw_entry> v(n);
-                v.swap(_vector);
-                _occupants = 0;
-                _front = _vector.end();
-                _back = _vector.begin();
-                for (auto& e : v) {
-                    if (e._hash)
-                        _insert_relocate(e);
-                }
-            }
-        }
-
-        
-        template<typename Keylike>
-        bool contains(const Keylike& k) const {
-            if (!_occupants)
-                return false;
-            const u64 h = _table_hash(hash(k));
-            u64 i = h;
-            for (;;) {
-                if ((_hash_at(i) == h) && (_key_at(i) == k))
-                    return true;
-                if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask())))
-                    return false;
-                ++i;
-            }
-        }
-        
-        template<typename Keylike>
-        value_type* try_get(const Keylike& k) const {
-            if (!_occupants)
-                return nullptr;
-            const u64 h = _table_hash(hash(k));
-            u64 i = h;
-            for (;;) {
-                if ((_hash_at(i) == h) && (_key_at(i) == k))
-                    return &_value_at(i);
-                else if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask())))
-                    return nullptr;
-                ++i;
-            }
-        }
-
-        // precondition: contains(k)
-        template<typename Keylike>
-        value_type& get(const Keylike& k) const {
-            assert(_occupants);
-            const u64 h = _table_hash(hash(k));
-            u64 i = h;
-            while ((_hash_at(i) != h) || (_key_at(i) != k)) {
-                assert(!((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))));
-                ++i;
-            }
-            return _value_at(i);
-        }
-        
-        // precondition: contains(k)
-        template<typename Keylike>
-        value_type& operator[](const Keylike& k) {
-            return get(k);
-        }
-
-        // precondition: contains(k)
-        template<typename Keylike>
-        const value_type& operator[](const Keylike& k) const {
-            return get(k);
         }
         
         template<typename Keylike, typename Valuelike>
-        entry& insert(Keylike&& k, Valuelike&& v) {
-            reserve(_occupants + 1);
-            maybe<_raw_entry> e;
-            e.emplace(std::forward<Keylike>(k), std::forward<Valuelike>(v));
-            return _insert_relocate(*e)._entry;
+        _raw_entry(u64 table_hash_hash_k, Keylike&& k, Valuelike&& v)
+        : _hash(table_hash_hash_k)
+        , _entry(std::forward<Keylike>(k),
+        std::forward<Valuelike>(v)) {
+            // assert(_hash == _table_hash(hash(k)));
         }
         
-        template<typename Keylike, typename Fn>
-        value_type& get_or_insert_with(Keylike&& k, Fn&& f) {
-            value_type* p = try_get(k);
-            if (p)
+    };
+    
+    struct _is_occupied {
+        bool operator()(const _raw_entry& r) const {
+            return static_cast<bool>(r._hash);
+        }
+    };
+    
+    using _raw_entry_iterator = filter_iterator<_raw_entry*, _raw_entry*, _is_occupied>;
+    using _const_raw_entry_iterator = filter_iterator<const _raw_entry*, const _raw_entry*, _is_occupied>;
+    
+    struct _dot_entry {
+        entry& operator()(_raw_entry& r) const {
+            return r._entry;
+        }
+        const entry& operator()(const _raw_entry& r) const {
+            return r._entry;
+        }
+    };
+    
+    using iterator = transform_iterator<_raw_entry_iterator, _dot_entry>;
+    using const_iterator = transform_iterator<_const_raw_entry_iterator, _dot_entry>;
+    
+    
+    raw_vector<_raw_entry> _vector;
+    usize _occupants;
+    
+    _raw_entry* _front;
+    _raw_entry* _back;
+    
+    u64 _mask() const { return _vector._capacity - 1; }
+    
+    static const u64 HIGH_BIT = u64(1) << 63;
+    
+    static u64 _table_hash(u64 already_hashed) {
+        // We need a cheap way to rule out the hash ever being zero.  The
+        // high bit will never contribute to the index, and merely doubles
+        // the negligible rate of hash collisions.
+        return already_hashed | HIGH_BIT;
+    }
+    
+    _raw_entry& _raw_entry_at(u64 h) const {
+        return _vector[h & _mask()];
+    }
+    
+    u64 _hash_at(u64 h) const {
+        return _raw_entry_at(h)._hash;
+    }
+    
+    entry& _entry_at(u64 h) const {
+        return _raw_entry_at(h)._entry;
+    }
+    
+    key_type& _key_at(u64 h) const {
+        return _entry_at(h).key;
+    }
+    
+    value_type& _value_at(u64 h) const {
+        return _entry_at(h).value;
+    }
+    
+    u64 _displacement_at(u64 h) const {
+        return (h - _hash_at(h)) & _mask();
+    }
+    
+    usize _capacity_for_occupants(usize n) {
+        // table resizes when 2/3 full.  tuning point.
+        return n ? std::ceil2(n + (n >> 1) + 1) : 0;
+    }
+    
+    void _assert_invariant() const {
+        assert(std::ispow2(_vector._capacity));
+        assert(!_vector._capacity || (_occupants < _vector._capacity));
+        usize n = 0;
+        for (usize i = 0; i != _vector._capacity; ++i) {
+            if (_hash_at(i)) {
+                ++n;
+                assert(_hash_at(i) == _table_hash(hash(_key_at(i))));
+                if (_hash_at(i - 1)) {
+                    assert(_displacement_at(i) <= (_displacement_at(i - 1) + 1));
+                } else {
+                    assert(_displacement_at(i) == 0);
+                }
+            }
+        }
+        assert(_occupants == n);
+    }
+    
+    _raw_entry& _insert_relocate(_raw_entry& e) {
+        u64 i = e._hash;
+        for (;;) {
+            if (_hash_at(i) == 0) {
+                _raw_entry* p = &_raw_entry_at(i);
+                relocate(p, &e);
+                ++_occupants;
+                if (p < _front)
+                    _front = p;
+                if (p > _back)
+                    _back = p;
                 return *p;
-            else
-                return insert(std::forward<Keylike>(k), std::forward<Fn>(f)()).value;
+            } else if ((_hash_at(i) == e._hash) && (_key_at(i) == e._entry.key)) {
+                _raw_entry_at(i).~_raw_entry();
+                relocate(&_raw_entry_at(i), &e);
+                return _raw_entry_at(i);
+            } else if (_displacement_at(i) < ((i - e._hash) & _mask())) {
+                using std::swap;
+                swap(e, _raw_entry_at(i));
+            }
+            ++i;
         }
+    }
+    
+    void _destroy_all() {
+        for (_raw_entry& e : _vector) {
+            if (e._hash)
+                e.~_raw_entry();
+        }
+    }
+    
+    
+    table3()
+    : _vector()
+    , _occupants(0)
+    , _front(nullptr)
+    , _back(nullptr) {
+    }
+    
+    table3(const table3&) = delete;
+    
+    table3(table3&& r)
+    : table3() {
+        r.swap(*this);
+    }
+    
+    explicit table3(usize n)
+    : _vector(_capacity_for_occupants(n))
+    , _occupants(0) {
+    }
+    
+    ~table3() {
+        _destroy_all();
+    }
+    
+    table3& operator=(const table3& r) = delete;
+    
+    table3& operator=(table3&& r) {
+        table3(std::move(r)).swap(*this);
+        return *this;
+    }
+    
+    usize capacity() {
+        constexpr usize a = 0x5555555555555555;
+        return _vector._capacity ? std::max(a & _mask(), ~a & _mask()) : 0;
         
-        template<typename Keylike>
-        void erase(Keylike&& k) {
-            const u64 h = _table_hash(hash(k));
-            u64 i = h;
-            for (;;) {
-                if ((_hash_at(i) == h) && (_key_at(i) == k)) {
-                    _raw_entry_at(i).~_raw_entry();
-                    while (_hash_at(i + 1) && _displacement_at(i + 1)) {
-                        relocate(&_raw_entry_at(i), &_raw_entry_at(i + 1));
-                        ++i;
-                    }
-                    _raw_entry_at(i)._hash = 0;
-                    --_occupants;
-                    if (_occupants) {
-                        while (!_back->_hash)
-                            --_back;
-                        while (!_front->_hash)
-                            ++_front;
-                    } else {
-                        _back = _vector.begin();
-                        _front = _vector.end();
-                    }
-                    return;
-                } else if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))) {
-                    return;
-                }
-                ++i;
+    }
+    usize size() const { return _occupants; }
+    bool empty() const { return !_occupants; }
+    
+    void swap(table3& r) {
+        using std::swap;
+        swap(_vector, r._vector);
+        swap(_occupants, r._occupants);
+        swap(_front, r._front);
+        swap(_back, r._back);
+    }
+    
+    void clear() {
+        for (_raw_entry& e : _vector)
+            if (e._hash) {
+                e.~_raw_entry();
+                e._hash = 0; // would block memset be better?
+            }
+        _occupants = 0;
+        _front = nullptr;
+        _back = nullptr;
+    }
+    
+    void clear_and_reserve(usize n) {
+        n = _capacity_for_occupants(n);
+        if (n <= _vector._capacity) {
+            clear();
+        } else {
+            _destroy_all();
+            _occupants = 0;
+            _vector = raw_vector<_raw_entry>(n);
+            _front = _vector.end();
+            _back = _vector.begin();
+        }
+    }
+    
+    void reserve(usize n) {
+        n = _capacity_for_occupants(n);
+        if (n > _vector._capacity) {
+            raw_vector<_raw_entry> v(n);
+            v.swap(_vector);
+            _occupants = 0;
+            _front = _vector.end();
+            _back = _vector.begin();
+            for (auto& e : v) {
+                if (e._hash)
+                    _insert_relocate(e);
             }
         }
-        
-        table3<u64, u64> histogram() const {
-            table3<u64, u64> x;
-            for (u64 i = 0; i != _vector._capacity; ++i) {
-                if (_hash_at(i)) {
-                    u64 j = _displacement_at(i);
-                    if (x.contains(j))
-                        ++x.get(j);
-                    else
-                        x.insert(j, 1);
-                }
+    }
+    
+    void shrink_to_fit() {
+        usize n = _capacity_for_occupants(_occupants);
+        if (n < _vector._capacity) {
+            raw_vector<_raw_entry> v(n);
+            v.swap(_vector);
+            _occupants = 0;
+            _front = _vector.end();
+            _back = _vector.begin();
+            for (auto& e : v) {
+                if (e._hash)
+                    _insert_relocate(e);
             }
-            return x;
         }
-        
-        iterator begin() {
-            _raw_entry* p = _occupants ? (_back + 1) : _front;
-            return iterator(_raw_entry_iterator(_front, p));
+    }
+    
+    
+    template<typename Keylike>
+    bool contains(const Keylike& k) const {
+        if (!_occupants)
+            return false;
+        const u64 h = _table_hash(hash(k));
+        u64 i = h;
+        for (;;) {
+            if ((_hash_at(i) == h) && (_key_at(i) == k))
+                return true;
+            if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask())))
+                return false;
+            ++i;
         }
-        
-        iterator end() {
-            _raw_entry* p = _occupants ? (_back + 1) : _front;
-            return iterator(_raw_entry_iterator(p, p));
+    }
+    
+    template<typename Keylike>
+    value_type* try_get(const Keylike& k) const {
+        if (!_occupants)
+            return nullptr;
+        const u64 h = _table_hash(hash(k));
+        u64 i = h;
+        for (;;) {
+            if ((_hash_at(i) == h) && (_key_at(i) == k))
+                return &_value_at(i);
+            else if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask())))
+                return nullptr;
+            ++i;
         }
-        
-        const_iterator begin() const {
-            _raw_entry* p = _occupants ? (_back + 1) : _front;
-            return const_iterator(_const_raw_entry_iterator(_front, p));
+    }
+    
+    // precondition: contains(k)
+    template<typename Keylike>
+    value_type& get(const Keylike& k) const {
+        assert(_occupants);
+        const u64 h = _table_hash(hash(k));
+        u64 i = h;
+        while ((_hash_at(i) != h) || (_key_at(i) != k)) {
+            assert(!((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))));
+            ++i;
         }
-        
-        const_iterator end() const {
-            _raw_entry* p = _occupants ? (_back + 1) : _front;
-            return const_iterator(_const_raw_entry_iterator(_front, p));
+        return _value_at(i);
+    }
+    
+    // precondition: contains(k)
+    template<typename Keylike>
+    value_type& operator[](const Keylike& k) {
+        return get(k);
+    }
+    
+    // precondition: contains(k)
+    template<typename Keylike>
+    const value_type& operator[](const Keylike& k) const {
+        return get(k);
+    }
+    
+    template<typename Keylike, typename Valuelike>
+    entry& insert(Keylike&& k, Valuelike&& v) {
+        reserve(_occupants + 1);
+        maybe<_raw_entry> e;
+        e.emplace(std::forward<Keylike>(k), std::forward<Valuelike>(v));
+        return _insert_relocate(*e)._entry;
+    }
+    
+    template<typename Keylike, typename Fn>
+    value_type& get_or_insert_with(Keylike&& k, Fn&& f) {
+        value_type* p = try_get(k);
+        if (p)
+            return *p;
+        else
+            return insert(std::forward<Keylike>(k), std::forward<Fn>(f)()).value;
+    }
+    
+    template<typename Keylike>
+    void erase(Keylike&& k) {
+        const u64 h = _table_hash(hash(k));
+        u64 i = h;
+        for (;;) {
+            if ((_hash_at(i) == h) && (_key_at(i) == k)) {
+                _raw_entry_at(i).~_raw_entry();
+                while (_hash_at(i + 1) && _displacement_at(i + 1)) {
+                    relocate(&_raw_entry_at(i), &_raw_entry_at(i + 1));
+                    ++i;
+                }
+                _raw_entry_at(i)._hash = 0;
+                --_occupants;
+                if (_occupants) {
+                    while (!_back->_hash)
+                        --_back;
+                    while (!_front->_hash)
+                        ++_front;
+                } else {
+                    _back = _vector.begin();
+                    _front = _vector.end();
+                }
+                return;
+            } else if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))) {
+                return;
+            }
+            ++i;
         }
-        
-        const_iterator cbegin() const {
-            return begin();
+    }
+    
+    table3<u64, u64> _histogram() const {
+        table3<u64, u64> x;
+        for (u64 i = 0; i != _vector._capacity; ++i) {
+            if (_hash_at(i)) {
+                u64 j = _displacement_at(i);
+                if (x.contains(j))
+                    ++x.get(j);
+                else
+                    x.insert(j, 1);
+            }
         }
-        
-        const_iterator cend() const {
-            return end();
-        }
-
-        entry& front() {
-            assert(_occupants);
-            return _front->_entry;
-        }
-        
-        entry const& front() const {
-            assert(_occupants);
-            return _front->_entry;
-        }
-        
-        entry& back() {
-            assert(_occupants);
-            return _back->_entry;
-        }
-        
-        entry const& back() const {
-            assert(_occupants);
-            return _back->_entry;
-        }
-
-        
+        return x;
+    }
+    
+    iterator begin() {
+        _raw_entry* p = _occupants ? (_back + 1) : _front;
+        return iterator(_raw_entry_iterator(_front, p));
+    }
+    
+    iterator end() {
+        _raw_entry* p = _occupants ? (_back + 1) : _front;
+        return iterator(_raw_entry_iterator(p, p));
+    }
+    
+    const_iterator begin() const {
+        _raw_entry* p = _occupants ? (_back + 1) : _front;
+        return const_iterator(_const_raw_entry_iterator(_front, p));
+    }
+    
+    const_iterator end() const {
+        _raw_entry* p = _occupants ? (_back + 1) : _front;
+        return const_iterator(_const_raw_entry_iterator(_front, p));
+    }
+    
+    const_iterator cbegin() const {
+        return begin();
+    }
+    
+    const_iterator cend() const {
+        return end();
+    }
+    
+    entry& front() {
+        assert(_occupants);
+        return _front->_entry;
+    }
+    
+    entry const& front() const {
+        assert(_occupants);
+        return _front->_entry;
+    }
+    
+    entry& back() {
+        assert(_occupants);
+        return _back->_entry;
+    }
+    
+    entry const& back() const {
+        assert(_occupants);
+        return _back->_entry;
+    }
+    
+    
     }; // class table3
     
     template<typename K, typename V>
@@ -533,7 +568,7 @@ inline u64 hash(const char* c) {
         auto end() {
             return transform_iterator(_perfect_capture.end(), _dot_value());
         }
-                
+        
     };
     
     template<typename T>
@@ -541,9 +576,9 @@ inline u64 hash(const char* c) {
         return _value_range<T>(std::forward<T>(r));
     }
     
-        
-        
-        
+    
+    
+    
     
 } // namespace manic
 

@@ -18,19 +18,13 @@
 #include <mach/mach_time.h>
 #include <string>
 
-#include "program.hpp"
-#include "vao.hpp"
-#include "vbo.hpp"
-#include "vertex.hpp"
-#include "vec.hpp"
-#include "mat.hpp"
-#include "image.hpp"
-#include "texture.hpp"
+#include "asset.hpp"
 #include "atlas.hpp"
-#include "surface.hpp"
+#include "debug.hpp"
+#include "mat.hpp"
+#include "program.hpp"
 #include "text.hpp"
 #include "thing.hpp"
-#include "debug.hpp"
 
 namespace manic {
 
@@ -53,9 +47,7 @@ class blenderer
     
     //vector<vector<int>> _grid;
     //vector<gl::vec<GLfloat, 2>> _entities;
-    
-    manic::surface _surface;
-    
+        
     gl::vec<double, 2> _camera_position;
     double             _camera_zoom;
     std::string _text;
@@ -105,8 +97,8 @@ blenderer::blenderer()
 , _atlas(1024) {
 
     // _tiles("/Users/acsearle/Downloads/textures/symbols")
-    _tiles = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
     _font = build_font(_atlas);
+    _tiles = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
     
     // _lineheight = manic::build_font(_font, _advances);
     
@@ -123,6 +115,7 @@ blenderer::blenderer()
     
     glBindAttribLocation(_program, (GLuint) gl::attribute::position, "position");
     glBindAttribLocation(_program, (GLuint) gl::attribute::texCoord, "texCoord");
+    glBindAttribLocation(_program, (GLuint) gl::attribute::color, "color");
     _program.link();
     
     _program.validate();
@@ -386,6 +379,8 @@ void blenderer::render() {
         blit3(z, u-32, v-32);
 
     }
+    
+    //_atlas.push_texture();
 
      
     if (!(frame & 63))
@@ -401,7 +396,7 @@ void blenderer::render() {
     {
         char s[64];
         auto new_t = mach_absolute_time();
-        sprintf(s, "%.1f ms | %d quads\n%dx%d\nFrm %d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
+        sprintf(s, "%.2f ms | %lu quads\n%dx%d\nf%d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
         scribe(s, -_width/2 + _font.first[' '].second, -_height/2 + _font.second);
     }
     

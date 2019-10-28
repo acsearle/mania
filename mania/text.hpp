@@ -10,6 +10,7 @@
 #define text_hpp
 
 #include "atlas.hpp"
+#include "table3.hpp"
 
 namespace manic {
     

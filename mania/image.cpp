@@ -125,7 +125,7 @@ namespace manic {
         for (ptrdiff_t i = 0; i != b.rows(); ++i)
             for (ptrdiff_t j = 0; j != b.columns(); ++j) {
                 gl::vec<double, 4> f = 0.0;
-                for (ptrdiff_t k = -2; k != 3; ++k)
+                for (ptrdiff_t k = 0; k != 5; ++k)
                     f += b(i, j + k) * d[k];
                 a(i, j) = f / e;
             }
@@ -163,18 +163,35 @@ void dilate(image& a) {
     image b(a.rows() + 4, a.columns() + 4);
     b.sub(2, 2, a.rows(), a.columns()) = a;
     swap(a, b);
+    double m[3][3] = {{0.6,0.9,0.6},{0.9,1.0,0.9},{0.6,0.9,0.6}};
     b = a.sub(1, 1, a.rows() - 2, a.columns() - 2);
     for (ptrdiff_t i = 0; i != b.rows(); ++i)
         for (ptrdiff_t j = 0; j != b.columns(); ++j) {
-            u8 c = 0;
+            double c = 0;
             for (ptrdiff_t k = 0; k != 3; ++k)
                 for (ptrdiff_t l = 0; l != 3; ++l) {
-                    c = std::max(c, a(i + k, j + l).a);
+                    c = std::max(c, a(i + k, j + l).a * m[k][l]);
                 }
             b(i, j).a = c;
         }
     swap(a, b);
     DUMP(a.rows());
+}
+
+pixel compose(pixel a, pixel b) {
+    pixel c;
+    auto o = 255 - b.a;
+    c.r = (a.r * o + b.r * 255) / 255;
+    c.g = (a.g * o + b.g * 255) / 255;
+    c.b = (a.b * o + b.b * 255) / 255;
+    c.a = (a.a * o + b.a * 255) / 255;
+    return c;
+}
+
+void compose(matrix_view<pixel> background, const_matrix_view<pixel> foreground) {
+    for (ptrdiff_t i = 0; i != background.rows(); ++i)
+        for (ptrdiff_t j = 0; j != background.columns(); ++j)
+            background(i, j) = compose(background(i, j), foreground(i, j));
 }
 
 }
