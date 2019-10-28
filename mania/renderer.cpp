@@ -25,6 +25,7 @@
 #include "program.hpp"
 #include "text.hpp"
 #include "thing.hpp"
+#include "unicode.hpp"
 
 namespace manic {
 
@@ -60,12 +61,9 @@ public:
     virtual ~blenderer() = default;
     void resize(GLsizei width, GLsizei height);
     void render();
-    void blit(ptrdiff_t i, float x, float y);
-    void blit_twist(ptrdiff_t i, ptrdiff_t x, ptrdiff_t y, double radians);
     
-    void scribe(char const*, float x, float y);
-    void glyph(unsigned long i, float x, float y);
-    void show_atlas(size_t n);
+    void scribe(std::string_view, gl::vec2 xy);
+
     void blit3(std::string_view v, float x, float y);
 
 
@@ -197,14 +195,6 @@ void blenderer::resize(GLsizei width, GLsizei height) {
     
 }
 
-void blenderer::glyph(unsigned long i, float x, float y) {
-    if (!_font.first.contains(i)) {
-        assert(false); // font should be complete for our ascii uses
-        return;
-    }
-    _atlas.push_sprite_translated(_font.first.get(i).first, gl::vec2(x, y));
-}
-
 void blenderer::blit3(std::string_view v, float x, float y) {
     if (!_tiles.contains(v))
         return;
@@ -215,18 +205,25 @@ void blenderer::blit3(std::string_view v, float x, float y) {
 }
  
 
-void blenderer::scribe(const char *p, float x, float y) {
-    float ox = x;
-    while (*p) {
-        if (*p == '\n') {
-            x = ox;
-            y += _font.second;
+void blenderer::scribe(std::string_view v, gl::vec2 xy) {
+    auto start = xy;
+    pixel col = { 255, 255, 255, 255 };
+    // char const* p = v.data();
+    auto p = utf8_iterator((u8 const*) v.data());
+    while (p != utf8_iterator((u8 const*) v.data() + v.size())) {
+        u32 c = *p; ++p;
+        if (c == '\n') {
+            xy.x = start.x;
+            xy.y += _font.second;
         } else {
-            u32 c = (unsigned char) *p;
-            glyph(c, x, y);
-            x += _font.first.get(c).second;
+            if (auto* q = _font.first.try_get(c)) {
+                sprite s = q->first;
+                s.a.color = col;
+                s.b.color = col;
+                _atlas.push_sprite_translated(s, xy);
+                xy.x += q->second;
+            }
         }
-        ++p;
     }
 }
         
@@ -394,12 +391,13 @@ void blenderer::render() {
     _atlas.commit();
 
     {
-        char s[64];
+        char s[128];
         auto new_t = mach_absolute_time();
         sprintf(s, "%.2f ms | %lu quads\n%dx%d\nf%d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
-        scribe(s, -_width/2 + _font.first[' '].second, -_height/2 + _font.second);
+        scribe(s, {-_width/2 + _font.first[' '].second, -_height/2 + _font.second});
     }
     
+    scribe("Falsches Üben von Xylophonmusik quält jeden größeren Zwerg", { 0, -_height/2 + _font.second });
 }
 
 } // namespace::manic

@@ -17,7 +17,7 @@
 
 namespace manic {
 
-u8* utf8advance(u8* p) {
+inline const u8* utf8advance(const u8* p) {
     if (((p[0] & 0b10000000) == 0b00000000))
         return p + 1;
     if (((p[0] & 0b11100000) == 0b11000000) &&
@@ -35,7 +35,7 @@ u8* utf8advance(u8* p) {
     abort();
 }
 
-bool utf8validatez(u8* p) {
+inline bool utf8validatez(u8* p) {
     for (;;) {
         if (p[0] == 0) {
             return true;
@@ -60,8 +60,32 @@ bool utf8validatez(u8* p) {
     abort();
 }
 
+inline u8* utf8_encode(u32 a, u8 b[4]) {
+    if (a < 0x8F) {
+        b[0] = a;
+        return b + 1;
+    } else if (a < 0x800) {
+        b[0] = 0b11000000 | (a >> 6);
+        b[1] = 0b10000000 | (a & 0b00111111);
+        return b + 2;
+    } else if (a < 0x10000) {
+        b[0] = 0b11100000 | (a >> 12);
+        b[1] = 0b10000000 | ((a >> 6) & 0b00111111);
+        b[2] = 0b10000000 | (a & 0b00111111);
+        return b + 3;
+    } else if (a < 0x110000) {
+        b[0] = 0b11110000 | (a >> 18);
+        b[1] = 0b10000000 | ((a >> 12) & 0b00111111);
+        b[2] = 0b10000000 | ((a >> 6) & 0b00111111);
+        b[3] = 0b10000000 | (a & 0b00111111);
+        return b + 4;
+    } else {
+        abort();
+    }
+}
 
-unsigned char* utf8advance_unsafe(unsigned char* p) {
+
+inline unsigned char* utf8advance_unsafe(unsigned char* p) {
     
     // Advance to the next code point in a valid UFT-8 sequence
     
@@ -96,7 +120,7 @@ unsigned char* utf8advance_unsafe(unsigned char* p) {
     
 }
 
-struct utf8iterator {
+struct utf8_iterator {
     
     u8 const* _ptr;
     
@@ -110,22 +134,42 @@ struct utf8iterator {
     using pointer = void;
     using iterator_category = std::bidirectional_iterator_tag;
     
-    utf8iterator() = default;
+    utf8_iterator() = default;
     
-    explicit utf8iterator(void const* ptr)
+    explicit utf8_iterator(void const* ptr)
     : _ptr((u8 const*) ptr) {
     }
     
-    utf8iterator& operator++() {
-        do {
-            ++_ptr;
-        } while (_is_continuation_byte());
+    explicit utf8_iterator(std::nullptr_t) : _ptr(nullptr) {}
+    
+    explicit operator bool() const { return _ptr; }
+    bool operator!() const { return !_ptr; }
+    
+    utf8_iterator& operator++() {
+        do { ++_ptr; } while (_is_continuation_byte());
         return *this;
     }
     
+    utf8_iterator operator++(int) {
+        utf8_iterator a(*this); operator++(); return a;
+    }
+    
+    utf8_iterator& operator--() {
+        do { --_ptr; } while (_is_continuation_byte());
+        return *this;
+    }
+    
+    utf8_iterator operator--(int) {
+        utf8_iterator a(*this); operator--(); return a;
+    }
+    
     u32 operator*() const {
-        if ((_ptr[0] & 0x80) == 0x00)
-            return (((_ptr[0]       )      ));
+        if (!(_ptr[0] & 0x80))
+            return *_ptr;
+        return _deref_multibyte();
+    }
+    
+    u32 _deref_multibyte() const {
         if ((_ptr[0] & 0xE0) == 0xC0)
             return (((_ptr[0] & 0x1F) <<  6) |
                     ((_ptr[1] & 0x3F)      ));
@@ -141,97 +185,179 @@ struct utf8iterator {
         abort();
     }
     
-    friend bool operator==(utf8iterator a, utf8iterator b) {
+    friend bool operator==(utf8_iterator a, utf8_iterator b) {
         return a._ptr == b._ptr;
     }
-
-    friend bool operator!=(utf8iterator a, utf8iterator b) {
-        return a._ptr == b._ptr;
-    }
-
-};
-
-
-
-struct string {
     
-    // utf-8 string
-    
-    vector<u8> _bytes;
-    
-    string() = default;
-    
-    explicit string(const char* utf8z) {
-        std::size_t n = std::strlen(utf8z);
-        _bytes.assign(utf8z, utf8z + n);
+    friend bool operator!=(utf8_iterator a, utf8_iterator b) {
+        return a._ptr != b._ptr;
     }
     
-    utf8iterator begin() const { return utf8iterator(_bytes.begin()); }
-    utf8iterator end() const { return utf8iterator(_bytes.end()); }
-    
-    char const* c_str() {
-        _bytes.push_back(0);
-        _bytes.pop_back();
-        return (char const*) _bytes.begin();
+    friend bool operator==(utf8_iterator a, std::nullptr_t) {
+        return a._ptr == nullptr;
     }
     
-    void push_back(u32 c) {
-        if (c < 0x80) {
-            _bytes.push_back(c);
-        } else if (c < 0x800) {
-            _bytes.push_back(0xC0 | ((c >>  6)       ));
-            _bytes.push_back(0x80 | ((c      ) & 0x3F));
-        } else if (c < 0x10000) {
-            _bytes.push_back(0xC0 | ((c >> 12)       ));
-            _bytes.push_back(0x80 | ((c >>  6) & 0x3F));
-            _bytes.push_back(0x80 | ((c      ) & 0x3F));
-        } else {
-            _bytes.push_back(0xC0 | ((c >> 18)       ));
-            _bytes.push_back(0x80 | ((c >> 12) & 0x3F));
-            _bytes.push_back(0x80 | ((c >>  6) & 0x3F));
-            _bytes.push_back(0x80 | ((c      ) & 0x3F));
+    friend bool operator==(std::nullptr_t, utf8_iterator b) {
+        return nullptr == b._ptr;
+    }
+    
+    friend bool operator!=(utf8_iterator a, std::nullptr_t) {
+        return a._ptr != nullptr;
+    }
+    
+    friend bool operator!=(std::nullptr_t, utf8_iterator b) {
+        return nullptr != b._ptr;
+    }
+    
+    
+    };
+    
+    struct string_view {
+
+        using const_iterator = utf8_iterator;
+        using iterator = const_iterator;
+        using value_type = u32;
+
+        const_iterator a, b;
+                
+        string_view() : a(nullptr), b(nullptr) {}
+        string_view(char const* z) : a(z), b(z + strlen(z)) {}
+        string_view(char const* p, usize n) : a(p), b(p + n) {}
+        string_view(char const* p, char const* q) : a(p), b(q) {}
+        string_view(const_iterator p, const_iterator q) : a(p), b(q) {}
+        string_view(string_view const&) = default;
+
+        bool empty() const { return a == b; }
+        
+        const_iterator begin() const { return a; }
+        const_iterator end() const { return b; }
+        const_iterator cbegin() const { return a; }
+        const_iterator cend() const { return b; }
+
+        u32 front() const { return *a; }
+        u32 back() const { utf8_iterator c(b); return *--c; }
+        
+        friend bool operator==(string_view a, string_view b) {
+            return std::equal(a.a, a.b, b.a, b.b);
         }
-    }
-    
-    void pop_back() {
-        u8 c;
-        do {
-            c = _bytes.pop_back();
-        } while ((c & 0xC0) == 0x80);
-    }
-    
-    bool empty() const {
-        return !_bytes.size();
-    }
-    
-    void clear() {
-        _bytes.clear();
-    }
 
-};
-
-struct string_view {
-    
-    utf8iterator a, b;
-    
-    string_view() = delete;
-    string_view(char const* p) : a(p), b(p + strlen(p)) {}
-    string_view(string_view const&) = default;
-    ~string_view() = default;
-    
-    u32 operator*() const { return *a; }
-    string_view& operator++() { ++a; return *this; }
-    bool is_empty() const { return a == b; }
-    
-    u32 front() const {
-        return *a;
-    }
-    
-    
-};
-
+        friend bool operator!=(string_view a, string_view b) { return a == b; }
         
+        friend bool operator<(string_view a, string_view b) {
+            return std::lexicographical_compare(a.a, a.b, b.a, b.b);
+        }
         
+        friend bool operator>(string_view a, string_view b) { return b < a; }
+        friend bool operator<=(string_view a, string_view b) { return !(b < a); }
+        friend bool operator>=(string_view a, string_view b) { return !(a < b); }
+
+        // terse (dangerous?) operations useful for parsing
+        u32 operator*() const { return *a; }
+        string_view& operator++() { ++a; return *this; }
+        string_view& operator--() { --b; return *this; }
+        explicit operator bool() const { return a != b; }
+
+    };
+    
+    
+    
+    
+    
+    
+    struct string {
+        
+        // utf-8 string
+
+        vector<u8> _bytes;
+
+        using const_iterator = utf8_iterator;
+        using iterator = const_iterator;
+        using value_type = u32;
+                
+        string() = default;
+        
+        explicit string(char const* z) {
+            std::size_t n = std::strlen(z);
+            _bytes.assign(z, z + n + 1);
+            _bytes.push_back(0);
+            _bytes.pop_back();
+        }
+        
+        string(char const* p, usize n) {
+            _bytes.assign(p, p + n);
+            _bytes.push_back(0);
+            _bytes.pop_back();
+        }
+        
+        string(char const* p, char const* q) {
+            _bytes.assign(p, q);
+            _bytes.push_back(0);
+            _bytes.pop_back();
+        }
+        
+        explicit operator const_vector_view<u8>() const { return _bytes; }
+        explicit operator string_view() const { return string_view(begin(), end()); }
+
+        utf8_iterator begin() const { return utf8_iterator(_bytes.begin()); }
+        utf8_iterator end() const { return utf8_iterator(_bytes.end()); }
+
+        u8 const* data() const { return _bytes.begin(); }
+        
+        char const* c_str() { return (char const*) _bytes.begin(); }
+        
+        void push_back(u32 c) {
+            if (c < 0x80) {
+                _bytes.push_back(c);
+            } else if (c < 0x800) {
+                _bytes.push_back(0xC0 | ((c >>  6)       ));
+                _bytes.push_back(0x80 | ((c      ) & 0x3F));
+            } else if (c < 0x10000) {
+                _bytes.push_back(0xC0 | ((c >> 12)       ));
+                _bytes.push_back(0x80 | ((c >>  6) & 0x3F));
+                _bytes.push_back(0x80 | ((c      ) & 0x3F));
+            } else {
+                _bytes.push_back(0xC0 | ((c >> 18)       ));
+                _bytes.push_back(0x80 | ((c >> 12) & 0x3F));
+                _bytes.push_back(0x80 | ((c >>  6) & 0x3F));
+                _bytes.push_back(0x80 | ((c      ) & 0x3F));
+            }
+            _bytes.push_back(0);
+            _bytes.pop_back();
+        }
+        
+        u32 pop_back() {
+            assert(!empty());
+            iterator e = end();
+            --e;
+            u32 c = *e;
+            _bytes._size = (e._ptr - _bytes._begin);
+            _bytes._begin[_bytes._size] = 0;
+            return c;
+        }
+        
+        u32 pop_front() {
+            assert(!empty());
+            iterator b = begin();
+            u32 c = *b;
+            ++b;
+            _bytes._size -= (b._ptr - _bytes._begin);
+            _bytes._begin += (b._ptr - _bytes._begin);
+            return c;
+        }
+        
+        bool empty() const {
+            return !_bytes._size;
+        }
+        
+        void clear() {
+            _bytes.clear();
+            _bytes.push_back(0);
+            _bytes.pop_back();
+        }
+        
+    };
+    
+    
 }
-        
+
 #endif /* unicode_hpp */
