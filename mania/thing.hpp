@@ -73,18 +73,13 @@ struct world {
     
     vector<size_t> _died; // indices of entities marked for death
     vector<mcu> _born; // entities born this tick
-
         
     world();
     
     void exec(mcu& x);
     
     void tick();
-    
-    void print_world();
-    
-    void simulate();
-        
+            
 }; // struct world
 
 

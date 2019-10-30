@@ -43,7 +43,7 @@ class blenderer
     
     world _thing;
     
-    gl::vec<double, 2> _camera_position;
+    gl::vec<i64, 2> _camera_position;
     string _text;
     
     short _lineheight;
@@ -311,28 +311,36 @@ void blenderer::render() {
         "register_d",
     };
     
-    for (i64 i = 0; i != _thing._board.rows(); ++i) {
-        for (i64 j = 0; j != _thing._board.columns(); ++j) {
-            u64 k = _thing._board(i, j);
-            u64 z = k;
-            using namespace instruction;
-            if (k & INSTRUCTION_FLAG) {
-                k = (k & OPCODE_MASK) >> OPCODE_SHIFT;
-            } else {
-                if (k) {
-                    k = 25 + (k & 0xF);
+    {
+        auto a = std::max<i64>(_camera_position.x >> 6, 0);
+        auto b = std::max<i64>(_camera_position.y >> 6, 0);
+        auto c = std::min<i64>((_camera_position.x + _width + 64) >> 6, _thing._board.rows());
+        auto d = std::min<i64>((_camera_position.y + _height + 64) >> 6, _thing._board.columns());
+        
+        for (i64 i = a; i != c; ++i) {
+            for (i64 j = b; j != d; ++j) {
+                u64 k = _thing._board(i, j);
+                u64 z = k;
+                using namespace instruction;
+                if (k & INSTRUCTION_FLAG) {
+                    k = (k & OPCODE_MASK) >> OPCODE_SHIFT;
+                } else {
+                    if (k) {
+                        k = 25 + (k & 0xF);
+                    }
+                }
+                
+                string_view v(translate[k]);
+                blit3(v, i * 64, j * 64);
+                if (z & INSTRUCTION_FLAG) {
+                    string_view u(translate[(z & 0x7) + 25 + 16]);
+                    blit3(u, i * 64, j * 64);
                 }
             }
-            
-            string_view v(translate[k]);
-            blit3(v, i * 64, j * 64);
-            if (z & INSTRUCTION_FLAG) {
-                string_view u(translate[(z & 0x7) + 25 + 16]);
-                blit3(u, i * 64, j * 64);
-            }
-            
         }
+        
     }
+    
     
     for (auto&& a : _thing._chests) {
         auto u = a.x * 64;

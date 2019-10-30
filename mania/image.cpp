@@ -35,14 +35,18 @@ namespace manic {
         png_image a;
         memset(&a, 0, sizeof(a));
         a.version = PNG_IMAGE_VERSION;
-        printf("%s\n", string(v).c_str());
-        png_image_begin_read_from_file(&a, string(v).c_str());
+        if (!png_image_begin_read_from_file(&a, string(v).c_str())) {
+            printf("png_image_begin_read_from_file -> \"%s\"\n", a.message);
+            abort();
+        }
         a.format = PNG_FORMAT_RGBA;
         image c(a.height, a.width);
-        png_image_finish_read(&a, nullptr, c.data(), (png_int_32) c.stride() * sizeof(pixel), nullptr);
+        if (!png_image_finish_read(&a, nullptr, c.data(), (png_int_32) c.stride() * sizeof(pixel), nullptr)) {
+            printf("png_image_finish_read -> \"%s\"\n", a.message);
+            abort();
+        }
         png_image_free(&a);
-        multiply_alpha(c);
-        
+        multiply_alpha(c);        
         return c;
     }
     

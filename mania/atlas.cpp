@@ -25,16 +25,11 @@ atlas::atlas(GLsizei n) : _packer(n), _size(n) {
 
 
 void atlas::commit() {
-    // Upload the vertices
     _vbo.bind(GL_ARRAY_BUFFER);
     gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
-    // Bind the texture atlas
     _texture.bind(GL_TEXTURE_2D);
-    // Bind the vertex array
     _vao.bind();
-    // Draw from the vertex array
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei) _vertices.size());
-    // Discard the vertices ready for next cycle
     _vertices.clear();
 }
 

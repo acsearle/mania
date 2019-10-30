@@ -12,7 +12,7 @@ namespace manic {
 
 world::world() {
     
-    _board.resize(16, 16);
+    _board.resize(256, 256);
     
     _mcus.push_back(mcu(8, 8, 0x3, 0x10)); // mcu at centre, heading north, primed for 4 loops
     
@@ -233,32 +233,6 @@ void world::tick() {
         }
     }
     
-}
-
-void world::print_world() {
-    for (ptrdiff_t j = 0; j != 16; ++j) {
-        for (ptrdiff_t i = 0; i != 16; ++i) {
-            printf("%2llX ", _board(i, j));
-        }
-        printf("\n");
-    }
-    
-    
-}
-
-void world::simulate() {
-    
-    print_world();
-    
-    while (_mcus.size()) {
-        
-        for (auto& x : _mcus)
-            std::cout << x;
-        std::cout << std::endl;
-        // breakpoint here
-        tick();
-        
-    }
 }
 
 }
