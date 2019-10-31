@@ -206,28 +206,25 @@ void blenderer::resize(GLsizei width, GLsizei height) {
 }
 
 void blenderer::blit3(string_view v, gl::vec2 xy) {
-    if (!_tiles.contains(v))
-        return;
-    xy.x -= _camera_position.x;
-    xy.y -= _camera_position.y;
-    _atlas.push_sprite_translated(_tiles[v], xy);
-    // scribe(v, {x, y});
+    if (auto p = _tiles.try_get(v)) {
+        xy.x -= _camera_position.x;
+        xy.y -= _camera_position.y;
+        _atlas.push_sprite_translated(*p, xy);
+    }
 }
 
 void blenderer::blit4(string_view v, gl::vec2 xy) {
-    if (!_tiles.contains(v))
-        return;
-    _atlas.push_sprite_translated(_tiles[v], xy);
-    // scribe(v, {x, y});
+    if (auto p = _tiles.try_get(v))
+        _atlas.push_sprite_translated(*p, xy);
 }
 
 void blenderer::blit5(string_view v, gl::vec2 xy) {
-    if (!_tiles.contains(v))
-        return;
-    auto s = _tiles[v];
-    s.a.color *= 0.5f;
-    s.b.color *= 0.5f;
-    _atlas.push_sprite_translated(s, xy);
+    if (auto p = _tiles.try_get(v)) {
+        auto s = *p;
+        s.a.color *= 0.5f;
+        s.b.color *= 0.5f;
+        _atlas.push_sprite_translated(s, xy);
+    }
 }
 
 
@@ -389,6 +386,7 @@ void blenderer::render() {
     };
     
     {
+        /*
         auto a = std::max<i64>(_camera_position.x >> 6, 0);
         auto b = std::max<i64>(_camera_position.y >> 6, 0);
         auto c = std::min<i64>((_camera_position.x + _width + 64) >> 6, _thing._board.rows());
@@ -401,6 +399,27 @@ void blenderer::render() {
                 if (k & instruction::INSTRUCTION_FLAG) {
                     string_view u(_translate[(k & 0x7) + instruction::_opcode_enum_size + 16]);
                     blit3(u, {i * 64, j * 64});
+                }
+            }
+        }
+         */
+        
+        for (auto&& z : _thing._board) {
+            auto key = z.key;
+            if (
+                ( key.x       * 64 < _width  + _camera_position.x) &&
+                ((key.x + 16) * 64 >           _camera_position.x) &&
+                ( key.y       * 64 < _height + _camera_position.y) &&
+                ((key.y + 16) * 64 >           _camera_position.y)) {
+                for (i64 i = 0; i != 16; ++i) {
+                    for (i64 j = 0; j != 16; ++j) {
+                        u64 k = z.value(i, j);
+                        blit3(translate(k), {(i + key.x) * 64, (j + key.y) * 64});
+                        if (k & instruction::INSTRUCTION_FLAG) {
+                            string_view u(_translate[(k & 0x7) + instruction::_opcode_enum_size + 16]);
+                            blit3(u, {(i + key.x) * 64, (j + key.y) * 64});
+                        }
+                    }
                 }
             }
         }

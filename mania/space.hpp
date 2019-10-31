@@ -26,7 +26,7 @@ struct space {
     static const i64 N = 16;
     static const i64 MASK = N - 1;
     
-    gl::vec<i64, 2> _make_key(gl::vec<i64, 2> ij) {
+    static gl::vec<i64, 2> _make_key(gl::vec<i64, 2> ij) {
         return gl::vec<i64, 2>{ij.x & ~MASK, ij.y & ~MASK};
     }
     
@@ -35,7 +35,7 @@ struct space {
         // perfect location for entry API
         auto p = _table.try_get(key);
         if (!p) {
-            p = &_table.insert(key, matrix<T>(16, 16));
+            p = &_table.insert(key, matrix<T>(16, 16)).value;
         }
         assert(p);
         return (*p)(ij.x & MASK, ij.y & MASK);
@@ -48,6 +48,15 @@ struct space {
     T const& operator()(gl::vec<i64, 2> ij) const {
         return _get_unsafe(ij);
     }
+    
+    T& operator()(i64 i, i64 j) {
+        return _get_unsafe(gl::vec<i64, 2>{i, j});
+    }
+
+    T const& operator()(i64 i, i64 j) const {
+        return _get_unsafe(gl::vec<i64, 2>{i, j});
+    }
+
     
     bool contains(gl::vec<i64, 2> ij) const {
         return _table.contains(_make_key(ij));

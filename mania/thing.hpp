@@ -10,6 +10,7 @@
 #define thing_hpp
 
 #include "matrix.hpp"
+#include "space.hpp"
 #include "vector.hpp"
 
 #include "rleq.hpp"
@@ -65,7 +66,8 @@ struct world {
     
     // State of world
     
-    matrix<u64> _board; // 2d grid of memory cells
+    // matrix<u64> _board; // 2d grid of memory cells
+    space<u64> _board;
     vector<mcu> _mcus; // list of entities
     vector<chest> _chests; // list of chests
     

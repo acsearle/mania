@@ -12,7 +12,7 @@ namespace manic {
 
 world::world() {
     
-    _board.resize(256, 256);
+    // _board.resize(256, 256);
     
     _mcus.push_back(mcu(8, 8, 0x3, 0x10)); // mcu at centre, heading north, primed for 4 loops
     
@@ -245,14 +245,15 @@ void world::tick() {
         }
     }
     
+    /* // With unbounded grid, no need to kill escapees
     vector<mcu> _news;
     for (mcu& x : _mcus) {
         if ((x.x > 0) && (x.y > 0) && (x.x < _board.rows() - 1) && (x.y < _board.columns())) {
             _news.push_back(x);
         }
     }
-    
     swap(_news, _mcus);
+     */
     
 }
 

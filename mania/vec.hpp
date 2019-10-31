@@ -439,11 +439,11 @@ return a;\
 
 }
 
-namespace manic {
+namespace gl {
     
-    template<typename T, usize N>
-    u64 hash(const gl::vec<T, N>& x) {
-        return hash_combine(&x, sizeof(x));
+    template<typename T, manic::usize N>
+    manic::u64 hash(const gl::vec<T, N>& x) {
+        return manic::hash_combine(&x, sizeof(x));
     }
 
 }
