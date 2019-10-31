@@ -320,7 +320,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 }
 
 -(void) scrollWheel:(NSEvent *)event {
-    NSLog(@"Scrolling %hhd\n", [event hasPreciseScrollingDeltas]);
+    //NSLog(@"Scrolling %g %g", [event scrollingDeltaX], [event scrollingDeltaX]);
+    _renderer->scrolled([event scrollingDeltaX], [event scrollingDeltaY]);
 }
 
 

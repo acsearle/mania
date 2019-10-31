@@ -46,6 +46,8 @@ public:
     void mouse_moved(double x, double y);
     gl::vec<double, 2> _mouse;
     
+    virtual void scrolled(double x, double y);
+
 };
 
 #endif /* renderer_hpp */

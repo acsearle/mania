@@ -67,6 +67,7 @@ public:
     virtual void key_down(manic::u32) override;
     virtual void mouse_up(manic::u64) override;
     virtual void mouse_down(manic::u64) override;
+    virtual void scrolled(double x, double y) override;
 
     gl::vec2 bound(string_view v);
 
@@ -591,4 +592,13 @@ void manic::blenderer::mouse_up(manic::u64 x) {
             std::cout << "writing" << std::hex << _selected_opcode << std::endl;
         }
     }
+}
+
+void renderer::scrolled(double x, double y) {
+}
+
+
+void manic::blenderer::scrolled(double x, double y) {
+    _camera_position.x -= x;
+    _camera_position.y -= y;
 }
