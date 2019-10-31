@@ -49,9 +49,6 @@
 		CAD3B23C2366B3FB001DA73B /* asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B23A2366B3FB001DA73B /* asset.cpp */; };
 		CAD3B23D2366B3FB001DA73B /* asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B23A2366B3FB001DA73B /* asset.cpp */; };
 		CAD3B23E2366B3FB001DA73B /* asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B23A2366B3FB001DA73B /* asset.cpp */; };
-		CAD3B2412366D4F2001DA73B /* string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B23F2366D4F2001DA73B /* string.cpp */; };
-		CAD3B2422366D4F2001DA73B /* string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B23F2366D4F2001DA73B /* string.cpp */; };
-		CAD3B2432366D4F2001DA73B /* string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B23F2366D4F2001DA73B /* string.cpp */; };
 		CAD3B247236808D0001DA73B /* parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B245236808D0001DA73B /* parse.cpp */; };
 		CAD3B248236808D0001DA73B /* parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B245236808D0001DA73B /* parse.cpp */; };
 		CAD3B249236808D0001DA73B /* parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B245236808D0001DA73B /* parse.cpp */; };
@@ -177,7 +174,6 @@
 		CAD3B2362365919E001DA73B /* atlas.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = atlas.cpp; sourceTree = "<group>"; };
 		CAD3B23A2366B3FB001DA73B /* asset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = asset.cpp; sourceTree = "<group>"; };
 		CAD3B23B2366B3FB001DA73B /* asset.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = asset.hpp; sourceTree = "<group>"; };
-		CAD3B23F2366D4F2001DA73B /* string.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = string.cpp; sourceTree = "<group>"; };
 		CAD3B2402366D4F2001DA73B /* string.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string.hpp; sourceTree = "<group>"; };
 		CAD3B24423680864001DA73B /* enum.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = enum.hpp; sourceTree = "<group>"; };
 		CAD3B245236808D0001DA73B /* parse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = parse.cpp; sourceTree = "<group>"; };
@@ -354,7 +350,6 @@
 			isa = PBXGroup;
 			children = (
 				CA0EB1492222CBC200DAE8CF /* table3.hpp */,
-				CAD3B23F2366D4F2001DA73B /* string.cpp */,
 				CAD3B2402366D4F2001DA73B /* string.hpp */,
 				CAEECDFB235BD649002D1E2F /* unicode.cpp */,
 				CAEECDFC235BD649002D1E2F /* unicode.hpp */,
@@ -606,7 +601,6 @@
 			files = (
 				CA44D79722FAE466004B76D7 /* enumerate-test.cpp in Sources */,
 				CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */,
-				CAD3B2422366D4F2001DA73B /* string.cpp in Sources */,
 				CAD3B21B236064FD001DA73B /* json.cpp in Sources */,
 				CAD3B24D23695080001DA73B /* application.cpp in Sources */,
 				CAD3B2382365919E001DA73B /* atlas.cpp in Sources */,
@@ -640,7 +634,6 @@
 				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
 				CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */,
 				CAD3B24E23695080001DA73B /* application.cpp in Sources */,
-				CAD3B2432366D4F2001DA73B /* string.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -652,7 +645,6 @@
 				CAC2FF88221D2DED00D8B4B2 /* surface.cpp in Sources */,
 				CAF889C01F14E31B005956A9 /* shader.cpp in Sources */,
 				CAD3B247236808D0001DA73B /* parse.cpp in Sources */,
-				CAD3B2412366D4F2001DA73B /* string.cpp in Sources */,
 				CAD3B24C23695080001DA73B /* application.cpp in Sources */,
 				CAF889AC1F14D618005956A9 /* ViewController.m in Sources */,
 				CA0EB15C2233C32800DAE8CF /* option.cpp in Sources */,
@@ -905,6 +897,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				INFOPLIST_FILE = mania/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (

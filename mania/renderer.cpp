@@ -68,6 +68,9 @@ public:
     virtual void mouse_up(manic::u64) override;
     virtual void mouse_down(manic::u64) override;
 
+    gl::vec2 bound(string_view v);
+
+    sprite _solid;
 
 };
 
@@ -98,6 +101,14 @@ blenderer::blenderer()
 
     _tiles = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
     _font = build_font(_atlas);
+    {
+        // Put a solid color pixel on the texture so we can render rects
+        pixel p{255, 255, 255, 255};
+        _solid = _atlas.place(const_matrix_view<pixel>(&p, 1, 1, 1));
+        auto midpoint = (_solid.a.texCoord + _solid.b.texCoord) / 2.0f;
+        _solid.a.texCoord = _solid.b.texCoord = midpoint;
+    }
+    
     
     // _lineheight = manic::build_font(_font, _advances);
     
@@ -240,7 +251,25 @@ void blenderer::scribe(string_view v, gl::vec2 xy) {
         }
     }
 }
-        
+
+gl::vec2 blenderer::bound(string_view v) {
+    gl::vec2 xy{0, 0};
+    float x = 0.0f;
+    while (v) {
+        u32 c = *v; ++v;
+        if (c != '\n') {
+            if (auto* p = _font.first.try_get(c)) {
+                x += p->second;
+            }
+        } else {
+            xy.x = std::max<float>(xy.x, x);
+            x = 0.0f;
+            xy.y += _font.second;
+        }
+    }
+    xy.x = std::max<float>(xy.x, x);
+    return xy;
+}
 
 
 void blenderer::render() {
@@ -422,6 +451,14 @@ void blenderer::render() {
     }
         
     //_atlas.push_texture();
+    
+    {
+        _solid.a.position = { 100, 100 };
+        _solid.b.position = { 200, 200 };
+        _solid.a.color = { 0, 0, 0, 64 };
+        _solid.b.color = { 0, 0, 0, 128 };
+        _atlas.push_sprite(_solid);
+    }
      
     if (!(frame & 63))
         _thing.tick();

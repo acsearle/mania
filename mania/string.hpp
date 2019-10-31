@@ -57,6 +57,8 @@ struct string_view {
     u32 operator*() const { return *a; }
     string_view& operator++() { ++a; return *this; }
     string_view& operator--() { --b; return *this; }
+    string_view operator++(int) { string_view old{*this}; ++a; return old; }
+    string_view operator--(int) { string_view old{*this}; --b; return old; }
     explicit operator bool() const { return a != b; }
     
     const_vector_view<u8> as_bytes() const {
