@@ -10,8 +10,10 @@
 #define renderer_hpp
 
 #include <memory>
+
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gltypes.h>
+
 #include "common.hpp"
 #include "table3.hpp"
 #include "vec.hpp"
@@ -27,15 +29,20 @@ public:
     virtual ~renderer() = default;
     renderer& operator=(const renderer&) = delete;
     renderer& operator=(renderer&&) = delete;
-    virtual void resize(GLsizei width, GLsizei height) = 0;
-    virtual void render() = 0;
+    
     static std::unique_ptr<renderer> make();
     
-    void key_down(manic::u32);
-    void key_up(manic::u32);
+    virtual void resize(GLsizei width, GLsizei height) = 0;
+    virtual void render() = 0;
     
+    virtual void key_down(manic::u32);
+    virtual void key_up(manic::u32);
     manic::table3<manic::u32, bool> _keyboard_map;
-    
+
+    virtual void mouse_down(manic::u64);
+    virtual void mouse_up(manic::u64);
+    manic::u64 _mouse_state;
+
     void mouse_moved(double x, double y);
     gl::vec<double, 2> _mouse;
     

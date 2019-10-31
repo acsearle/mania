@@ -28,6 +28,8 @@ struct mcu {
     // moves (NESW).  One register (and 8 bit opcodes) may not be sufficient
     
     u64 a;
+    u64 b;
+    u64 c;
     u64 d;
     
     // Each tick, the MCU reads its instruction from the cell it is "at".  The
@@ -106,7 +108,7 @@ const auto OPCODE_SHIFT = 32;
 const auto OPCODE_MASK = ((~0ull) << OPCODE_SHIFT) ^ INSTRUCTION_FLAG;
 
 const auto ADDRESS_SHIFT = 0;
-const auto ADDRESS_MASK = ~0ull ^ (OPCODE_MASK | INSTRUCTION_FLAG);
+const auto ADDRESS_MASK = 7;
 
 enum opcode_enum : u64 {
     noop,
@@ -133,7 +135,7 @@ enum opcode_enum : u64 {
     clear,
     compare,
     and_complement_of,
-    opcode_enum_size,
+    _opcode_enum_size
 };
 
 enum address_enum : u64 {
@@ -153,9 +155,6 @@ inline u64 opcode(opcode_enum op, address_enum ad = northeast) {
 
 } // namespace instruction
 
-
 } // namespace manic
-
-
 
 #endif /* thing_hpp */

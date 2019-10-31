@@ -159,7 +159,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     
     // Synchronize buffer swaps with vertical refresh rate
     GLint swapInt = 1;
-    [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
+    [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
         
     // Init our renderer.  Use 0 for the defaultFBO which is appropriate for
     // OSX (but not iOS since iOS apps must create their own FBO)
@@ -194,20 +194,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
                       viewRectPixels.size.height);
     
     CGLUnlockContext([[self openGLContext] CGLContextObj]);
-}
-
-- (void)renewGState
-{
-    // Called whenever graphics state updated (such as window resize)
-    
-    // OpenGL rendering is not synchronous with other rendering on the OSX.
-    // Therefore, call disableScreenUpdatesUntilFlush so the window server
-    // doesn't render non-OpenGL content in the window asynchronously from
-    // OpenGL content, which could cause flickering.  (non-OpenGL content
-    // includes the title bar and drawing done by the app with other APIs)
-    [[self window] disableScreenUpdatesUntilFlush];
-    
-    [super renewGState];
 }
 
 - (void) drawRect: (NSRect) theRect
@@ -260,15 +246,17 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     return [super resignFirstResponder];
 }
 
+// Keyboard events
+
 - (void) keyDown:(NSEvent *)event
 {
-    NSLog(@"%@\n", event.charactersIgnoringModifiers);
+    //NSLog(@"%@\n", event.charactersIgnoringModifiers);
     _renderer->key_down([event.charactersIgnoringModifiers characterAtIndex:0]);
 }
 
 - (void) keyUp:(NSEvent*) event
 {
-    NSLog(@"%@\n", event.charactersIgnoringModifiers);
+    //NSLog(@"%@\n", event.charactersIgnoringModifiers);
     _renderer->key_up([event.charactersIgnoringModifiers characterAtIndex:0]);
 }
 
@@ -277,26 +265,58 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     NSLog(@"%lu", (unsigned long)event.modifierFlags);
 }
 
--(void) mouseUp:(NSEvent *)event {
-    //_renderer->mouse_down(event.pressedMouseButtons);
+// Mouse events
+
+-(void) mouseEntered:(NSEvent *)event {
+    NSLog(@"mouseEntered");
 }
 
--(void) mouseDown:(NSEvent *)event {
-    //_renderer->mouse_up(event.pressedMouseButtons);
+-(void) mouseExited:(NSEvent *)event {
+    NSLog(@"mouseExited");
 }
 
 -(void) mouseMoved:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    NSLog(@"Mouse %g %g\n", p.x, p.y);
     _renderer->mouse_moved(p.x, p.y);
 }
 
--(void) mouseEntered:(NSEvent *)event {
-    
+-(void) mouseUp:(NSEvent *)event {
+    _renderer->mouse_up([event buttonNumber]);
 }
 
--(void) mouseExited:(NSEvent *)event {
-    
+-(void) mouseDown:(NSEvent *)event {
+    _renderer->mouse_down([event buttonNumber]);
+}
+
+-(void) mouseDragged:(NSEvent *)event {
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    _renderer->mouse_moved(p.x, p.y);
+}
+
+-(void) rightMouseUp:(NSEvent *)event {
+    _renderer->mouse_up([event buttonNumber]);
+}
+
+-(void) rightMouseDown:(NSEvent *)event {
+    _renderer->mouse_down([event buttonNumber]);
+}
+
+-(void) rightMouseDragged:(NSEvent *)event {
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    _renderer->mouse_moved(p.x, p.y);
+}
+
+-(void) otherMouseUp:(NSEvent *)event {
+    _renderer->mouse_up([event buttonNumber]);
+}
+
+-(void) otherMouseDown:(NSEvent *)event {
+    _renderer->mouse_down([event buttonNumber]);
+}
+
+-(void) otherMouseDragged:(NSEvent *)event {
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    _renderer->mouse_moved(p.x, p.y);
 }
 
 -(void) scrollWheel:(NSEvent *)event {

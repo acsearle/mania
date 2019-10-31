@@ -47,17 +47,26 @@ class blenderer
     string _text;
     
     short _lineheight;
+    
+    u64 _selected_opcode;
+        
         
 public:
     
     blenderer();
     virtual ~blenderer() = default;
-    void resize(GLsizei width, GLsizei height);
-    void render();
+    void resize(GLsizei width, GLsizei height) override;
+    void render() override;
     
     void scribe(string_view, gl::vec2 xy);
 
-    void blit3(string_view v, float x, float y);
+    void blit3(string_view v, gl::vec2 xy);
+    void blit4(string_view v, gl::vec2 xy);
+    void blit5(string_view v, gl::vec2 xy);
+
+    virtual void key_down(manic::u32) override;
+    virtual void mouse_up(manic::u64) override;
+    virtual void mouse_down(manic::u64) override;
 
 
 };
@@ -112,6 +121,7 @@ blenderer::blenderer()
     _program.assign("sampler", 0);
         
     _camera_position = 0;
+    _selected_opcode = 0;
     
     
 }
@@ -184,15 +194,31 @@ void blenderer::resize(GLsizei width, GLsizei height) {
     
 }
 
-void blenderer::blit3(string_view v, float x, float y) {
+void blenderer::blit3(string_view v, gl::vec2 xy) {
     if (!_tiles.contains(v))
         return;
-    x -= _camera_position.x;
-    y -= _camera_position.y;
-    _atlas.push_sprite_translated(_tiles[v], gl::vec2(x, y));
+    xy.x -= _camera_position.x;
+    xy.y -= _camera_position.y;
+    _atlas.push_sprite_translated(_tiles[v], xy);
     // scribe(v, {x, y});
 }
- 
+
+void blenderer::blit4(string_view v, gl::vec2 xy) {
+    if (!_tiles.contains(v))
+        return;
+    _atlas.push_sprite_translated(_tiles[v], xy);
+    // scribe(v, {x, y});
+}
+
+void blenderer::blit5(string_view v, gl::vec2 xy) {
+    if (!_tiles.contains(v))
+        return;
+    auto s = _tiles[v];
+    s.a.color *= 0.5f;
+    s.b.color *= 0.5f;
+    _atlas.push_sprite_translated(s, xy);
+}
+
 
 void blenderer::scribe(string_view v, gl::vec2 xy) {
     auto start = xy;
@@ -253,13 +279,13 @@ void blenderer::render() {
         _camera_position.x += 2;
     }
 
-    /*
-     blit3("northwest",
-        _mouse.x * 2 - _width / 2 + _camera_position.x,
-        - _mouse.y * 2 + _height / 2 + _camera_position.y);
-     */
+    gl::vec2 world_mouse{
+        _mouse.x * 2 + _camera_position.x,
+        - _mouse.y * 2 + _height + _camera_position.y};
     
-    static const char* translate[] = {
+    gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
+        
+    static const char* _translate[] = {
         "noop",
         "load",
         "store",
@@ -284,7 +310,6 @@ void blenderer::render() {
         "clear",
         "compare",
         "and_complement_of",
-        "opcode_enum_size",
         "0",
         "1",
         "2",
@@ -311,6 +336,20 @@ void blenderer::render() {
         "register_d",
     };
     
+    auto translate = [&](u64 x) {
+        using namespace instruction;
+        if (x & INSTRUCTION_FLAG) {
+            x = (x & OPCODE_MASK) >> OPCODE_SHIFT;
+            if (x < _opcode_enum_size) {
+                return _translate[x];
+            } else {
+                return "missing";
+            }
+        } else {
+            return _translate[(x & 0xF) + _opcode_enum_size];
+        }
+    };
+    
     {
         auto a = std::max<i64>(_camera_position.x >> 6, 0);
         auto b = std::max<i64>(_camera_position.y >> 6, 0);
@@ -320,21 +359,10 @@ void blenderer::render() {
         for (i64 i = a; i != c; ++i) {
             for (i64 j = b; j != d; ++j) {
                 u64 k = _thing._board(i, j);
-                u64 z = k;
-                using namespace instruction;
-                if (k & INSTRUCTION_FLAG) {
-                    k = (k & OPCODE_MASK) >> OPCODE_SHIFT;
-                } else {
-                    if (k) {
-                        k = 25 + (k & 0xF);
-                    }
-                }
-                
-                string_view v(translate[k]);
-                blit3(v, i * 64, j * 64);
-                if (z & INSTRUCTION_FLAG) {
-                    string_view u(translate[(z & 0x7) + 25 + 16]);
-                    blit3(u, i * 64, j * 64);
+                blit3(translate(k), {i * 64, j * 64});
+                if (k & instruction::INSTRUCTION_FLAG) {
+                    string_view u(_translate[(k & 0x7) + instruction::_opcode_enum_size + 16]);
+                    blit3(u, {i * 64, j * 64});
                 }
             }
         }
@@ -345,10 +373,10 @@ void blenderer::render() {
     for (auto&& a : _thing._chests) {
         auto u = a.x * 64;
         auto v = a.y * 64;
-        blit3("chest1", u - 64, v);
-        blit3("chest2", u, v);
-        blit3("chest3", u - 64, v + 64);
-        blit3("chest4", u, v + 64);
+        blit3("chest1", {u - 64, v});
+        blit3("chest2", {u, v});
+        blit3("chest3", {u - 64, v + 64});
+        blit3("chest4", {u, v + 64});
         
     }
     
@@ -362,17 +390,38 @@ void blenderer::render() {
             case 2: v -= f; break;
             case 3: u += f; break;
         }
-        blit3("house", u, v);
+        blit3("house", {u, v});
         char z[32];
-        sprintf(z, "%llX", a.d);
-        blit3(z, u+32, v+32);
         sprintf(z, "%llX", a.a);
-        blit3(z, u-32, v-32);
+        blit3(z, {u-32, v-32});
+        sprintf(z, "%llX", a.b);
+        blit3(z, {u+32, v-32});
+        sprintf(z, "%llX", a.c);
+        blit3(z, {u+32, v+32});
+        sprintf(z, "%llX", a.d);
+        blit3(z, {u-32, v+32});
 
     }
-    
-    //_atlas.push_texture();
 
+    if (_selected_opcode) {
+        gl::vec2 offset(-16, -16);
+        using namespace instruction;
+        //blit5(translate(_selected_opcode), world_mouse + _camera_position + offset);
+        //blit5(_translate[((_selected_opcode) & 7) + _opcode_enum_size + 16], world_mouse + _camera_position + offset);
+        blit5(translate(_selected_opcode), selectee * 64 - _camera_position);
+        blit5(_translate[((_selected_opcode) & 7) + _opcode_enum_size + 16], selectee * 64 - _camera_position);
+        
+    } else {
+        blit5("reticule", selectee * 64 - _camera_position);
+    }
+
+    for (i64 i = 0; i != instruction::_opcode_enum_size; ++i) {
+        string_view v = translate(instruction::opcode((instruction::opcode_enum) i));
+        blit4("button", {i * 64, _height - 64});
+        blit4(v, {i * 64, _height - 64});
+    }
+        
+    //_atlas.push_texture();
      
     if (!(frame & 63))
         _thing.tick();
@@ -412,4 +461,81 @@ void renderer::mouse_moved(double x, double y) {
     _mouse.y = y;
 }
 
+void manic::blenderer::key_down(manic::u32 c) {
+    renderer::key_down(c);
+    
+    gl::vec2 world_mouse{
+        _mouse.x * 2 + _camera_position.x,
+        - _mouse.y * 2 + _height + _camera_position.y};
+    
+    gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
+    i64 i = selectee.x;
+    i64 j = selectee.y;
+    
+    switch (c) {
+        case 'r':
+            if (_selected_opcode) {
+                ++_selected_opcode;
+            } else {
+                ++_thing._board(i, j);
+            }
+            break;
+        case 'R':
+            if (_selected_opcode) {
+                --_selected_opcode;
+            } else {
+                --_thing._board(i, j);
+            }
+            break;
+        case 'q': {
+            mcu m(selectee.x, selectee.y, 0, 0);
+            _thing._mcus.push_back(m);
+        }
+            
+        default:
+            break;
+    }
+}
 
+void renderer::mouse_down(manic::u64 x) {
+    std::cout << "mouse_down: " << x << std::endl;
+}
+
+void renderer::mouse_up(manic::u64 x) {
+    std::cout << "mouse_up: " << x << std::endl;
+}
+
+void manic::blenderer::mouse_down(manic::u64 x) {
+    if (x != 1)
+        return;
+    if (_selected_opcode) {
+        _selected_opcode = 0;
+    } else {
+        gl::vec2 world_mouse(_mouse.x * 2 + _camera_position.x,
+                             - _mouse.y * 2 + _height + _camera_position.y);
+        gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
+        _thing._board(selectee.x, selectee.y) = 0;
+    }
+}
+
+void manic::blenderer::mouse_up(manic::u64 x) {
+    if (x != 0)
+        return;
+    gl::vec2 _screen_mouse(_mouse.x * 2,
+                           - _mouse.y * 2 + _height);
+    if (_screen_mouse.y > _height - 64) {
+        i64 j = _screen_mouse.x;
+        j >>= 6;
+        if (j < instruction::_opcode_enum_size) {
+            _selected_opcode = instruction::opcode((instruction::opcode_enum) j);
+        }
+    } else {
+        if (_selected_opcode) {
+            gl::vec2 world_mouse(_mouse.x * 2 + _camera_position.x,
+                                 - _mouse.y * 2 + _height + _camera_position.y);
+            gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
+            _thing._board(selectee.x, selectee.y) = _selected_opcode;
+            std::cout << "writing" << std::hex << _selected_opcode << std::endl;
+        }
+    }
+}

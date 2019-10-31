@@ -38,7 +38,7 @@ void atlas::discard() {
 }
 
 sprite atlas::place(const_matrix_view<pixel> v, gl::vec2 origin) {
-    auto tl = _packer.place({v.columns(), v.rows()});
+    auto tl = _packer.place({(GLsizei) v.columns(), (GLsizei) v.rows()});
     glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) v.stride());
     glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
     _texture.bind(GL_TEXTURE_2D);

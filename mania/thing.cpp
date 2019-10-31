@@ -100,6 +100,13 @@ void world::exec(mcu& x) {
             break;
         case register_a:
             p = &x.a;
+            break;
+        case register_b:
+            p = &x.b;
+            break;
+        case register_c:
+            p = &x.c;
+            break;
         case register_d:
             p = &x.d;
             break;
@@ -134,11 +141,18 @@ void world::exec(mcu& x) {
         case bitwise_xor: // XOR
             x.a ^= *p;
             break;
+        case decrement: // DEC
+            --*p;
+            break;
         case decrement_saturate: // SATURATING DECREMENT (TURN CCW IF DIRECTION NONZERO)
             if (*p)
                 --*p;
             break;
-        case increment_saturate: // SATURATING DECREMENT (TURN CCW IF DIRECTION NONZERO)
+        case increment: // INC
+            std::cout << "incrementing" << std::endl;
+            ++*p;
+            break;
+        case increment_saturate: // SATURATING INCREMENT (TURN CW IF DIRECTION NONZERO)
             if (~*p)
                 ++*p;
             break;
@@ -155,12 +169,6 @@ void world::exec(mcu& x) {
             break;
         case instruction::swap:
             std::swap(x.a, *p);
-            break;
-        case increment: // INC
-            ++*p;
-            break;
-        case decrement: // DEC
-            --*p;
             break;
         case kill: // DIE
             _died.push_back(&x - _mcus.begin());
@@ -185,6 +193,10 @@ void world::exec(mcu& x) {
             break;
         case compare:
             x.d = (*p < x.a) - (x.a < *p);
+            break;
+        default:
+            
+            break;
             
     }
 }
@@ -232,6 +244,15 @@ void world::tick() {
                 break;
         }
     }
+    
+    vector<mcu> _news;
+    for (mcu& x : _mcus) {
+        if ((x.x > 0) && (x.y > 0) && (x.x < _board.rows() - 1) && (x.y < _board.columns())) {
+            _news.push_back(x);
+        }
+    }
+    
+    swap(_news, _mcus);
     
 }
 
