@@ -55,6 +55,9 @@
 		CAD3B24C23695080001DA73B /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B24A23695080001DA73B /* application.cpp */; };
 		CAD3B24D23695080001DA73B /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B24A23695080001DA73B /* application.cpp */; };
 		CAD3B24E23695080001DA73B /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B24A23695080001DA73B /* application.cpp */; };
+		CAEB6603236AE3BB00C28580 /* space.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6601236AE3BB00C28580 /* space.cpp */; };
+		CAEB6604236AE3BB00C28580 /* space.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6601236AE3BB00C28580 /* space.cpp */; };
+		CAEB6605236AE3BB00C28580 /* space.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6601236AE3BB00C28580 /* space.cpp */; };
 		CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
@@ -187,6 +190,8 @@
 		CAE2F1BB2216B97000B832F6 /* deque-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "deque-test.cpp"; sourceTree = "<group>"; };
 		CAE2F1BC2216B97000B832F6 /* deque.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = deque.hpp; sourceTree = "<group>"; };
 		CAE2F1BE2216EBAB00B832F6 /* catch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = catch.hpp; sourceTree = "<group>"; };
+		CAEB6601236AE3BB00C28580 /* space.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = space.cpp; sourceTree = "<group>"; };
+		CAEB6602236AE3BB00C28580 /* space.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = space.hpp; sourceTree = "<group>"; };
 		CAEECDFA235A5ABD002D1E2F /* sentinel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sentinel.h; sourceTree = "<group>"; };
 		CAEECDFB235BD649002D1E2F /* unicode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = unicode.cpp; sourceTree = "<group>"; };
 		CAEECDFC235BD649002D1E2F /* unicode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = unicode.hpp; sourceTree = "<group>"; };
@@ -459,6 +464,8 @@
 				CAEECE00235EE674002D1E2F /* thing.cpp */,
 				CAEECE01235EE674002D1E2F /* thing.hpp */,
 				CA72B7BC221A8EE200AC9441 /* utility */,
+				CAEB6601236AE3BB00C28580 /* space.cpp */,
+				CAEB6602236AE3BB00C28580 /* space.hpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -605,6 +612,7 @@
 				CAD3B24D23695080001DA73B /* application.cpp in Sources */,
 				CAD3B2382365919E001DA73B /* atlas.cpp in Sources */,
 				CAD3B248236808D0001DA73B /* parse.cpp in Sources */,
+				CAEB6604236AE3BB00C28580 /* space.cpp in Sources */,
 				CA0EB14B2222CBD700DAE8CF /* table3-test.cpp in Sources */,
 				CAD3B22A2363A2E5001DA73B /* rleq.cpp in Sources */,
 				CAD3B23D2366B3FB001DA73B /* asset.cpp in Sources */,
@@ -631,6 +639,7 @@
 				CAEECE04235EE674002D1E2F /* thing.cpp in Sources */,
 				CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */,
 				CAD3B21C236064FD001DA73B /* json.cpp in Sources */,
+				CAEB6605236AE3BB00C28580 /* space.cpp in Sources */,
 				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
 				CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */,
 				CAD3B24E23695080001DA73B /* application.cpp in Sources */,
@@ -653,6 +662,7 @@
 				CA3FF5E42079A828009F006F /* int.cpp in Sources */,
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
 				CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */,
+				CAEB6603236AE3BB00C28580 /* space.cpp in Sources */,
 				CA0EB15F223471D400DAE8CF /* packer.cpp in Sources */,
 				CA0EB15622311F3600DAE8CF /* ordset.cpp in Sources */,
 				CAD3B233236568E2001DA73B /* dense_table.cpp in Sources */,

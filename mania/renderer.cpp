@@ -237,6 +237,8 @@ void blenderer::scribe(string_view v, gl::vec2 xy) {
         _solid.b.position = xy + bound(v);;
         _solid.a.position.y -= _font.ascender;
         _solid.b.position.y -= _font.ascender;
+        _solid.a.color = pixel{0, 0, 0, 64};
+        _solid.b.color = pixel{0, 0, 0, 192};
         _atlas.push_sprite(_solid);
     }
     auto start = xy;

@@ -441,15 +441,11 @@ return a;\
 
 namespace manic {
     
-    template<typename T, std::size_t N>
-    u64 hash(const gl::vec<T, N>& v) {
-        u64 s = 0;
-        for (auto&& e : v) {
-            s = hash(s ^ hash(e));
-        }
-        return s;
+    template<typename T, usize N>
+    u64 hash(const gl::vec<T, N>& x) {
+        return hash_combine(&x, sizeof(x));
     }
-    
+
 }
 
 #endif /* vec_hpp */
