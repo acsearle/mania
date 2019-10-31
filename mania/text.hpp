@@ -13,8 +13,24 @@
 #include "table3.hpp"
 
 namespace manic {
+
+struct font {
     
-std::pair<table3<u32, std::pair<sprite, float>>, float> build_font(atlas&);
+    struct glyph {
+        sprite sprite_;
+        float advance;
+    };
+    
+    table3<u32, glyph> charmap;
+    
+    float ascender;
+    float descender;
+    float height;
+    
+};
+    
+// std::pair<table3<u32, std::pair<sprite, float>>, float> build_font(atlas&);
+font build_font(atlas&);
 
 }
 

@@ -19,53 +19,10 @@
 namespace manic {
 
 
-struct font {
-    
-    FT_Library _library;
-    FT_Face _face;
-    
-    explicit font(char const* filename) {
-        FT_Error e;
-        e = FT_Init_FreeType(&_library);
-        assert(!e);
-        e = FT_New_Face(_library, filename, 0, &_face);
-        assert(!e);
-        FT_Set_Pixel_Sizes(_face, 0, 64);
-    }
-    
-    ~font() {
-        FT_Done_Face(_face);
-        FT_Done_FreeType(_library);
-    }
-    
-    i32 kerning(u32 left, u32 right) {
-        FT_Error e;
-        FT_Vector k;
-        e = FT_Get_Kerning(_face,
-                           FT_Get_Char_Index(_face, left),
-                           FT_Get_Char_Index(_face, right),
-                           FT_KERNING_DEFAULT,
-                           &k);
-        assert(!e);
-        assert(!(k.x & 0x3F));
-        return (i32) (k.x >> 6);
-    }
-    
-    i32 advance(u32 character) {
-        FT_Error e;
-        e = FT_Load_Char(_face, character, FT_LOAD_DEFAULT);
-        assert(!e);
-        return (i32) (_face->glyph->advance.x >> 6);
-    }
-    
-};
-
-
-
 // short build_font(atlas2<unsigned long>& font_atlas, table3<unsigned long, float>& advances) {
-std::pair<table3<u32, std::pair<sprite, float>>, float> build_font(atlas& atl) {
+font build_font(atlas& atl) {
     
-    std::pair<table3<u32, std::pair<sprite, float>>, float> result;
+    font result;
     
     FT_Library ft;
     FT_Error e = FT_Init_FreeType(&ft);
@@ -112,13 +69,15 @@ std::pair<table3<u32, std::pair<sprite, float>>, float> build_font(atlas& atl) {
                                       +face->glyph->bitmap_top));
         
         float advance = face->glyph->advance.x * 0.015625f;
-        result.first.insert((u32) charcode, std::make_pair(s, advance));
+        result.charmap.insert((u32) charcode, font::glyph{s, advance});
         
         charcode = FT_Get_Next_Char(face, charcode, &gindex);
     }
     
-    result.second = face->size->metrics.height * 0.015625f;
-    
+    result.height = face->size->metrics.height * 0.015625f;
+    result.ascender = face->size->metrics.ascender * 0.015625f;
+    result.descender = face->size->metrics.descender * 0.015625f;
+
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
     

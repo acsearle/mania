@@ -35,7 +35,7 @@ class blenderer
     
     GLsizei _width, _height;
         
-    std::pair<table3<u32, std::pair<sprite, float>>, float> _font;
+    font _font;
     
     // manic::atlas3 _tiles;
     atlas _atlas;
@@ -102,7 +102,7 @@ blenderer::blenderer()
     _tiles = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
     _font = build_font(_atlas);
     {
-        // Put a solid color pixel on the texture so we can render rects
+        // Put a white pixel on the texture so we can render solid blocks of color
         pixel p{255, 255, 255, 255};
         _solid = _atlas.place(const_matrix_view<pixel>(&p, 1, 1, 1));
         auto midpoint = (_solid.a.texCoord + _solid.b.texCoord) / 2.0f;
@@ -232,6 +232,13 @@ void blenderer::blit5(string_view v, gl::vec2 xy) {
 
 
 void blenderer::scribe(string_view v, gl::vec2 xy) {
+    {
+        _solid.a.position = xy;
+        _solid.b.position = xy + bound(v);;
+        _solid.a.position.y -= _font.ascender;
+        _solid.b.position.y -= _font.ascender;
+        _atlas.push_sprite(_solid);
+    }
     auto start = xy;
     pixel col = { 255, 255, 255, 255 };
     // char const* p = v.data();
@@ -239,32 +246,32 @@ void blenderer::scribe(string_view v, gl::vec2 xy) {
         u32 c = *v; ++v;
         if (c == '\n') {
             xy.x = start.x;
-            xy.y += _font.second;
+            xy.y += _font.height;
         } else {
-            if (auto* q = _font.first.try_get(c)) {
-                sprite s = q->first;
+            if (auto* q = _font.charmap.try_get(c)) {
+                sprite s = q->sprite_;
                 s.a.color = col;
                 s.b.color = col;
                 _atlas.push_sprite_translated(s, xy);
-                xy.x += q->second;
+                xy.x += q->advance;
             }
         }
     }
 }
 
 gl::vec2 blenderer::bound(string_view v) {
-    gl::vec2 xy{0, 0};
+    gl::vec2 xy{0, _font.ascender - _font.descender};
     float x = 0.0f;
     while (v) {
         u32 c = *v; ++v;
         if (c != '\n') {
-            if (auto* p = _font.first.try_get(c)) {
-                x += p->second;
+            if (auto* p = _font.charmap.try_get(c)) {
+                x += p->advance;
             }
         } else {
             xy.x = std::max<float>(xy.x, x);
             x = 0.0f;
-            xy.y += _font.second;
+            xy.y += _font.height;
         }
     }
     xy.x = std::max<float>(xy.x, x);
@@ -435,8 +442,6 @@ void blenderer::render() {
     if (_selected_opcode) {
         gl::vec2 offset(-16, -16);
         using namespace instruction;
-        //blit5(translate(_selected_opcode), world_mouse + _camera_position + offset);
-        //blit5(_translate[((_selected_opcode) & 7) + _opcode_enum_size + 16], world_mouse + _camera_position + offset);
         blit5(translate(_selected_opcode), selectee * 64 - _camera_position);
         blit5(_translate[((_selected_opcode) & 7) + _opcode_enum_size + 16], selectee * 64 - _camera_position);
         
@@ -449,17 +454,7 @@ void blenderer::render() {
         blit4("button", {i * 64, _height - 64});
         blit4(v, {i * 64, _height - 64});
     }
-        
-    //_atlas.push_texture();
-    
-    {
-        _solid.a.position = { 100, 100 };
-        _solid.b.position = { 200, 200 };
-        _solid.a.color = { 0, 0, 0, 64 };
-        _solid.b.color = { 0, 0, 0, 128 };
-        _atlas.push_sprite(_solid);
-    }
-     
+             
     if (!(frame & 63))
         _thing.tick();
         
@@ -474,10 +469,10 @@ void blenderer::render() {
         char s[128];
         auto new_t = mach_absolute_time();
         sprintf(s, "%.2f ms | %lu quads\n%dx%d\nf%d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
-        scribe(s, {_font.first[' '].second, _font.second});
+        scribe(s, {_font.charmap[' '].advance, _font.height});
     }
     
-    scribe("Falsches Üben von Xylophonmusik quält jeden größeren Zwerg", { _width / 2, + _font.second });
+    scribe("Falsches Üben von Xylophonmusik quält jeden größeren Zwerg", { _width / 2, + _font.height });
 }
 
 } // namespace::manic
