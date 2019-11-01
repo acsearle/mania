@@ -344,6 +344,8 @@ void game::draw() {
         "and_complement_of",
         "dump",
         "halt",
+        "barrier",
+        "mutex",
         "0",
         "1",
         "2",

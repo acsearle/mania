@@ -187,6 +187,8 @@ enum opcode_enum : u64 {
     and_complement_of,
     dump,
     halt,
+    barrier,
+    mutex,
     _opcode_enum_size
 };
 
@@ -199,6 +201,12 @@ enum address_enum : u64 {
     register_b,
     register_c,
     register_d,
+};
+
+enum state_enum : u64 {
+    entering = 0,
+    exiting = 1,
+    waiting = 2,
 };
 
 inline u64 opcode(opcode_enum op, address_enum ad = northeast) {

@@ -219,12 +219,28 @@ void world::exec(entity& x) {
                 break;
             case halt:
                 x.s = 2;
+                break;
+            case barrier:
+                // decrement the barrier
+                if (*p)
+                    --*p;
+                // if the barrier is nonzero, we have to wait until it is zero
+                if (*p)
+                    x.s = 2;
+                break;
+            case mutex:
+                if (!*p) {
+                    ++*p;
+                } else {
+                    x.s = 2;
+                }
+                break;
             default:
                 
                 break;
                 
         }
-    } else /* x.s != 0 */ {
+    } else if (x.s == 2) {
         // This is not our first attempt at this block.  For most operations,
         // this means our exit was obstructed by another entity, so we do
         // nothing.  Some operations are blocking, and will enter this state
@@ -234,7 +250,54 @@ void world::exec(entity& x) {
         i64 v = x.y;
         u64 instruction_ = _board(u, v);
         u64 opcode_ = (instruction_ & OPCODE_MASK) >> OPCODE_SHIFT;
+        u64 target = instruction_ & ADDRESS_MASK;
+        u64* p = nullptr;
+        // u64* q = nullptr;
+        
+        // Get these addresses on demand from a functor rather than compute everywhere
+        
+        // resolve what we are operating on - a nearby cell or a register
+        switch (target) {
+                // a diagonally adjacent cell of the board
+            case northeast:
+                ++u; --v; p = &_board(u, v); // NE
+                break;
+            case southeast:
+                ++u; ++v; p = &_board(u, v); // SE
+                break;
+            case southwest:
+                --u; ++v; p = &_board(u, v); // SW
+                break;
+            case northwest:
+                --u; --v; p = &_board(u, v); // NW
+                break;
+            case register_a:
+                p = &x.a;
+                break;
+            case register_b:
+                p = &x.b;
+                break;
+            case register_c:
+                p = &x.c;
+                break;
+            case register_d:
+                p = &x.d;
+                break;
+            default:
+                
+                break;
+        }
+        
         switch (opcode_) {
+            case barrier:
+                if (!*p)
+                    x.s = 1;
+                break;
+            case mutex:
+                if (!*p) {
+                    ++*p;
+                    x.s = 1;
+                }
             default:
                 // do nothing by default
                 break;
