@@ -11,9 +11,7 @@
 namespace manic {
 
 world::world() {
-    
-    // _board.resize(256, 256);
-    
+        
     entity* m = entity::make();
     m->x = 8; m->y = 8; m->a = 0x3; m->d = 0x10;
     _entities[0].push_back(m); // mcu at centre, heading north, primed for 4 loops
@@ -48,7 +46,7 @@ void world::exec(entity& x) {
     
     using namespace instruction;
     
-    if (x.s == 0) {
+    if (x.s == entering) {
         // We are entering the cell for the first time; unobstruct our origin cell
         u64* q = nullptr;
         switch (x.d & 3) {
@@ -67,9 +65,8 @@ void world::exec(entity& x) {
         }
         *q &= ~OBSTRUCTION_FLAG;
     }
-    
-    // if we are not obstructed, execute the command
-    if (x.s == 0) {
+
+    if (x.s != exiting) {
         i64 u = x.x;
         i64 v = x.y;
         u64 instruction_ = _board(u, v);
@@ -132,7 +129,7 @@ void world::exec(entity& x) {
         // Some opcodes have special behaviour when waiting or blocked
         
         // perform the operation
-        switch (opcode_) {
+        switch (opcode_ | x.s) {
             case noop: // NOOP
                 
                 break;
@@ -212,101 +209,52 @@ void world::exec(entity& x) {
             case compare:
                 x.d = (*p < x.a) - (x.a < *p);
                 break;
+                
             case dump:
-                *q = x.a;
-                x.a = 0;
-                x.d += 2;
-                break;
-            case halt:
-                x.s = 2;
-                break;
-            case barrier:
-                // decrement the barrier
-                if (*p)
-                    --*p;
-                // if the barrier is nonzero, we have to wait until it is zero
-                if (*p)
-                    x.s = 2;
-                break;
-            case mutex:
-                if (!*p) {
-                    ++*p;
+                // fallthrough
+            case dump | waiting:
+                if (*q) {
+                    x.s = waiting;
                 } else {
-                    x.s = 2;
+                    *q = x.a;
+                    x.a = 0;
+                    x.d += 2;
+                    x.s = exiting;
                 }
                 break;
-            default:
                 
+            case halt:
+                x.s = waiting;
                 break;
                 
-        }
-    } else if (x.s == 2) {
-        // This is not our first attempt at this block.  For most operations,
-        // this means our exit was obstructed by another entity, so we do
-        // nothing.  Some operations are blocking, and will enter this state
-        // and wait until their condition is satisfied
-        
-        i64 u = x.x;
-        i64 v = x.y;
-        u64 instruction_ = _board(u, v);
-        u64 opcode_ = (instruction_ & OPCODE_MASK) >> OPCODE_SHIFT;
-        u64 target = instruction_ & ADDRESS_MASK;
-        u64* p = nullptr;
-        // u64* q = nullptr;
-        
-        // Get these addresses on demand from a functor rather than compute everywhere
-        
-        // resolve what we are operating on - a nearby cell or a register
-        switch (target) {
-                // a diagonally adjacent cell of the board
-            case northeast:
-                ++u; --v; p = &_board(u, v); // NE
-                break;
-            case southeast:
-                ++u; ++v; p = &_board(u, v); // SE
-                break;
-            case southwest:
-                --u; ++v; p = &_board(u, v); // SW
-                break;
-            case northwest:
-                --u; --v; p = &_board(u, v); // NW
-                break;
-            case register_a:
-                p = &x.a;
-                break;
-            case register_b:
-                p = &x.b;
-                break;
-            case register_c:
-                p = &x.c;
-                break;
-            case register_d:
-                p = &x.d;
-                break;
-            default:
-                
-                break;
-        }
-        
-        switch (opcode_) {
             case barrier:
-                if (!*p)
-                    x.s = 1;
+                if (*p) --*p;
+                // fallthrough
+            case barrier | waiting:
+                x.s = *p ? waiting : exiting;
                 break;
+                
             case mutex:
-                if (!*p) {
-                    ++*p;
-                    x.s = 1;
+                //fallthrough
+            case mutex | waiting:
+                if (*p) {
+                    x.s = waiting;
+                } else {
+                    *p = 1;
+                    x.s = exiting;
                 }
-            default:
-                // do nothing by default
                 break;
+                
+            default:
+                
+                break;
+                
         }
-
-        
+        if (x.s == entering)
+            x.s = exiting;
     }
     
-    if (x.s < 2) {
+    if (x.s == exiting) {
         // The operation is complete; attempt to exit the cell
         
         // Locate next cell
@@ -326,13 +274,9 @@ void world::exec(entity& x) {
                 break;
         }
         // Check if we can claim it
-        if (*q & OBSTRUCTION_MASK) {
-            // The cell is already claimed; set our state to OBSTRUCTED and
-            // try again next turn
-            x.s = 1;
-        } else {
+        if (!(*q & OBSTRUCTION_MASK)) {
             // step forward
-            x.s = 0; // set travelling state
+            x.s = entering; // set travelling state
             *q |= OBSTRUCTION_FLAG; // claim the destination cell
             switch (x.d & 3) { // jump into it
                 case 0:

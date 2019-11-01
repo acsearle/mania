@@ -204,10 +204,12 @@ enum address_enum : u64 {
 };
 
 enum state_enum : u64 {
-    entering = 0,
-    exiting = 1,
-    waiting = 2,
+    entering = 0x0000'0000,
+    waiting = 0x4000'0000,
+    exiting = 0x8000'000,
 };
+
+const u64 STATE_MASK = 0xC000'0000;
 
 inline u64 opcode(opcode_enum op, address_enum ad = northeast) {
     return INSTRUCTION_FLAG | (op << OPCODE_SHIFT) | (ad << ADDRESS_SHIFT);
