@@ -17,13 +17,13 @@ namespace manic {
 //
 // (string_view&) -> bool
 
-auto parse_literal(u32 c) {
+inline auto parse_literal(u32 c) {
     return [=](string_view& v) {
         return v && (*v == c) && ((void) ++v, true);
     };
 }
 
-auto parse_literal(string_view u) {
+inline auto parse_literal(string_view u) {
     return [=](string_view& v) {
         string_view s{u};
         string_view t{v};
@@ -34,7 +34,7 @@ auto parse_literal(string_view u) {
     };
 }
 
-auto parse_whitespace() {
+inline auto parse_whitespace() {
     return [](string_view& v) {
         while (v && iswspace(*v))
             ++v;
@@ -71,9 +71,10 @@ auto parse_optional(F&& f) {
 }
 
 template<typename... Args>
-auto parse_all_of(Args&... args) {
-    return [&](string_view& v) {
-        return (... && args(v));
+auto parse_all_of(Args&&... args) {
+    return [=](string_view& v) {
+        string_view u = v;
+        return (... && args(v)) && ((void) (v = u), true);
     };
 }
 

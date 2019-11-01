@@ -33,6 +33,10 @@ struct sprite {
     gl::vertex b;
 };
 
+
+// atlas holds the OpenGL texture, vertex array and buffer objects needed to
+// draw textured triangles, and it provides an interface to pack the texture
+// with smaller images such as png assets and font glyphs.
 struct atlas {
 
     gl::texture _texture;

@@ -35,12 +35,6 @@ enum materials : u64 {
     
 };
 
-// instruction format
-// number | material | instruction
-// number: 00 xxxx
-// material: 01 disambiguation | processing tags | elements
-// instruction: 01 opcode | address
-
-};
+} // namespace manic
 
 #endif /* elements_hpp */

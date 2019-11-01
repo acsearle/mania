@@ -12,8 +12,10 @@
 #include <iterator>
 #include <OpenGL/gl3.h>
 
+#include "application.hpp"
 #include "renderer.hpp"
 
+using manic::application;
 using manic::string;
 using manic::string_view;
 
@@ -28,14 +30,13 @@ string load(string name) {
     return string(s.c_str());
 }
 
-string load(string_view name, string_view ext) {
-    return load(path_for_resource(name, ext));
+string manic::load(string_view name, string_view ext) {
+    return ::load(path_for_resource(name, ext));
 }
 
 @implementation MyOpenGLView {
-    std::unique_ptr<renderer> _renderer;
+    // std::unique_ptr<renderer> _renderer;
 }
-
 
 - (CVReturn) getFrameForTime:(const CVTimeStamp*)outputTime {
     @autoreleasepool {
@@ -163,7 +164,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
         
     // Init our renderer.  Use 0 for the defaultFBO which is appropriate for
     // OSX (but not iOS since iOS apps must create their own FBO)
-    _renderer = renderer::make();
+    // _renderer = renderer::make();
+    application::get();
         
 }
 
@@ -190,8 +192,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     NSRect viewRectPixels = [self convertRectToBacking:viewRectPoints];
     
     // Set the new dimensions in our renderer
-    _renderer->resize(viewRectPixels.size.width,
-                      viewRectPixels.size.height);
+    application::get().resize(viewRectPixels.size.width,
+                              viewRectPixels.size.height);
     
     CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
@@ -214,7 +216,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     // simultaneously when resizing
     CGLLockContext([[self openGLContext] CGLContextObj]);
     
-    _renderer->render();
+    application::get().draw();
     
     CGLFlushDrawable([[self openGLContext] CGLContextObj]);
     CGLUnlockContext([[self openGLContext] CGLContextObj]);
@@ -250,14 +252,12 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 
 - (void) keyDown:(NSEvent *)event
 {
-    //NSLog(@"%@\n", event.charactersIgnoringModifiers);
-    _renderer->key_down([event.charactersIgnoringModifiers characterAtIndex:0]);
+    application::get().key_down([event.charactersIgnoringModifiers characterAtIndex:0]);
 }
 
 - (void) keyUp:(NSEvent*) event
 {
-    //NSLog(@"%@\n", event.charactersIgnoringModifiers);
-    _renderer->key_up([event.charactersIgnoringModifiers characterAtIndex:0]);
+    application::get().key_up([event.charactersIgnoringModifiers characterAtIndex:0]);
 }
 
 -(void) flagsChanged:(NSEvent *)event
@@ -277,51 +277,50 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 
 -(void) mouseMoved:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    _renderer->mouse_moved(p.x, p.y);
+    application::get().mouse_moved(p.x, p.y);
 }
 
 -(void) mouseUp:(NSEvent *)event {
-    _renderer->mouse_up([event buttonNumber]);
+    application::get().mouse_up([event buttonNumber]);
 }
 
 -(void) mouseDown:(NSEvent *)event {
-    _renderer->mouse_down([event buttonNumber]);
+    application::get().mouse_down([event buttonNumber]);
 }
 
 -(void) mouseDragged:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    _renderer->mouse_moved(p.x, p.y);
+    application::get().mouse_moved(p.x, p.y);
 }
 
 -(void) rightMouseUp:(NSEvent *)event {
-    _renderer->mouse_up([event buttonNumber]);
+    application::get().mouse_up([event buttonNumber]);
 }
 
 -(void) rightMouseDown:(NSEvent *)event {
-    _renderer->mouse_down([event buttonNumber]);
+    application::get().mouse_down([event buttonNumber]);
 }
 
 -(void) rightMouseDragged:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    _renderer->mouse_moved(p.x, p.y);
+    application::get().mouse_moved(p.x, p.y);
 }
 
 -(void) otherMouseUp:(NSEvent *)event {
-    _renderer->mouse_up([event buttonNumber]);
+    application::get().mouse_up([event buttonNumber]);
 }
 
 -(void) otherMouseDown:(NSEvent *)event {
-    _renderer->mouse_down([event buttonNumber]);
+    application::get().mouse_down([event buttonNumber]);
 }
 
 -(void) otherMouseDragged:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    _renderer->mouse_moved(p.x, p.y);
+    application::get().mouse_moved(p.x, p.y);
 }
 
 -(void) scrollWheel:(NSEvent *)event {
-    //NSLog(@"Scrolling %g %g", [event scrollingDeltaX], [event scrollingDeltaX]);
-    _renderer->scrolled([event scrollingDeltaX], [event scrollingDeltaY]);
+    application::get().scrolled([event scrollingDeltaX], [event scrollingDeltaY]);
 }
 
 

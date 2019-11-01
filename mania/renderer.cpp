@@ -17,6 +17,7 @@
 
 #include <mach/mach_time.h>
 
+#include "application.hpp"
 #include "asset.hpp"
 #include "atlas.hpp"
 #include "debug.hpp"
@@ -24,16 +25,14 @@
 #include "program.hpp"
 #include "text.hpp"
 #include "thing.hpp"
-#include "unicode.hpp"
 
 namespace manic {
 
-class blenderer
-: public renderer {
+struct game : application {
     
     gl::program _program;
     
-    GLsizei _width, _height;
+    usize _width, _height;
         
     font _font;
     
@@ -50,13 +49,10 @@ class blenderer
     
     u64 _selected_opcode;
         
-        
-public:
-    
-    blenderer();
-    virtual ~blenderer() = default;
-    void resize(GLsizei width, GLsizei height) override;
-    void render() override;
+    game();
+    virtual ~game() = default;
+    void resize(usize width, usize height) override;
+    void draw() override;
     
     void scribe(string_view, gl::vec2 xy);
 
@@ -64,22 +60,21 @@ public:
     void blit4(string_view v, gl::vec2 xy);
     void blit5(string_view v, gl::vec2 xy);
 
-    virtual void key_down(manic::u32) override;
-    virtual void mouse_up(manic::u64) override;
-    virtual void mouse_down(manic::u64) override;
+    virtual void key_down(u32) override;
+    virtual void mouse_up(u64) override;
+    virtual void mouse_down(u64) override;
     virtual void scrolled(double x, double y) override;
 
     gl::vec2 bound(string_view v);
 
     sprite _solid;
 
-};
+}; // struct game
 
+application& application::get() {
+    static game x;
+    return x;
 }
-std::unique_ptr<renderer> renderer::make() {
-    return std::make_unique<manic::blenderer>();
-}
-namespace manic {
 
 // As a general principle, we want to use nested local coordinates as much as
 // possible, because we access and copy lots of coordinates.  Using doubles
@@ -96,7 +91,7 @@ namespace manic {
 // Conclusion: to support non-integer camera zooms, we need GL_LINEAR rendering.
 // Tiles must supply border pixels as well to supply GL_LINEAR what it needs.
 
-blenderer::blenderer()
+game::game()
 : _program("basic")
 , _atlas(1024) {
 
@@ -109,6 +104,9 @@ blenderer::blenderer()
         auto midpoint = (_solid.a.texCoord + _solid.b.texCoord) / 2.0f;
         _solid.a.texCoord = _solid.b.texCoord = midpoint;
     }
+    
+    std::cout << load("enum", "hpp") << std::endl;
+    
     
     
     // _lineheight = manic::build_font(_font, _advances);
@@ -199,14 +197,14 @@ blenderer::blenderer()
 
 
 
-void blenderer::resize(GLsizei width, GLsizei height) {
+void game::resize(usize width, usize height) {
     
     _width = width;
     _height = height;
     
 }
 
-void blenderer::blit3(string_view v, gl::vec2 xy) {
+void game::blit3(string_view v, gl::vec2 xy) {
     if (auto p = _tiles.try_get(v)) {
         xy.x -= _camera_position.x;
         xy.y -= _camera_position.y;
@@ -214,12 +212,12 @@ void blenderer::blit3(string_view v, gl::vec2 xy) {
     }
 }
 
-void blenderer::blit4(string_view v, gl::vec2 xy) {
+void game::blit4(string_view v, gl::vec2 xy) {
     if (auto p = _tiles.try_get(v))
         _atlas.push_sprite_translated(*p, xy);
 }
 
-void blenderer::blit5(string_view v, gl::vec2 xy) {
+void game::blit5(string_view v, gl::vec2 xy) {
     if (auto p = _tiles.try_get(v)) {
         auto s = *p;
         s.a.color *= 0.5f;
@@ -229,7 +227,7 @@ void blenderer::blit5(string_view v, gl::vec2 xy) {
 }
 
 
-void blenderer::scribe(string_view v, gl::vec2 xy) {
+void game::scribe(string_view v, gl::vec2 xy) {
     {
         _solid.a.position = xy;
         _solid.b.position = xy + bound(v);;
@@ -259,7 +257,7 @@ void blenderer::scribe(string_view v, gl::vec2 xy) {
     }
 }
 
-gl::vec2 blenderer::bound(string_view v) {
+gl::vec2 game::bound(string_view v) {
     gl::vec2 xy{0, _font.ascender - _font.descender};
     float x = 0.0f;
     while (v) {
@@ -279,16 +277,14 @@ gl::vec2 blenderer::bound(string_view v) {
 }
 
 
-void blenderer::render() {
+void game::draw() {
 
     auto old_t = mach_absolute_time();
 
     static int frame = 0;
     frame += 1;
-
     
-    
-    glViewport(0, 0, _width, _height);
+    glViewport(0, 0, (GLsizei) _width, (GLsizei) _height);
     
     GLfloat transform[16] = {
         (float) 2.0f/_width, 0, 0, -1,
@@ -302,22 +298,22 @@ void blenderer::render() {
     static double angle = 0.0;
     angle += 0.01;
     
-    if (_keyboard_map.contains('w')) {
+    if (_keyboard_state.contains('w')) {
         _camera_position.y -= 2;
     }
-    if (_keyboard_map.contains('a')) {
+    if (_keyboard_state.contains('a')) {
         _camera_position.x -= 2;
     }
-    if (_keyboard_map.contains('s')) {
+    if (_keyboard_state.contains('s')) {
         _camera_position.y += 2;
     }
-    if (_keyboard_map.contains('d')) {
+    if (_keyboard_state.contains('d')) {
         _camera_position.x += 2;
     }
 
     gl::vec2 world_mouse{
-        _mouse.x * 2 + _camera_position.x,
-        - _mouse.y * 2 + _height + _camera_position.y};
+        _mouse_window.x * 2 + _camera_position.x,
+        - _mouse_window.y * 2 + _height + _camera_position.y};
     
     gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
         
@@ -497,30 +493,12 @@ void blenderer::render() {
     scribe("Falsches Üben von Xylophonmusik quält jeden größeren Zwerg", { _width / 2, + _font.height });
 }
 
-} // namespace::manic
-
-void renderer::key_up(manic::u32 c) {
-    // we need a hash_set, clearly (or a bound on key things)
-    if (_keyboard_map.contains(c)) {
-        _keyboard_map.erase(c);
-    }
-}
-
-void renderer::key_down(manic::u32 c) {
-    _keyboard_map.insert(c, true);
-}
-
-void renderer::mouse_moved(double x, double y) {
-    _mouse.x = x;
-    _mouse.y = y;
-}
-
-void manic::blenderer::key_down(manic::u32 c) {
-    renderer::key_down(c);
+void game::key_down(u32 c) {
+    application::key_down(c);
     
     gl::vec2 world_mouse{
-        _mouse.x * 2 + _camera_position.x,
-        - _mouse.y * 2 + _height + _camera_position.y};
+        _mouse_window.x * 2 + _camera_position.x,
+        - _mouse_window.y * 2 + _height + _camera_position.y};
     
     gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
     i64 i = selectee.x;
@@ -551,32 +529,28 @@ void manic::blenderer::key_down(manic::u32 c) {
     }
 }
 
-void renderer::mouse_down(manic::u64 x) {
-    std::cout << "mouse_down: " << x << std::endl;
-}
 
-void renderer::mouse_up(manic::u64 x) {
-    std::cout << "mouse_up: " << x << std::endl;
-}
 
-void manic::blenderer::mouse_down(manic::u64 x) {
+void game::mouse_down(u64 x) {
+    application::mouse_down(x);
     if (x != 1)
         return;
     if (_selected_opcode) {
         _selected_opcode = 0;
     } else {
-        gl::vec2 world_mouse(_mouse.x * 2 + _camera_position.x,
-                             - _mouse.y * 2 + _height + _camera_position.y);
+        gl::vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
+                             - _mouse_window.y * 2 + _height + _camera_position.y);
         gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
         _thing._board(selectee.x, selectee.y) = 0;
     }
 }
 
-void manic::blenderer::mouse_up(manic::u64 x) {
+void game::mouse_up(u64 x) {
+    application::mouse_up(x);
     if (x != 0)
         return;
-    gl::vec2 _screen_mouse(_mouse.x * 2,
-                           - _mouse.y * 2 + _height);
+    gl::vec2 _screen_mouse(_mouse_window.x * 2,
+                           - _mouse_window.y * 2 + _height);
     if (_screen_mouse.y > _height - 64) {
         i64 j = _screen_mouse.x;
         j >>= 6;
@@ -585,8 +559,8 @@ void manic::blenderer::mouse_up(manic::u64 x) {
         }
     } else {
         if (_selected_opcode) {
-            gl::vec2 world_mouse(_mouse.x * 2 + _camera_position.x,
-                                 - _mouse.y * 2 + _height + _camera_position.y);
+            gl::vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
+                                 - _mouse_window.y * 2 + _height + _camera_position.y);
             gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
             _thing._board(selectee.x, selectee.y) = _selected_opcode;
             std::cout << "writing" << std::hex << _selected_opcode << std::endl;
@@ -594,11 +568,12 @@ void manic::blenderer::mouse_up(manic::u64 x) {
     }
 }
 
-void renderer::scrolled(double x, double y) {
-}
 
 
-void manic::blenderer::scrolled(double x, double y) {
+void game::scrolled(double x, double y) {
+    application::scrolled(x, y);
     _camera_position.x -= x;
     _camera_position.y -= y;
 }
+
+} // namespace manic
