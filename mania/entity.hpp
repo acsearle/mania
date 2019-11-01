@@ -17,7 +17,9 @@
 
 namespace manic {
 
-struct mcu {
+struct entity {
+    
+    u64 type; // make the type explicit rather than screw with vtbl id
     
     // MCU has a 2d location in a plane of memory cells, instead of a function
     // pointer into 1d memory
@@ -76,20 +78,15 @@ struct mcu {
     
     u64 i; // identity, serial number
     
-};
-
-struct chest {
-    
-    i64 x;
-    i64 y;
-    
-    rleq<u64> _queue;
-    
-};
-
-inline std::ostream& operator<<(std::ostream& s, const manic::mcu& x) {
-    return (s << "{ " << (int) x.x << ", " << (int)x.y << ", " << (int) x.d << " }");
+    static entity* make() {
+        return (entity*) calloc(1, sizeof(entity));
     }
+    
+};
+
+inline std::ostream& operator<<(std::ostream& s, const manic::entity& x) {
+    return s << std::hex << "entity{x=" << x.x << ",y=" << x.y << ",a=" << x.a << ",d=" << x.d << "}";
+}
     
 struct world {
     
@@ -117,26 +114,21 @@ struct world {
     //   existing ones jump forward a bit
     //
     // Idea: each MCU gets a turn every N (=64) ticks.  There are 64 queues,
-    // each MCU lives in one, and each tick executes a whole queue.  A potential
-    // problem is if the queues become unbalanced; balancing them constrains
-    // what we can guarantee about the relative order of forked MCUs?
+    // each MCU lives in one, and each tick executes a whole queue in order.
+    // A potential problem is if the queues become unbalanced; balancing them
+    // constrains what we can guarantee about the relative order of forked
+    // MCUs?
         
-    vector<mcu> _mcus; // list of entities
-    
-    vector<chest> _chests; // list of chests
-    
-    // The world is a 2d grid of 64-bit memory locations.
-    
-    // Impl. details
-    
-    vector<size_t> _died; // indices of entities marked for death
-    vector<mcu> _born; // entities born this tick
-        
+    vector<entity*> _entities[64];
+            
     world();
-    
-    void exec(mcu& x);
+
+    u64 counter = 0;
     
     void tick();
+    
+    void exec(entity&);
+    
             
 }; // struct world
 

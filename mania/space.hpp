@@ -61,7 +61,7 @@ struct space {
     }
 
     T operator()(i64 i, i64 j) const {
-        return read(i, i);
+        return read(i, j);
     }
 
     
@@ -89,7 +89,8 @@ struct space {
             p = &_table.insert(key, matrix<T>(16, 16)).value;
         }
         assert(p);
-        return (*p)(ij.x & MASK, ij.y & MASK);
+        T* q = &(*p)(ij.x & MASK, ij.y & MASK);
+        return *q;
     }
     
     

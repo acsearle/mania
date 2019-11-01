@@ -6,7 +6,7 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
-#include "thing.hpp"
+#include "entity.hpp"
 
 namespace manic {
 
@@ -14,7 +14,9 @@ world::world() {
     
     // _board.resize(256, 256);
     
-    _mcus.push_back(mcu(8, 8, 0x3, 0x10)); // mcu at centre, heading north, primed for 4 loops
+    entity* m = entity::make();
+    m->x = 8; m->y = 8; m->a = 0x3; m->d = 0x10;
+    _entities[0].push_back(m); // mcu at centre, heading north, primed for 4 loops
     
     using namespace instruction;
     
@@ -35,40 +37,10 @@ world::world() {
     
     _board(2, 4) = opcode(kill);
     _board(14, 4) = opcode(kill);
-
-    {
-        chest c;
-        c.x = 12;
-        c.y = 12;
-        c._queue.push_back(1);
-        c._queue.push_back(2);
-        c._queue.push_back(3);
-        c._queue.push_back(4);
-        c._queue.push_back(5);
-        _chests.push_back(c);
-        
-        _board(13, 11) = opcode(decrement, register_d);
-        _board(10, 11) = opcode(decrement, register_d);
-        _board(10, 14) = opcode(decrement, register_d);
-        _board(13, 14) = opcode(decrement, register_d);
-        
-        _mcus.push_back(mcu{13, 12, 0, 0});
-        
-        _board(11, 11) = opcode(instruction::swap, southeast);
-        _board(12, 14) = opcode(instruction::swap, northwest);
-
-        _mcus.push_back(mcu{10, 12, 0, (~0ull << 1)});
-
-
-    }
-
-    // simulate();
-    
-    
     
 }
 
-void world::exec(mcu& x) {
+void world::exec(entity& x) {
     
     // instructions are opcode:target
     // target for operation may be the cell NE SE SW NW or the register
@@ -187,10 +159,11 @@ void world::exec(mcu& x) {
             std::swap(x.a, *p);
             break;
         case kill: // DIE
-            _died.push_back(&x - _mcus.begin());
+            // _died.push_back(&x - _mcus.begin());
+            return; // without moving
             break;
         case fork: { // FORK INTO DIAGONALLY ADJACENT CELL
-            mcu y(x); y.x = u; y.y = v; _born.push_back(y);
+            // mcu y(x); y.x = u; y.y = v; _born.push_back(y);
         } break;
         case conservative_or:
             x.a |= std::exchange(*p, x.a & *p);
@@ -222,62 +195,29 @@ void world::exec(mcu& x) {
             break;
             
     }
+        
+    switch (x.d & 3) {
+        case 0:
+            x.y -= 1;
+            break;
+        case 1:
+            x.x += 1;
+            break;
+        case 2:
+            x.y += 1;
+            break;
+        case 3:
+            x.x -= 1;
+            break;
+    }
+
 }
 
 void world::tick() {
-    
-    for (auto& c : _chests) {
-        if (_board(c.x - 1, c.y + 1)) {
-            c._queue.push_back(_board(c.x - 1, c.y + 1));
-            _board(c.x - 1, c.y + 1) = 0;
-        }
-        if (c._queue.size() && !_board(c.x, c.y))
-            _board(c.x, c.y) = c._queue.pop_front();
+    for (entity* p : _entities[counter & 63]) {
+        exec(*p);
     }
-    
-    for (mcu& x : _mcus) {
-        exec(x);
-    }
-    
-    // process deaths
-    while (_died.size()) {
-        size_t i = _died.pop_back();
-        _mcus.erase(i);
-    }
-    
-    // process births
-    while (_born.size()) {
-        _mcus.push_back(_born.pop_front());
-    }
-    
-    // move mcus
-    for (mcu& x : _mcus) {
-        switch (x.d & 3) {
-            case 0:
-                x.y -= 1;
-                break;
-            case 1:
-                x.x += 1;
-                break;
-            case 2:
-                x.y += 1;
-                break;
-            case 3:
-                x.x -= 1;
-                break;
-        }
-    }
-    
-    /* // With unbounded grid, no need to kill escapees
-    vector<mcu> _news;
-    for (mcu& x : _mcus) {
-        if ((x.x > 0) && (x.y > 0) && (x.x < _board.rows() - 1) && (x.y < _board.columns())) {
-            _news.push_back(x);
-        }
-    }
-    swap(_news, _mcus);
-     */
-    
+    ++counter;
 }
 
-}
+} // namespace manic

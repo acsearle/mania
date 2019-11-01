@@ -24,7 +24,7 @@
 #include "mat.hpp"
 #include "program.hpp"
 #include "text.hpp"
-#include "thing.hpp"
+#include "entity.hpp"
 
 namespace manic {
 
@@ -342,6 +342,8 @@ void game::draw() {
         "clear",
         "compare",
         "and_complement_of",
+        "dump",
+        "halt",
         "0",
         "1",
         "2",
@@ -420,41 +422,31 @@ void game::draw() {
                 }
             }
         }
-        
     }
     
-    
-    for (auto&& a : _thing._chests) {
-        auto u = a.x * 64;
-        auto v = a.y * 64;
-        blit3("chest1", {u - 64, v});
-        blit3("chest2", {u, v});
-        blit3("chest3", {u - 64, v + 64});
-        blit3("chest4", {u, v + 64});
-        
-    }
-    
-    for (auto&& a : _thing._mcus) {
-        auto u = a.x * 64;
-        auto v = a.y * 64;
-        auto f = (-frame) & 63;
-        switch (a.d & 3) {
-            case 0: v += f; break;
-            case 1: u -= f; break;
-            case 2: v -= f; break;
-            case 3: u += f; break;
+    for (u64 i = 0; i != 63; ++i) {
+        for (entity* p : _thing._entities[i]) {
+            auto u = p->x * 64;
+            auto v = p->y * 64;
+            auto f = (i - _thing.counter) & 63;
+            switch (p->d & 3) {
+                case 0: v += f; break;
+                case 1: u -= f; break;
+                case 2: v -= f; break;
+                case 3: u += f; break;
+            }
+            char z[32];
+            sprintf(z, "house%llX", p->d & 3);
+            blit3(z, {u, v});
+            sprintf(z, "%llX", p->a);
+            blit3(z, {u-32, v-32});
+            sprintf(z, "%llX", p->b);
+            blit3(z, {u+32, v-32});
+            sprintf(z, "%llX", p->c);
+            blit3(z, {u+32, v+32});
+            sprintf(z, "%llX", p->d);
+            blit3(z, {u-32, v+32});
         }
-        blit3("house", {u, v});
-        char z[32];
-        sprintf(z, "%llX", a.a);
-        blit3(z, {u-32, v-32});
-        sprintf(z, "%llX", a.b);
-        blit3(z, {u+32, v-32});
-        sprintf(z, "%llX", a.c);
-        blit3(z, {u+32, v+32});
-        sprintf(z, "%llX", a.d);
-        blit3(z, {u-32, v+32});
-
     }
 
     if (_selected_opcode) {
@@ -473,8 +465,8 @@ void game::draw() {
         blit4(v, {i * 64, _height - 64});
     }
              
-    if (!(frame & 63))
-        _thing.tick();
+        
+    _thing.tick();
         
     glClearColor(0.5, 0.6, 0.4, 0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -519,8 +511,10 @@ void game::key_down(u32 c) {
             }
             break;
         case 'q': {
-            mcu m(selectee.x, selectee.y, 0, 0);
-            _thing._mcus.push_back(m);
+            entity* p = entity::make();
+            p->x = selectee.x;
+            p->y = selectee.y;
+            _thing._entities[_thing.counter & 63].push_back(p);
         }
             
         default:
