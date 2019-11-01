@@ -38,9 +38,9 @@ struct entity {
     // zero when entering and leaving a new cell.  Without the microstate, the
     // MCU would always attempt to execute the whole instructon each cycle while
     // blocked.  This is not always desired.
-
+    
     u64 s; // 0: travelling; 1: obstructed; other: instruction defined
-
+    
     // Operations may wait for some conditions to be met, mutate their own state
     // and that of the world, and then wait for more conditions to be met before
     // moving on.  For example, a LOCK instruction waits until a cell is zero,
@@ -51,7 +51,7 @@ struct entity {
     // as they travel through them.  On execution, if state is zero, release
     // the "from" cell indicated by D, perform instruction, then if not
     // waiting, acquire the "to" cell indicated by D.
-       
+    
     // MCU has multiple registers.  These let it carry state as it moves around
     //     A:  The accumulator register.  Instructions involving two locations
     //         usually include accumulator as one of them.  For example,
@@ -85,13 +85,13 @@ struct entity {
 };
 
 inline std::ostream& operator<<(std::ostream& s, const manic::entity& x) {
-    return s << std::hex << "entity{x=" << x.x << ",y=" << x.y << ",a=" << x.a << ",d=" << x.d << "}";
+    return (s << std::hex << "entity{x=" << x.x << ",y=" << x.y << ",a=" << x.a << ",d=" << x.d << "}");
 }
-    
+
 struct world {
     
     // State of world
-
+    
     // The world is a 2D grid of memory cells.  Entities are "above" this plane,
     // terrain is "below" (and mostly cosmetic).
     // The interpretation of the value is complex.  It may either be a value
@@ -118,45 +118,47 @@ struct world {
     // A potential problem is if the queues become unbalanced; balancing them
     // constrains what we can guarantee about the relative order of forked
     // MCUs?
-        
+    
     vector<entity*> _entities[64];
-            
+    
     world();
-
+    
     u64 counter = 0;
     
     void tick();
     
     void exec(entity&);
     
-            
+    
 }; // struct world
 
 
 namespace instruction {
 
-// opcodes
-//
-// opcode_flag     = 0x800000000;
-// opcode_cell     = 0x800000000; // ..3
-// opcode_register = 0x800000004; // ..7
-// opcode_register_a = 0x80000004;
-// opcode_register_d = 0x80000007;
-// opcode_noop     = 0x800000000;
-// opcode_swap
-// opcode_sat_dec_d = 0xA0000007;
-// fork
-// dec d
-// inc d
+// allocation of word:
+// 63: obstruction flag
+// 62: instruction flag
+// 61: opcode
+//   :
+// 31: address
+//   :
+//  2: register flag
+//  1: direction
+//  0: direction
 
-const auto INSTRUCTION_FLAG = 0x8000000000000000ull;
-const auto NUMBER_MASK = ~INSTRUCTION_FLAG;
+const u64 OBSTRUCTION_FLAG = 0x8000'0000'0000'0000ull;
+const u64 OBSTRUCTION_MASK = 0x8000'0000'0000'0000ull;
 
-const auto OPCODE_SHIFT = 32;
-const auto OPCODE_MASK = ((~0ull) << OPCODE_SHIFT) ^ INSTRUCTION_FLAG;
+const u64 INSTRUCTION_FLAG = 0x4000'0000'0000'0000ull;
+const u64 NUMBER_MASK =      0x3FFF'FFFF'FFFF'FFFFull;
 
-const auto ADDRESS_SHIFT = 0;
-const auto ADDRESS_MASK = 7;
+const u64 OPCODE_SHIFT = 32;
+const u64 OPCODE_MASK = 0x3FFF'FFFF'0000'0000ull;
+
+const u64 ADDRESS_SHIFT = 0x000ull;
+const u64 ADDRESS_MASK = 0x0007ull;
+
+const u64 REGISTER_FLAG = 0x0004ull;
 
 enum opcode_enum : u64 {
     noop,
@@ -198,7 +200,7 @@ enum address_enum : u64 {
     register_c,
     register_d,
 };
-    
+
 inline u64 opcode(opcode_enum op, address_enum ad = northeast) {
     return INSTRUCTION_FLAG | (op << OPCODE_SHIFT) | (ad << ADDRESS_SHIFT);
 }
