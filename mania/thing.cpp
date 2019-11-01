@@ -82,6 +82,7 @@ void world::exec(mcu& x) {
     u64 opcode_ = (instruction_ & OPCODE_MASK) >> OPCODE_SHIFT;
     u64 target = instruction_ & ADDRESS_MASK;
     u64* p = nullptr;
+    u64* q = nullptr;
     
     // resolve what we are operating on - a nearby cell or a register
     switch (target) {
@@ -115,21 +116,36 @@ void world::exec(mcu& x) {
             break;
     }
     
+    switch (x.d & 3) {
+        case 0:
+            q = &_board(x.x, x.y - 1);
+            break;
+        case 1:
+            q = &_board(x.x + 1, x.y);
+            break;
+        case 2:
+            q = &_board(x.x, x.y + 1);
+            break;
+        case 3:
+            q = &_board(x.x - 1, x.y);
+            break;
+    }
+
     // perform the operation
     switch (opcode_) {
         case noop: // NOOP
             
             break;
-        case load: // LOAD
+        case load: // LOAD target into accumulator
             x.a = *p;
             break;
-        case store: // STORE
+        case store: // STORE accumulator into target
             *p = x.a;
             break;
-        case add: // ADD
+        case add: // ADD target to accumulator
             x.a += *p;
             break;
-        case sub: // SUB
+        case sub: // SUB target from accumulator
             x.a -= *p;
             break;
         case bitwise_and: // AND
@@ -194,8 +210,15 @@ void world::exec(mcu& x) {
         case compare:
             x.d = (*p < x.a) - (x.a < *p);
             break;
+        case dump:
+            *q = x.a;
+            x.a = 0;
+            x.d += 2;
+            break;
+        case halt:
+            x.s = 2;
         default:
-            
+    
             break;
             
     }

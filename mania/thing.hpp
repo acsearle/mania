@@ -25,13 +25,47 @@ struct mcu {
     i64 x;
     i64 y;
     
-    // MCU has a single register currently.  Last two bits encode direction it
-    // moves (NESW).  One register (and 8 bit opcodes) may not be sufficient
+    // MCU has a 'microstate' that allows it to perform operations over multiple
+    // cycles.  The most common is being obstructed, where it must wait for
+    // the cell ahead to clear before it can move on.  It can also be used to
+    // wait for conditions to be met (input cell nonzero, output cell zero)
+    // that can be used to construct locks, barriers, wait_load, wait_store.
+    // Never use the microstate to smuggle information between cells; this is
+    // what the registers are for, and nonzero values have different meanings
+    // in different cells / instructions anyway.  The microstate is always
+    // zero when entering and leaving a new cell.  Without the microstate, the
+    // MCU would always attempt to execute the whole instructon each cycle while
+    // blocked.  This is not always desired.
+
+    u64 s; // 0: travelling; 1: obstructed; other: instruction defined
+
+    // Operations may wait for some conditions to be met, mutate their own state
+    // and that of the world, and then wait for more conditions to be met before
+    // moving on.  For example, a LOCK instruction waits until a cell is zero,
+    // then writes one to it, then proceeds.  A BARRIER instruction decrements
+    // a cell, then waits until the cell is zero, then proceeds.
     
-    u64 a;
+    // If MCUs are physical, the operations must also reserve and release cells
+    // as they travel through them.  On execution, if state is zero, release
+    // the "from" cell indicated by D, perform instruction, then if not
+    // waiting, acquire the "to" cell indicated by D.
+       
+    // MCU has multiple registers.  These let it carry state as it moves around
+    //     A:  The accumulator register.  Instructions involving two locations
+    //         usually include accumulator as one of them.  For example,
+    //         addition is perfromed by adding a value from a memory cell or
+    //         register to the accumulator, A = A + *addr
+    //     B:  General-purpose register
+    //     C:  General-purpose register
+    //     D:  The direction register.  The last two bits control the direction
+    //         the MCU is travelling (0123 -> NESW).  Conditional instructions
+    //         like "<" write their output to the direction register, as in
+    //         right-turn-if-less-than D += (A < *addr)
+    
+    u64 a; // accumulator
     u64 b;
     u64 c;
-    u64 d;
+    u64 d; // direction
     
     // Each tick, the MCU reads its instruction from the cell it is "at".  The
     // instruction may address only the diagonally adjacent cells for read write
@@ -40,12 +74,7 @@ struct mcu {
     // Code and data are mingled together, but diagonal access means it is easy
     // to keep them locally separate on two complementary grids.
     
-    mcu(u64 x_, u64 y_, u64 a_, u64 d_)
-    : x(x_)
-    , y(y_)
-    , a(a_)
-    , d(d_) {
-    }
+    u64 i; // identity, serial number
     
 };
 
@@ -65,10 +94,35 @@ inline std::ostream& operator<<(std::ostream& s, const manic::mcu& x) {
 struct world {
     
     // State of world
+
+    // The world is a 2D grid of memory cells.  Entities are "above" this plane,
+    // terrain is "below" (and mostly cosmetic).
+    // The interpretation of the value is complex.  It may either be a value
+    // or an opcode.  One bit is reserved to indicate if an MCU may enter the
+    // cell; MCUs lock and unlock cells using this mechanism as they move
+    // around the board, preventing collisions (like Factorio, deadlock is
+    // possible if there are N MCUs in a loop of N nodes; unlike Factorio, the
+    // MCUs have unit extent and thus cannot deadlock #-shaped intersections)
     
-    // matrix<u64> _board; // 2d grid of memory cells
     space<u64> _board;
+    
+    // MCUs take turns to act on the board.  A queue is the obvious data
+    // structure.  However, we want to spread the computational load across
+    // each frame, and we want MCUs to move at a predictable speed.
+    // * If we exec all MCUs in one frame, load spike
+    // * If we dispatch to another CPU, we have to clone data
+    // * If we process some one MCU each frame, they get slower as there are
+    //   more (even if CPU is not loaded)
+    // * If we process some fraction each frame, adding more MCUs makes the
+    //   existing ones jump forward a bit
+    //
+    // Idea: each MCU gets a turn every N (=64) ticks.  There are 64 queues,
+    // each MCU lives in one, and each tick executes a whole queue.  A potential
+    // problem is if the queues become unbalanced; balancing them constrains
+    // what we can guarantee about the relative order of forked MCUs?
+        
     vector<mcu> _mcus; // list of entities
+    
     vector<chest> _chests; // list of chests
     
     // The world is a 2d grid of 64-bit memory locations.
@@ -137,6 +191,8 @@ enum opcode_enum : u64 {
     clear,
     compare,
     and_complement_of,
+    dump,
+    halt,
     _opcode_enum_size
 };
 

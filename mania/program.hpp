@@ -15,11 +15,6 @@
 #include "string.hpp"
 #include "vec.hpp"
 
-namespace gl {
-
-using manic::string;
-using manic::vec;
-
 inline void glUniform(GLint location, GLint v0) {
     glUniform1i(location, v0);
 }
@@ -28,9 +23,14 @@ inline void glUniform(GLuint location, GLfloat v0) {
     glUniform1f(location, v0);
 }
 
-inline void glUniform(GLuint location, const vec<GLfloat, 4>& value) {
+inline void glUniform(GLuint location, const manic::vec<GLfloat, 4>& value) {
     glUniform4fv(location, 1, value.data());
 }
+
+namespace gl {
+
+using manic::string;
+using manic::vec;
 
 class shader;
 

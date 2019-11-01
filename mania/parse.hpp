@@ -17,9 +17,16 @@ namespace manic {
 //
 // (string_view&) -> bool
 
-inline auto parse_literal(u32 c) {
+inline auto parse_character(u32 c) {
     return [=](string_view& v) {
         return v && (*v == c) && ((void) ++v, true);
+    };
+}
+
+template<typename Predicate>
+auto parse_character_predicate(Predicate predicate) {
+    return [=](string_view& v) {
+        return v && predicate(*v) && ((void) ++v, true);
     };
 }
 
