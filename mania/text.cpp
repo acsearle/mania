@@ -65,7 +65,7 @@ font build_font(atlas& atl) {
         //dilate(u);
         
         sprite s = atl.place(u,
-                             gl::vec2(-face->glyph->bitmap_left,
+                             vec2(-face->glyph->bitmap_left,
                                       +face->glyph->bitmap_top));
         
         float advance = face->glyph->advance.x * 0.015625f;

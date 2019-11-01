@@ -128,7 +128,7 @@ namespace manic {
         double e = std::accumulate(c.begin(), c.end(), 0.0);
         for (ptrdiff_t i = 0; i != b.rows(); ++i)
             for (ptrdiff_t j = 0; j != b.columns(); ++j) {
-                gl::vec<double, 4> f = 0.0;
+                vec<double, 4> f = 0.0;
                 for (ptrdiff_t k = 0; k != 5; ++k)
                     f += b(i, j + k) * d[k];
                 a(i, j) = f / e;
@@ -145,8 +145,8 @@ bool is_blank(const_matrix_view<pixel> v) {
     return true;
 }
 
-gl::vec<i64, 2> prune(matrix_view<pixel>& v) {
-    gl::vec<i64, 2> o(0, 0);
+vec<i64, 2> prune(matrix_view<pixel>& v) {
+    vec<i64, 2> o(0, 0);
     while (v.rows() && is_blank(v.sub(0, 0, 1, v.columns()))) {
         ++o.y;
         v = v.sub(1, 0, v.rows() - 1, v.columns());

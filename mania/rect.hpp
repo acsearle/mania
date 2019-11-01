@@ -23,7 +23,7 @@ class rect {
     
 public:
     
-    gl::vec<T, 2> a, b;
+    vec<T, 2> a, b;
     
     bool invariant() const {
         return (a.x <= b.x) && (a.y <= b.y);
@@ -31,8 +31,8 @@ public:
     
     rect(const rect&) = default;
     
-    rect(const gl::vec<T, 2>& x,
-         const gl::vec<T, 2>& y)
+    rect(const vec<T, 2>& x,
+         const vec<T, 2>& y)
     : a(x)
     , b(y) {
     }
@@ -50,7 +50,7 @@ public:
             swap(a.y, b.y);
     }
     
-    gl::vec<T, 2> size() const { return b - a; }
+    vec<T, 2> size() const { return b - a; }
     
     T width() const { return b.x - a.x; }
     T height() const { return b.y - a.y; }

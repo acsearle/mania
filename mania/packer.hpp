@@ -41,7 +41,7 @@ namespace manic {
             _free.insert(r);
         }
         
-        gl::vec<T, 2> place(gl::vec<T, 2> wh) {
+        vec<T, 2> place(vec<T, 2> wh) {
             
             // Start with the smallest free rectangle with enough area
             auto i = _free.lower_bound(rect(0, 0, wh.x, wh.y));
@@ -57,7 +57,7 @@ namespace manic {
             _free.erase(i);
             
             // Compute the new corner
-            gl::vec c(old.a + wh);
+            vec c(old.a + wh);
             
             // Compute which split yields a bigger free rectangle
             if (((old.b.x - old.a.x) * (old.b.y - c.y)) >= ((old.b.x - c.x) * (old.b.y - old.a.y))) {
@@ -77,7 +77,7 @@ namespace manic {
             
         }
         
-        void release(gl::vec<T, 2> a, gl::vec<T, 2> b) {
+        void release(vec<T, 2> a, vec<T, 2> b) {
             _free.emplace(a, b);
         }
         

@@ -36,7 +36,7 @@ table3<string, sprite> load_asset(string_view asset_name, atlas& atl) {
         for (size_t j = 0; j != e.size(); ++j) {
             result.insert(e[j].as_string(),
                           atl.place(a.sub(i * c, j * c, c, c),
-                                    gl::vec2(0, 0)));
+                                    vec2(0, 0)));
         }
         
     }

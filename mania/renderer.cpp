@@ -42,7 +42,7 @@ struct game : application {
     
     world _thing;
     
-    gl::vec<i64, 2> _camera_position;
+    vec<i64, 2> _camera_position;
     string _text;
     
     short _lineheight;
@@ -54,18 +54,18 @@ struct game : application {
     void resize(usize width, usize height) override;
     void draw() override;
     
-    void scribe(string_view, gl::vec2 xy);
+    void scribe(string_view, vec2 xy);
 
-    void blit3(string_view v, gl::vec2 xy);
-    void blit4(string_view v, gl::vec2 xy);
-    void blit5(string_view v, gl::vec2 xy);
+    void blit3(string_view v, vec2 xy);
+    void blit4(string_view v, vec2 xy);
+    void blit5(string_view v, vec2 xy);
 
     virtual void key_down(u32) override;
     virtual void mouse_up(u64) override;
     virtual void mouse_down(u64) override;
     virtual void scrolled(double x, double y) override;
 
-    gl::vec2 bound(string_view v);
+    vec2 bound(string_view v);
 
     sprite _solid;
 
@@ -204,7 +204,7 @@ void game::resize(usize width, usize height) {
     
 }
 
-void game::blit3(string_view v, gl::vec2 xy) {
+void game::blit3(string_view v, vec2 xy) {
     if (auto p = _tiles.try_get(v)) {
         xy.x -= _camera_position.x;
         xy.y -= _camera_position.y;
@@ -212,12 +212,12 @@ void game::blit3(string_view v, gl::vec2 xy) {
     }
 }
 
-void game::blit4(string_view v, gl::vec2 xy) {
+void game::blit4(string_view v, vec2 xy) {
     if (auto p = _tiles.try_get(v))
         _atlas.push_sprite_translated(*p, xy);
 }
 
-void game::blit5(string_view v, gl::vec2 xy) {
+void game::blit5(string_view v, vec2 xy) {
     if (auto p = _tiles.try_get(v)) {
         auto s = *p;
         s.a.color *= 0.5f;
@@ -227,7 +227,7 @@ void game::blit5(string_view v, gl::vec2 xy) {
 }
 
 
-void game::scribe(string_view v, gl::vec2 xy) {
+void game::scribe(string_view v, vec2 xy) {
     {
         _solid.a.position = xy;
         _solid.b.position = xy + bound(v);;
@@ -257,8 +257,8 @@ void game::scribe(string_view v, gl::vec2 xy) {
     }
 }
 
-gl::vec2 game::bound(string_view v) {
-    gl::vec2 xy{0, _font.ascender - _font.descender};
+vec2 game::bound(string_view v) {
+    vec2 xy{0, _font.ascender - _font.descender};
     float x = 0.0f;
     while (v) {
         u32 c = *v; ++v;
@@ -311,11 +311,11 @@ void game::draw() {
         _camera_position.x += 2;
     }
 
-    gl::vec2 world_mouse{
+    vec2 world_mouse{
         _mouse_window.x * 2 + _camera_position.x,
         - _mouse_window.y * 2 + _height + _camera_position.y};
     
-    gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
+    vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
         
     static const char* _translate[] = {
         "noop",
@@ -458,7 +458,7 @@ void game::draw() {
     }
 
     if (_selected_opcode) {
-        gl::vec2 offset(-16, -16);
+        vec2 offset(-16, -16);
         using namespace instruction;
         blit5(translate(_selected_opcode), selectee * 64 - _camera_position);
         blit5(_translate[((_selected_opcode) & 7) + _opcode_enum_size + 16], selectee * 64 - _camera_position);
@@ -486,21 +486,20 @@ void game::draw() {
     {
         char s[128];
         auto new_t = mach_absolute_time();
-        sprintf(s, "%.2f ms | %lu quads\n%dx%d\nf%d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
+        sprintf(s, "%.2f ms | %lu quads\n%lux%lu\nf%d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
         scribe(s, {_font.charmap[' '].advance, _font.height});
     }
     
-    scribe("Falsches Üben von Xylophonmusik quält jeden größeren Zwerg", { _width / 2, + _font.height });
 }
 
 void game::key_down(u32 c) {
     application::key_down(c);
     
-    gl::vec2 world_mouse{
+    vec2 world_mouse{
         _mouse_window.x * 2 + _camera_position.x,
         - _mouse_window.y * 2 + _height + _camera_position.y};
     
-    gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
+    vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
     i64 i = selectee.x;
     i64 j = selectee.y;
     
@@ -538,9 +537,9 @@ void game::mouse_down(u64 x) {
     if (_selected_opcode) {
         _selected_opcode = 0;
     } else {
-        gl::vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
+        vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
                              - _mouse_window.y * 2 + _height + _camera_position.y);
-        gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
+        vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
         _thing._board(selectee.x, selectee.y) = 0;
     }
 }
@@ -549,7 +548,7 @@ void game::mouse_up(u64 x) {
     application::mouse_up(x);
     if (x != 0)
         return;
-    gl::vec2 _screen_mouse(_mouse_window.x * 2,
+    vec2 _screen_mouse(_mouse_window.x * 2,
                            - _mouse_window.y * 2 + _height);
     if (_screen_mouse.y > _height - 64) {
         i64 j = _screen_mouse.x;
@@ -559,9 +558,9 @@ void game::mouse_up(u64 x) {
         }
     } else {
         if (_selected_opcode) {
-            gl::vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
+            vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
                                  - _mouse_window.y * 2 + _height + _camera_position.y);
-            gl::vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
+            vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
             _thing._board(selectee.x, selectee.y) = _selected_opcode;
             std::cout << "writing" << std::hex << _selected_opcode << std::endl;
         }

@@ -25,7 +25,7 @@ namespace manic {
         
         matrix<u8> _tiles;
         
-        std::vector<gl::vec<f32, 2>> _entities;
+        std::vector<vec<f32, 2>> _entities;
         
         chunk(isize i_, isize j_);
         

@@ -37,7 +37,7 @@ void atlas::discard() {
     _vertices.clear();
 }
 
-sprite atlas::place(const_matrix_view<pixel> v, gl::vec2 origin) {
+sprite atlas::place(const_matrix_view<pixel> v, vec2 origin) {
     auto tl = _packer.place({(GLsizei) v.columns(), (GLsizei) v.rows()});
     glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) v.stride());
     glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
@@ -53,14 +53,14 @@ sprite atlas::place(const_matrix_view<pixel> v, gl::vec2 origin) {
     s.a.texCoord = tl / (float) _size;
     s.a.color = {255, 255, 255, 255};
     s.b.position = { v.columns() - origin.x, v.rows() - origin.y };
-    s.b.texCoord = gl::vec2{ tl.x + v.columns(), tl.y + v.rows() } / _size;
+    s.b.texCoord = vec2{ tl.x + v.columns(), tl.y + v.rows() } / _size;
     s.b.color = s.a.color;
     return s;
 }
 
 void atlas::release(sprite s) {
-    gl::vec<GLint, 2> a = s.a.texCoord * _size;
-    gl::vec<GLint, 2> b = s.b.texCoord * _size;
+    vec<GLint, 2> a = s.a.texCoord * _size;
+    vec<GLint, 2> b = s.b.texCoord * _size;
     _packer.release(a, b);
 }
 

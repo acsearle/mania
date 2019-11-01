@@ -19,7 +19,7 @@ struct application {
     
     table3<u32, bool> _keyboard_state;
     u64 _mouse_state;
-    gl::vec<double, 2> _mouse_window;
+    vec<double, 2> _mouse_window;
     
     application() = default;
     application(const application&) = delete;

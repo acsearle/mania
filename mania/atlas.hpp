@@ -62,7 +62,7 @@ struct atlas {
         _vertices.push_back(s.b);
     }
     
-    void push_atlas_translated(gl::vec2 v) {
+    void push_atlas_translated(vec2 v) {
         // Draw the whole texture, typically for debugging
         push_sprite({{{v.x, v.y}, {0, 0}}, {{v.x + _size, v.y + _size}, {1, 1}}});
     }
@@ -77,7 +77,7 @@ struct atlas {
         _vertices.push_back(v[3]);
     }
     
-    void push_sprite_translated(sprite s, gl::vec2 v) {
+    void push_sprite_translated(sprite s, vec2 v) {
         s.a.position += v;
         s.b.position += v;
         push_sprite(s);
@@ -87,7 +87,7 @@ struct atlas {
     
     void discard();
     
-    sprite place(const_matrix_view<pixel>, gl::vec2 origin = { 0, 0 });
+    sprite place(const_matrix_view<pixel>, vec2 origin = { 0, 0 });
     
     void release(sprite);
     

@@ -16,6 +16,8 @@
 #include <OpenGL/gl3.h>
 
 namespace gl {
+
+using namespace manic;
     
     enum class attribute {
         position,
@@ -34,10 +36,10 @@ namespace gl {
     // Infer format from a struct
     
     template<typename T> constexpr GLenum format = GL_RED;
-    template<typename T> constexpr GLenum format<gl::vec<T, 1>> = GL_RED;
-    template<typename T> constexpr GLenum format<gl::vec<T, 2>> = GL_RG;
-    template<typename T> constexpr GLenum format<gl::vec<T, 3>> = GL_RGB;
-    template<typename T> constexpr GLenum format<gl::vec<T, 4>> = GL_RGBA;
+    template<typename T> constexpr GLenum format<vec<T, 1>> = GL_RED;
+    template<typename T> constexpr GLenum format<vec<T, 2>> = GL_RG;
+    template<typename T> constexpr GLenum format<vec<T, 3>> = GL_RGB;
+    template<typename T> constexpr GLenum format<vec<T, 4>> = GL_RGBA;
     
     
     // Infer type from a struct
@@ -45,16 +47,16 @@ namespace gl {
     template<typename T> GLenum type;
     
     template<> constexpr GLenum type<GLubyte> = GL_UNSIGNED_BYTE;
-    template<std::size_t N> constexpr GLenum type<gl::vec<GLubyte, N>> = GL_UNSIGNED_BYTE;
+    template<std::size_t N> constexpr GLenum type<vec<GLubyte, N>> = GL_UNSIGNED_BYTE;
     
     template<> constexpr GLenum type<GLfloat> = GL_FLOAT;
-    template<std::size_t N> constexpr GLenum type<gl::vec<GLfloat, N>> = GL_FLOAT;
+    template<std::size_t N> constexpr GLenum type<vec<GLfloat, N>> = GL_FLOAT;
     
     
     // Infer size from a struct
     
     template<typename T> constexpr GLint size = 1;
-    template<typename T, std::size_t N> constexpr GLint size<gl::vec<T, N>> = (GLint) N;
+    template<typename T, std::size_t N> constexpr GLint size<vec<T, N>> = (GLint) N;
 
     
 

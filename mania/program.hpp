@@ -18,6 +18,7 @@
 namespace gl {
 
 using manic::string;
+using manic::vec;
 
 inline void glUniform(GLint location, GLint v0) {
     glUniform1i(location, v0);

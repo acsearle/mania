@@ -15,8 +15,6 @@
 
 namespace manic {
     
-    using gl::vec;
-    
     struct circle {
         
         vec<double, 2> center;
@@ -50,7 +48,6 @@ namespace manic {
     
     
     
-    using namespace gl;
     
     struct Triel {
         vec<double, 2> *pts; // pointer to array of points

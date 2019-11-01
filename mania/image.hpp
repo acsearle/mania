@@ -27,7 +27,7 @@ namespace manic {
 
     
 
-    using pixel = gl::vec<unsigned char, 4>;
+    using pixel = vec<unsigned char, 4>;
 
     /*
     template<typename T>
@@ -125,7 +125,7 @@ void compose(matrix_view<pixel> background, const_matrix_view<pixel> foreground)
     }
 */
 
-gl::vec<i64, 2> prune(matrix_view<pixel>& a);
+vec<i64, 2> prune(matrix_view<pixel>& a);
 
 }
 

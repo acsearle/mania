@@ -17,7 +17,7 @@
 #include "common.hpp"
 #include "hash.hpp"
 
-namespace gl {
+namespace manic {
     
     template<typename T, std::size_t N>
     class vec;
@@ -333,12 +333,7 @@ return a;\
             c += a[i] * b[i];
         return c;
     }
-    
-    template<typename T>
-    auto sqr(const T& a) {
-        return a * a;
-    }
-    
+        
     template<typename T, std::size_t N>
     auto sqr(const vec<T, N>& a) {
         static_assert(N, "");
@@ -437,13 +432,9 @@ return a;\
     using uvec3 = vec<uint, 3>;
     using uvec4 = vec<uint, 4>;
 
-}
-
-namespace gl {
-    
-    template<typename T, manic::usize N>
-    manic::u64 hash(const gl::vec<T, N>& x) {
-        return manic::hash_combine(&x, sizeof(x));
+    template<typename T, usize N>
+    u64 hash(const vec<T, N>& x) {
+        return hash_combine(&x, sizeof(x));
     }
 
 }

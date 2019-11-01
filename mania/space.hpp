@@ -21,16 +21,16 @@ struct space {
     // to speed lookup, consider
     // * reducing depth of indices
     // * storing T* instead and constructing view from implicit 16x16 knowledge
-    mutable table3<gl::vec<i64, 2>, matrix<T>> _table;
+    mutable table3<vec<i64, 2>, matrix<T>> _table;
     
     static const i64 N = 16;
     static const i64 MASK = N - 1;
     
-    static gl::vec<i64, 2> _make_key(gl::vec<i64, 2> ij) {
-        return gl::vec<i64, 2>{ij.x & ~MASK, ij.y & ~MASK};
+    static vec<i64, 2> _make_key(vec<i64, 2> ij) {
+        return vec<i64, 2>{ij.x & ~MASK, ij.y & ~MASK};
     }
     
-    T& _get_unsafe(gl::vec<i64, 2> ij) const {
+    T& _get_unsafe(vec<i64, 2> ij) const {
         auto key = _make_key(ij);
         // perfect location for entry API
         auto p = _table.try_get(key);
@@ -41,24 +41,24 @@ struct space {
         return (*p)(ij.x & MASK, ij.y & MASK);
     }
     
-    T& operator()(gl::vec<i64, 2> ij) {
+    T& operator()(vec<i64, 2> ij) {
         return _get_unsafe(ij);
     }
 
-    T const& operator()(gl::vec<i64, 2> ij) const {
+    T const& operator()(vec<i64, 2> ij) const {
         return _get_unsafe(ij);
     }
     
     T& operator()(i64 i, i64 j) {
-        return _get_unsafe(gl::vec<i64, 2>{i, j});
+        return _get_unsafe(vec<i64, 2>{i, j});
     }
 
     T const& operator()(i64 i, i64 j) const {
-        return _get_unsafe(gl::vec<i64, 2>{i, j});
+        return _get_unsafe(vec<i64, 2>{i, j});
     }
 
     
-    bool contains(gl::vec<i64, 2> ij) const {
+    bool contains(vec<i64, 2> ij) const {
         return _table.contains(_make_key(ij));
     }
 

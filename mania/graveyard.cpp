@@ -551,12 +551,12 @@ double uniform() {
     return rand() / (double) RAND_MAX;
 }
 
-float norm(gl::vec2 v) {
+float norm(vec2 v) {
     return v[0] * v[0] + v[1] * v[1];
 }
 
-gl::vec2 disk() {
-    gl::vec2 v;
+vec2 disk() {
+    vec2 v;
     do {
         v = vec2(uniform(), uniform()) * 2 - 1;
     } while (norm(v) > 1.0);
@@ -729,7 +729,7 @@ void blenderer::render() {
     
     glViewport(0, 0, std::min(_width, _height), std::min(_width, _height));
     
-    gl::vec2 gravity;
+    vec2 gravity;
     gravity[0] = 0;
     gravity[1] = -9.8/60.0/60.0/64.0;
     
@@ -948,7 +948,7 @@ void blenderer::render() {
     }
     
     
-    std::vector<gl::vec<double, 2>> vx;
+    std::vector<vec<double, 2>> vx;
     vx.reserve(_vertices.size());
     for (auto& a : _vertices)
         vx.push_back(a.position);
@@ -1211,9 +1211,9 @@ matrix<double> convolve(const_matrix_view<double> a, const_matrix_view<double> b
 }
 
 pixel hue(double s) {
-    gl::vec<double, 3> mid(0.5, 0.5, 0.5);
-    gl::vec<double, 3> red(1.0, 0.0, 0.0);
-    gl::vec<double, 3> green = cross(mid, red);
+    vec<double, 3> mid(0.5, 0.5, 0.5);
+    vec<double, 3> red(1.0, 0.0, 0.0);
+    vec<double, 3> green = cross(mid, red);
     red = cross(mid, green);
     red /= length(red);
     red *= std::hypot(0.5, 0.25, 0.25);

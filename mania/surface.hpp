@@ -19,7 +19,7 @@
 namespace manic {
     
     struct surface
-    : table3<gl::vec<ptrdiff_t, 2>, chunk> {
+    : table3<vec<ptrdiff_t, 2>, chunk> {
         
         void instantiate(ptrdiff_t i, ptrdiff_t j);
         

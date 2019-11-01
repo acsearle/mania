@@ -198,8 +198,8 @@ namespace manic {
         return (ntree - 1);
     }
     
-    vector<gl::vec<int,3>> Delaunay::triangles() const {
-        vector<gl::vec<int,3>> r;
+    vector<vec<int,3>> Delaunay::triangles() const {
+        vector<vec<int,3>> r;
         auto b = thelist.data();
         auto e = b + ntree;
         for (; b != e; ++b)
