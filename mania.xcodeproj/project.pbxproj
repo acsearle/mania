@@ -62,6 +62,9 @@
 		CAEB6609236C34A400C28580 /* reflector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6606236C34A400C28580 /* reflector.cpp */; };
 		CAEB660A236C34A400C28580 /* reflector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6606236C34A400C28580 /* reflector.cpp */; };
 		CAEB660B236C3B9100C28580 /* enum.hpp in Resources */ = {isa = PBXBuildFile; fileRef = CAD3B24423680864001DA73B /* enum.hpp */; };
+		CAEB660E236D3B3500C28580 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB660C236D3B3500C28580 /* animation.cpp */; };
+		CAEB660F236D3B3500C28580 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB660C236D3B3500C28580 /* animation.cpp */; };
+		CAEB6610236D3B3500C28580 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB660C236D3B3500C28580 /* animation.cpp */; };
 		CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
@@ -198,6 +201,8 @@
 		CAEB6602236AE3BB00C28580 /* space.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = space.hpp; sourceTree = "<group>"; };
 		CAEB6606236C34A400C28580 /* reflector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = reflector.cpp; sourceTree = "<group>"; };
 		CAEB6607236C34A400C28580 /* reflector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = reflector.hpp; sourceTree = "<group>"; };
+		CAEB660C236D3B3500C28580 /* animation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = animation.cpp; sourceTree = "<group>"; };
+		CAEB660D236D3B3500C28580 /* animation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = animation.hpp; sourceTree = "<group>"; };
 		CAEECDFA235A5ABD002D1E2F /* sentinel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sentinel.h; sourceTree = "<group>"; };
 		CAEECDFB235BD649002D1E2F /* unicode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = unicode.cpp; sourceTree = "<group>"; };
 		CAEECDFC235BD649002D1E2F /* unicode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = unicode.hpp; sourceTree = "<group>"; };
@@ -432,6 +437,8 @@
 		CAF889D71F198B2D005956A9 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				CAEB660C236D3B3500C28580 /* animation.cpp */,
+				CAEB660D236D3B3500C28580 /* animation.hpp */,
 				CAD3B24A23695080001DA73B /* application.cpp */,
 				CAD3B24B23695080001DA73B /* application.hpp */,
 				CAD3B23A2366B3FB001DA73B /* asset.cpp */,
@@ -443,6 +450,8 @@
 				CADB9B44202C282000415C1B /* debug.hpp */,
 				CAD3B2222362CDC6001DA73B /* elements.cpp */,
 				CAD3B2232362CDC6001DA73B /* elements.hpp */,
+				CAEECE00235EE674002D1E2F /* entity.cpp */,
+				CAEECE01235EE674002D1E2F /* entity.hpp */,
 				CAD3B24423680864001DA73B /* enum.hpp */,
 				CA0EB1402222524300DAE8CF /* f8.hpp */,
 				CA72B7BA221A8C4600AC9441 /* gl */,
@@ -471,8 +480,6 @@
 				CA0EB12A22201ADB00DAE8CF /* terrain.hpp */,
 				CA0EB14C222F9BA000DAE8CF /* text.cpp */,
 				CA0EB14D222F9BA000DAE8CF /* text.hpp */,
-				CAEECE00235EE674002D1E2F /* entity.cpp */,
-				CAEECE01235EE674002D1E2F /* entity.hpp */,
 				CA72B7BC221A8EE200AC9441 /* utility */,
 			);
 			name = src;
@@ -619,6 +626,7 @@
 				CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */,
 				CAD3B21B236064FD001DA73B /* json.cpp in Sources */,
 				CAD3B24D23695080001DA73B /* application.cpp in Sources */,
+				CAEB660F236D3B3500C28580 /* animation.cpp in Sources */,
 				CAD3B2382365919E001DA73B /* atlas.cpp in Sources */,
 				CAD3B248236808D0001DA73B /* parse.cpp in Sources */,
 				CAEB6604236AE3BB00C28580 /* space.cpp in Sources */,
@@ -653,6 +661,7 @@
 				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
 				CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */,
 				CAD3B24E23695080001DA73B /* application.cpp in Sources */,
+				CAEB6610236D3B3500C28580 /* animation.cpp in Sources */,
 				CAEB660A236C34A400C28580 /* reflector.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -683,6 +692,7 @@
 				CAF889E91F1CC3B6005956A9 /* nr.cpp in Sources */,
 				CAF889BD1F14DFCF005956A9 /* renderer.cpp in Sources */,
 				CA0EB12B22201ADB00DAE8CF /* terrain.cpp in Sources */,
+				CAEB660E236D3B3500C28580 /* animation.cpp in Sources */,
 				CAF889A61F14D618005956A9 /* AppDelegate.m in Sources */,
 				CAD3B21A236064FD001DA73B /* json.cpp in Sources */,
 				CA0EB14E222F9BA000DAE8CF /* text.cpp in Sources */,

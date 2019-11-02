@@ -64,7 +64,9 @@ struct atlas {
     
     void push_atlas_translated(vec2 v) {
         // Draw the whole texture, typically for debugging
-        push_sprite({{{v.x, v.y}, {0, 0}}, {{v.x + _size, v.y + _size}, {1, 1}}});
+        push_sprite(
+                {{{v.x, v.y}, {0, 0}, {255,255,255,255}},
+            {{v.x + _size, v.y + _size}, {1, 1}, {255,255,255,255}}});
     }
     
     void push_quad(gl::vertex v[]) {

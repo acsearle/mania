@@ -65,6 +65,9 @@ void world::exec(entity& x) {
         }
         *q &= ~OBSTRUCTION_FLAG;
     }
+    
+    // newborn entities need to skip to here and not overwrite the cell their
+    // direction indicates they came from
 
     if (x.s != exiting) {
         i64 u = x.x;
@@ -162,7 +165,6 @@ void world::exec(entity& x) {
                     --*p;
                 break;
             case increment: // INC
-                std::cout << "incrementing" << std::endl;
                 ++*p;
                 break;
             case increment_saturate: // SATURATING INCREMENT (TURN CW IF DIRECTION NONZERO)
@@ -183,14 +185,16 @@ void world::exec(entity& x) {
             case instruction::swap:
                 std::swap(x.a, *p);
                 break;
-            case kill: // DIE
-                // _died.push_back(&x - _mcus.begin());
-                x.s = 2;
-                return; // without moving
+
+            case kill:
+                // how to remove self from queue, while iterating?
+                x.s = waiting;
                 break;
-            case fork: { // FORK INTO DIAGONALLY ADJACENT CELL
-                // mcu y(x); y.x = u; y.y = v; _born.push_back(y);
-            } break;
+
+            case fork:
+                // how to add to queue, while iterating?
+            break;
+                
             case conservative_or:
                 x.a |= std::exchange(*p, x.a & *p);
                 break;
@@ -210,7 +214,7 @@ void world::exec(entity& x) {
                 x.d = (*p < x.a) - (x.a < *p);
                 break;
                 
-            case dump:
+            case dump | entering:
                 // fallthrough
             case dump | waiting:
                 if (*q) {
@@ -227,14 +231,14 @@ void world::exec(entity& x) {
                 x.s = waiting;
                 break;
                 
-            case barrier:
+            case barrier | entering:
                 if (*p) --*p;
                 // fallthrough
             case barrier | waiting:
                 x.s = *p ? waiting : exiting;
                 break;
                 
-            case mutex:
+            case mutex | entering:
                 //fallthrough
             case mutex | waiting:
                 if (*p) {
@@ -246,10 +250,13 @@ void world::exec(entity& x) {
                 break;
                 
             default:
-                
+                // most values are not opcodes
                 break;
                 
         }
+        
+        // cleanup the state, otherwise we have to set x.s = exiting in every
+        // clause
         if (x.s == entering)
             x.s = exiting;
     }

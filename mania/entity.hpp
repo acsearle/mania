@@ -203,10 +203,14 @@ enum address_enum : u64 {
     register_d,
 };
 
+// state enum needs to nicely mesh with the opcode bits.  If the top two
+// bits of the u64 are OBSTRUCTION_FLAG and INSTRUCTION_FLAG, neither are
+// needed?
 enum state_enum : u64 {
     entering = 0x0000'0000,
     waiting = 0x4000'0000,
     exiting = 0x8000'000,
+    // newborn?
 };
 
 const u64 STATE_MASK = 0xC000'0000;

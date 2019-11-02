@@ -17,6 +17,7 @@
 
 #include <mach/mach_time.h>
 
+#include "animation.hpp"
 #include "application.hpp"
 #include "asset.hpp"
 #include "atlas.hpp"
@@ -39,7 +40,9 @@ struct game : application {
     // manic::atlas3 _tiles;
     atlas _atlas;
     table3<string, sprite> _tiles;
-    
+    vector<sprite> _animation_h;
+    vector<sprite> _animation_v;
+
     world _thing;
     
     vec<i64, 2> _camera_position;
@@ -105,9 +108,11 @@ game::game()
         _solid.a.texCoord = _solid.b.texCoord = midpoint;
     }
     
-    std::cout << load("enum", "hpp") << std::endl;
+    //std::cout << load("enum", "hpp") << std::endl;
     
-    
+    _animation_h = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepper", {1, 0});
+    _animation_v = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepperv", {0, (float)(1.0/sqrt(2.0))});
+
     
     // _lineheight = manic::build_font(_font, _advances);
     
@@ -408,9 +413,9 @@ void game::draw() {
         for (auto&& z : _thing._board) {
             auto key = z.key;
             if (
-                ( key.x       * 64 < _width  + _camera_position.x) &&
+                ( key.x       * 64 < (i64) (_width  + _camera_position.x)) &&
                 ((key.x + 16) * 64 >           _camera_position.x) &&
-                ( key.y       * 64 < _height + _camera_position.y) &&
+                ( key.y       * 64 < (i64) (_height + _camera_position.y)) &&
                 ((key.y + 16) * 64 >           _camera_position.y)) {
                 for (i64 i = 0; i != 16; ++i) {
                     for (i64 j = 0; j != 16; ++j) {
@@ -430,18 +435,38 @@ void game::draw() {
         for (entity* p : _thing._entities[i]) {
             auto u = p->x * 64;
             auto v = p->y * 64;
+            u64 k = 0;
             if (!p->s) {
                 auto f = (i - _thing.counter) & 63;
                 switch (p->d & 3) {
-                    case 0: v += f; break;
-                    case 1: u -= f; break;
-                    case 2: v -= f; break;
-                    case 3: u += f; break;
+                    case 0:
+                        v += f;
+                        k = -f;
+                        break;
+                    case 1:
+                        u -= f;
+                        k = f;
+                        break;
+                    case 2:
+                        v -= f;
+                        k = +f;
+                        break;
+                    case 3:
+                        u += f;
+                        k = -f;
+                        break;
                 }
             }
+            
+            if (p->d & 1) {
+                _atlas.push_sprite_translated(_animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+            } else {
+                _atlas.push_sprite_translated(_animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+            }
+            
             char z[32];
-            sprintf(z, "house%llX", p->d & 3);
-            blit3(z, {u, v});
+            //sprintf(z, "house%llX", p->d & 3);
+            //blit3(z, {u, v});
             sprintf(z, "%llX", p->a);
             blit3(z, {u-32, v-32});
             sprintf(z, "%llX", p->b);
@@ -471,9 +496,20 @@ void game::draw() {
              
         
     _thing.tick();
+    
+    
+    //_atlas.push_sprite_translated(_animation[frame & 31], {100, 100});
         
     glClearColor(0.5, 0.6, 0.4, 0);
     glClear(GL_COLOR_BUFFER_BIT);
+    
+    if (false) {
+        _atlas.discard();
+        _atlas.push_atlas_translated({0, 0});
+        glClearColor(0.5, 0.5, 0.5, 0.5);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+    
     
     auto n = _atlas._vertices.size() / 6;
     
