@@ -47,6 +47,31 @@ void world::exec(entity& x) {
     
     using namespace instruction;
     
+    // Check some invariants
+    {
+        assert(is_occupied(x.a) == is_conserved(x.a));
+        assert(!is_occupied(x.d));
+        assert(false
+               || ((x.a & TAG_MASK) == NUMBER_TAG)
+               || ((x.a & TAG_MASK) == INSTRUCTION_TAG)
+               || ((x.a & TAG_MASK) == GHOST_TAG)
+               || ((x.a & TAG_MASK) == MATERIAL_TAG)
+               );
+        assert(false
+               || ((x.d & TAG_MASK) == NUMBER_TAG)
+               || ((x.d & TAG_MASK) == INSTRUCTION_TAG)
+               || ((x.d & TAG_MASK) == GHOST_TAG)
+               );
+    }
+    
+    // define some helpers
+    //
+    auto try_mutate = [](u64& x, u64 y) {
+        if (!is_conserved(x)) {
+            x = (x & ~VALUE_MASK) | (y & VALUE_MASK);
+        }
+    };
+    
     if (x.s == entering) {
         // We are entering the cell for the first time; unobstruct our origin cell
         u64* q = nullptr;
@@ -142,161 +167,184 @@ void world::exec(entity& x) {
                 break;
 
             case load: // LOAD target into accumulator
-                x.a = *p;
+                if (!is_conserved(x.a))
+                    x.a = ghost_of(*p);
                 x.s = exiting;
                 break;
 
             case store: // STORE accumulator into target
-                *p = x.a;
+                if (!is_conserved(*p))
+                    *p = (*p & ~OCCUPIED_FLAG) | ghost_of(x.a);
                 x.s = exiting;
                 break;
                 
             case add: // ADD target to accumulator
-                x.a += *p;
+                try_mutate(x.a, x.a + *p);
                 x.s = exiting;
                 break;
                 
             case sub: // SUB target from accumulator
-                x.a -= *p;
+                try_mutate(x.a, x.a - *p);
                 x.s = exiting;
                 break;
                 
             case bitwise_and: // AND
-                x.a &= *p;
+                try_mutate(x.a, x.a & *p);
                 x.s = exiting;
                 break;
                 
             case bitwise_or: // OR
-                x.a |= *p;
+                try_mutate(x.a, x.a | *p);
                 x.s = exiting;
                 break;
                 
             case bitwise_xor: // XOR
-                x.a ^= *p;
+                try_mutate(x.a, x.a ^ *p);
                 x.s = exiting;
                 break;
                 
             case decrement: // DEC
-                --*p;
+                try_mutate(*p, *p - 1);
                 x.s = exiting;
                 break;
                 
             case decrement_saturate: // SATURATING DECREMENT (TURN CCW IF DIRECTION NONZERO)
-                if (*p)
-                    --*p;
+                if (!is_conserved(*p) && (*p & VALUE_MASK))
+                    *p = (*p & FLAGS_MASK) | ((*p - 1) & VALUE_MASK);
                 x.s = exiting;
                 break;
                 
             case increment: // INC
-                ++*p;
+                try_mutate(*p, *p + 1);
                 x.s = exiting;
                 break;
                 
             case increment_saturate: // SATURATING INCREMENT (TURN CW IF DIRECTION NONZERO)
-                if (~*p)
-                    ++*p;
+                if (!is_conserved(*p) && (*p & VALUE_MASK))
+                    *p = (*p & FLAGS_MASK) | ((*p - 1) & VALUE_MASK);
                 x.s = exiting;
                 break;
                 
             case and_complement_of:
-                x.a &= ~*p;
+                try_mutate(x.a, x.a &~ *p);
                 x.s = exiting;
                 break;
                 
             case flip_decrement: // flip
-                --*p;
-                _board(x.x, x.y) = opcode(flip_increment, register_d);
+                try_mutate(*p, *p - 1);
+                _board(x.x, x.y) = (_board(x.x, x.y) & ~OPCODE_MASK) | flip_increment;
                 x.s = exiting;
                 break;
                 
             case flip_increment: // flip
-                ++*p;
-                _board(x.x, x.y) = opcode(flip_decrement, register_d);
+                try_mutate(*p, *p + 1);
+                _board(x.x, x.y) = (_board(x.x, x.y) & ~OPCODE_MASK) | flip_decrement;
+                x.s = exiting;
                 break;
 
             case instruction::swap:
+                assert(!(instruction_ & REGISTER_FLAG));
+                // assert something about physical and occupied flags being consistent?
                 std::swap(x.a, *p);
                 x.s = exiting;
                 break;
                 
             case conservative_or: // "load bits"?
+                assert(false);
                 x.a |= std::exchange(*p, x.a & *p);
                 x.s = exiting;
                 break;
                 
             case conservative_and: // "store bits"?
+                assert(false);
                 x.a &= std::exchange(*p, x.a | *p);
                 x.s = exiting;
                 break;
                 
             case less_than:
-                x.d += x.a < *p;
+                assert(!is_conserved(x.d));
+                x.d = (x.d & FLAGS_MASK) | ((x.d + (signed_of(x.a) < signed_of(*p))) & VALUE_MASK);
                 x.s = exiting;
                 break;
 
             case greater_than:
-                x.d += x.a > *p;
+                assert(!is_conserved(x.d));
+                x.d = (x.d & FLAGS_MASK) | ((x.d + (signed_of(x.a) > signed_of(*p))) & VALUE_MASK);
                 x.s = exiting;
                 break;
 
             case less_than_or_equal_to:
-                x.d += x.a <= *p;
+                assert(!is_conserved(x.d));
+                x.d = (x.d & FLAGS_MASK) | ((x.d + (signed_of(x.a) <= signed_of(*p))) & VALUE_MASK);
                 x.s = exiting;
                 break;
                 
             case greater_than_or_equal_to:
-                x.d += x.a >= *p;
+                assert(!is_conserved(x.d));
+                x.d = (x.d & FLAGS_MASK) | ((x.d + (signed_of(x.a) >= signed_of(*p))) & VALUE_MASK);
                 x.s = exiting;
                 break;
 
             case equal_to:
-                x.d += (x.a == *p);
+                assert(!is_conserved(x.d));
+                x.d = (x.d & FLAGS_MASK) | ((x.d + ((x.a & EQUALITY_MASK) == (*p & EQUALITY_MASK))) & VALUE_MASK);
                 x.s = exiting;
                 break;
 
             case not_equal_to:
-                x.d += (x.a != *p);
+                assert(!is_conserved(x.d));
+                x.d = (x.d & FLAGS_MASK) | ((x.d + ((x.a & EQUALITY_MASK) != (*p & EQUALITY_MASK))) & VALUE_MASK);
                 x.s = exiting;
                 break;
 
             case compare:
+                assert(false);
+                // jesus
                 x.d = (*p < x.a) - (x.a < *p); // which way around is best?
                 x.s = exiting;
                 break;
                 
             case complement:
-                *p = ~*p;
+                try_mutate(*p, ~*p);
                 x.s = exiting;
                 break;
                 
             case negate:
-                *p = -*p;
+                try_mutate(*p, -*p);
                 break;
 
             case clear:
-                *p = 0;
+                if (!is_conserved(*p))
+                    *p &= OCCUPIED_FLAG; // zero, execpt occupation status
                 x.s = exiting;
                 break;
             
             case shift_left:
-                x.a <<= *p;
+                if (!is_conserved(x.a))
+                    x.a = (x.a & FLAGS_MASK) | (((x.a & VALUE_MASK) << signed_of(*p)) & VALUE_MASK);
                 x.s = exiting;
                 break;
 
             case shift_right:
-                x.a >>= *p;
+                if (!is_conserved(x.a))
+                    x.a = (x.a & FLAGS_MASK) | (((x.a & VALUE_MASK) >> signed_of(*p)) & VALUE_MASK);
+                x.s = exiting;
                 x.s = exiting;
                 break;
 
             case dump | entering:
                 // fallthrough
             case dump | waiting:
-                if (*q) {
+                // assert if conserved, or if occupied and accumulator is conserved?
+                //
+                // if (*q) {
+                if (is_conserved(*q) || (is_conserved(x.a) && is_occupied(*q))) {
                     x.s = waiting;
                 } else {
                     *q = x.a;
                     x.a = 0;
-                    x.d += 2;
+                    assert(!is_conserved(x.d));
+                    x.d = (x.d & FLAGS_MASK) | ((x.d + 2) & VALUE_MASK);
                     x.s = exiting;
                 }
                 break;
@@ -310,6 +358,7 @@ void world::exec(entity& x) {
                 break;
                 
             case barrier | entering:
+                // jesus
                 if (*p)
                     --*p; // decrement the barrier
                 else
@@ -322,6 +371,7 @@ void world::exec(entity& x) {
             case mutex | entering:
                 //fallthrough
             case mutex | waiting:
+                // jesus
                 if (*p) {
                     x.s = waiting;
                 } else {
