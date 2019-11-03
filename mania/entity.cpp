@@ -6,14 +6,23 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
+#include "instruction.hpp"
+#include "elements.hpp"
 #include "entity.hpp"
 
 namespace manic {
 
 world::world() {
-        
-    mcu* m = mcu::make();
-    m->x = 8; m->y = 8; m->a = 0x3; m->d = 0x10;
+    
+    push_back(new mine(4, 4, element::carbon));
+
+    push_back(new mine(8, 4, element::hematite));
+
+    push_back(new smelter(12, 4));
+
+    
+    /*
+    mcu* m = new mcu(8, 8, 0x10);
     instruction::occupy(_board(m->x, m->y));
     _entities[0].push_back(m); // mcu at centre, heading north, primed for 4 loops
     
@@ -36,6 +45,7 @@ world::world() {
     
     _board(2, 4) = opcode(kill);
     _board(14, 4) = opcode(kill);
+     */
     
 }
 
@@ -55,15 +65,15 @@ void mcu::tick(space<u64>& _board) {
         assert(is_occupied(x.a) == is_conserved(x.a));
         assert(!is_occupied(x.d));
         assert(false
-               || ((x.a & TAG_MASK) == NUMBER_TAG)
-               || ((x.a & TAG_MASK) == INSTRUCTION_TAG)
-               || ((x.a & TAG_MASK) == GHOST_TAG)
-               || ((x.a & TAG_MASK) == MATERIAL_TAG)
+               || ((x.a & FLAGS_MASK) == NUMBER_TAG)
+               || ((x.a & FLAGS_MASK) == INSTRUCTION_TAG)
+               || ((x.a & FLAGS_MASK) == GHOST_TAG)
+               || ((x.a & FLAGS_MASK) == MATERIAL_TAG)
                );
         assert(false
-               || ((x.d & TAG_MASK) == NUMBER_TAG)
-               || ((x.d & TAG_MASK) == INSTRUCTION_TAG)
-               || ((x.d & TAG_MASK) == GHOST_TAG)
+               || ((x.d & FLAGS_MASK) == NUMBER_TAG)
+               || ((x.d & FLAGS_MASK) == INSTRUCTION_TAG)
+               || ((x.d & FLAGS_MASK) == GHOST_TAG)
                );
     }
     
@@ -430,12 +440,46 @@ void mcu::tick(space<u64>& _board) {
     
 }
 
+
+void mine::tick(space<u64>& _board) {
+    
+    using namespace instruction;
+    u64* p = &_board(this->x, this->y + 1);
+    assert(p);
+    if (!(*p & (OCCUPIED_FLAG | CONSERVED_FLAG))) {
+        *p = m;
+    }
+    
+}
+
+void smelter::tick(space<u64>& _board) {
+    
+    using namespace instruction;
+    using namespace element;
+    
+    u64* a = &_board(this->x + 1, this->y - 1);
+    u64* b = &_board(this->x + 1, this->y + 1);
+    u64* c = &_board(this->x - 1, this->y + 1);
+    
+    if ((*c == carbon) && (*b == hematite) && !is_occupied(*a)) {
+        *c = 0;
+        *b = 0;
+        *a = iron;
+    }
+
+}
+
 void world::tick() {
     for (entity* p : _entities[counter & 63]) {
         assert(p);
         p->tick(_board);
     }
     ++counter;
+}
+
+void world::push_back(entity* p) {
+    instruction::occupy(_board(p->x, p->y));
+    _entities[counter & 63].push_back(p);
 }
 
 } // namespace manic

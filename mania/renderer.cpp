@@ -26,6 +26,8 @@
 #include "program.hpp"
 #include "text.hpp"
 #include "entity.hpp"
+#include "instruction.hpp"
+#include "elements.hpp"
 
 namespace manic {
 
@@ -42,6 +44,8 @@ struct game : application {
     table3<string, sprite> _tiles;
     vector<sprite> _animation_h;
     vector<sprite> _animation_v;
+    
+    table3<u64, string> _periodic;
 
     world _thing;
     
@@ -138,7 +142,11 @@ game::game()
     _camera_position = 0;
     _selected_opcode = 0;
     
-    
+    using namespace element;
+    _periodic.insert(carbon, "coal");
+    _periodic.insert(hematite, "iron_ore");
+    _periodic.insert(iron, "iron");
+
 }
 
 // Rendering engine:
@@ -396,6 +404,9 @@ void game::draw() {
         if (is_instruction(x)) {
             x = opcode_of(x) >> OPCODE_SHIFT;
             return _translate_opcode[x];
+        } if (is_item(x)) {
+            auto* p = _periodic.try_get(x);
+            return p ? p->c_str() : "0";
         } else {
             return _translate_value[(x & 0xF)];
         }
@@ -414,7 +425,7 @@ void game::draw() {
                     for (i64 j = 0; j != 16; ++j) {
                         u64 k = z.value(i, j);
                         blit3(translate(k), {(i + key.x) * 64, (j + key.y) * 64});
-                        if (k & instruction::INSTRUCTION_FLAG) {
+                        if (instruction::is_instruction(k)) {
                             string_view u(_translate_address[(k & 0x7)]);
                             blit3(u, {(i + key.x) * 64, (j + key.y) * 64});
                         }
@@ -429,52 +440,57 @@ void game::draw() {
             
             // clip this list to screen
             // and draw in proper order (top to bottom, left to right?)
-            
+
+            auto u = q->x * 64;
+            auto v = q->y * 64;
+
             if (mcu* p = dynamic_cast<mcu*>(q)) {
-            
-            auto u = p->x * 64;
-            auto v = p->y * 64;
-            u64 k = 0;
-            if (!p->s) {
-                auto f = (i - _thing.counter) & 63;
-                switch (p->d & 3) {
-                    case 0:
-                        v += f;
-                        k = -f;
-                        break;
-                    case 1:
-                        u -= f;
-                        k = f;
-                        break;
-                    case 2:
-                        v -= f;
-                        k = +f;
-                        break;
-                    case 3:
-                        u += f;
-                        k = -f;
-                        break;
-                }
-            }
-            
-            if (p->d & 1) {
-                _atlas.push_sprite_translated(_animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
-            } else {
-                _atlas.push_sprite_translated(_animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
-            }
-            
-            char z[32];
-            //sprintf(z, "house%llX", p->d & 3);
-            //blit3(z, {u, v});
-            sprintf(z, "%llX", p->a);
-            blit3(z, {u-32, v-32});
-            sprintf(z, "%llX", p->b);
-            blit3(z, {u+32, v-32});
-            sprintf(z, "%llX", p->c);
-            blit3(z, {u+32, v+32});
-            sprintf(z, "%llX", p->d);
-            blit3(z, {u-32, v+32});
                 
+                u64 k = 0;
+                if (!p->s) {
+                    auto f = (i - _thing.counter) & 63;
+                    switch (p->d & 3) {
+                        case 0:
+                            v += f;
+                            k = -f;
+                            break;
+                        case 1:
+                            u -= f;
+                            k = f;
+                            break;
+                        case 2:
+                            v -= f;
+                            k = +f;
+                            break;
+                        case 3:
+                            u += f;
+                            k = -f;
+                            break;
+                    }
+                }
+                
+                if (p->d & 1) {
+                    _atlas.push_sprite_translated(_animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                } else {
+                    _atlas.push_sprite_translated(_animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                }
+                
+                //char z[32];
+                //sprintf(z, "house%llX", p->d & 3);
+                //blit3(z, {u, v});
+                //sprintf(z, "%llX", p->a);
+                //blit3(z, {u-32, v-32});
+                //sprintf(z, "%llX", p->b);
+                //blit3(z, {u+32, v-32});
+                //sprintf(z, "%llX", p->c);
+                //blit3(z, {u+32, v+32});
+                //sprintf(z, "%llX", p->d);
+                //blit3(z, {u-32, v+32});
+                blit3(translate(p->a), {u, v-24});
+                
+            } else {
+                // some other kind of entity
+                blit3("house", {u, v});
             }
         }
     }
@@ -553,12 +569,9 @@ void game::key_down(u32 c) {
             break;
         case 'q': {
             using namespace instruction;
-            entity* p = mcu::make();
-            p->x = selectee.x;
-            p->y = selectee.y;
+            entity* p = new mcu(selectee.x, selectee.y, 0);
             if (is_vacant(_thing._board(p->x, p->y))) {
-                instruction::occupy(_thing._board(p->x, p->y));
-                _thing._entities[_thing.counter & 63].push_back(p);
+                _thing.push_back(p);
             }
         }
             

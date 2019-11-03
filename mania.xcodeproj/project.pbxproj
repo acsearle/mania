@@ -65,6 +65,9 @@
 		CAEB660E236D3B3500C28580 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB660C236D3B3500C28580 /* animation.cpp */; };
 		CAEB660F236D3B3500C28580 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB660C236D3B3500C28580 /* animation.cpp */; };
 		CAEB6610236D3B3500C28580 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB660C236D3B3500C28580 /* animation.cpp */; };
+		CAEB6613236EB91900C28580 /* instruction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6611236EB91900C28580 /* instruction.cpp */; };
+		CAEB6614236EB91900C28580 /* instruction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6611236EB91900C28580 /* instruction.cpp */; };
+		CAEB6615236EB91900C28580 /* instruction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6611236EB91900C28580 /* instruction.cpp */; };
 		CAEECDFD235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFE235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
 		CAEECDFF235BD649002D1E2F /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEECDFB235BD649002D1E2F /* unicode.cpp */; };
@@ -203,6 +206,8 @@
 		CAEB6607236C34A400C28580 /* reflector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = reflector.hpp; sourceTree = "<group>"; };
 		CAEB660C236D3B3500C28580 /* animation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = animation.cpp; sourceTree = "<group>"; };
 		CAEB660D236D3B3500C28580 /* animation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = animation.hpp; sourceTree = "<group>"; };
+		CAEB6611236EB91900C28580 /* instruction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = instruction.cpp; sourceTree = "<group>"; };
+		CAEB6612236EB91900C28580 /* instruction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = instruction.hpp; sourceTree = "<group>"; };
 		CAEECDFA235A5ABD002D1E2F /* sentinel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sentinel.h; sourceTree = "<group>"; };
 		CAEECDFB235BD649002D1E2F /* unicode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = unicode.cpp; sourceTree = "<group>"; };
 		CAEECDFC235BD649002D1E2F /* unicode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = unicode.hpp; sourceTree = "<group>"; };
@@ -452,6 +457,8 @@
 				CAD3B2232362CDC6001DA73B /* elements.hpp */,
 				CAEECE00235EE674002D1E2F /* entity.cpp */,
 				CAEECE01235EE674002D1E2F /* entity.hpp */,
+				CAEB6611236EB91900C28580 /* instruction.cpp */,
+				CAEB6612236EB91900C28580 /* instruction.hpp */,
 				CAD3B24423680864001DA73B /* enum.hpp */,
 				CA0EB1402222524300DAE8CF /* f8.hpp */,
 				CA72B7BA221A8C4600AC9441 /* gl */,
@@ -640,6 +647,7 @@
 				CAD3B2252362CDC6001DA73B /* elements.cpp in Sources */,
 				CA44D79C22FAEF57004B76D7 /* zip-test.cpp in Sources */,
 				CA0EB143222254B600DAE8CF /* f8-test.cpp in Sources */,
+				CAEB6614236EB91900C28580 /* instruction.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -655,6 +663,7 @@
 				CAD3B22B2363A2E5001DA73B /* rleq.cpp in Sources */,
 				CAD3B23E2366B3FB001DA73B /* asset.cpp in Sources */,
 				CAEECE04235EE674002D1E2F /* entity.cpp in Sources */,
+				CAEB6615236EB91900C28580 /* instruction.cpp in Sources */,
 				CA72B7B4221A7DB100AC9441 /* main.cpp in Sources */,
 				CAD3B21C236064FD001DA73B /* json.cpp in Sources */,
 				CAEB6605236AE3BB00C28580 /* space.cpp in Sources */,
@@ -670,6 +679,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CAEB6613236EB91900C28580 /* instruction.cpp in Sources */,
 				CAF889C31F14F1C0005956A9 /* program.cpp in Sources */,
 				CAC2FF88221D2DED00D8B4B2 /* surface.cpp in Sources */,
 				CAF889C01F14E31B005956A9 /* shader.cpp in Sources */,

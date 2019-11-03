@@ -9,31 +9,41 @@
 #ifndef elements_hpp
 #define elements_hpp
 
-#include "common.hpp"
+#include "instruction.hpp"
 
 namespace manic {
     
-enum elements : u64 {
-    hydrogen = 1ull << 0,
-    carbon = 1ull << 1,
-    oxygen = 1ull << 2,
-    silicon = 1ull << 3,
-    sulfur = 1ull << 4,
-    calcium = 1ull << 5,
-    iron = 1ull << 6,
-    copper = 1ull << 7,
-    nitrogen = 1ull << 8,
+namespace element {
+    
+constexpr u64 _make_elements_enum(u64 i) {
+    using namespace instruction;
+    return MATERIAL_TAG | ((1ull << (i)) & VALUE_MASK);
+}
+
+enum elements_enum : u64 {
+    
+    // more than we can pack
+
+    hydrogen = _make_elements_enum(0),
+    carbon = _make_elements_enum(1),
+    oxygen = _make_elements_enum(2),
+    sulfur = _make_elements_enum(3),
+    iron = _make_elements_enum(4),
+    silicon = _make_elements_enum(5),
+
 };
 
-enum materials : u64 {
+enum materials_enum : u64 {
+    
+    kerosene = hydrogen | carbon,
     water = hydrogen | oxygen,
-    silica = silicon | oxygen,
-    limestone = calcium | carbon | oxygen,
-    earth = carbon | hydrogen | oxygen | silicon,
-    air = oxygen | nitrogen,
-    coal = carbon | sulfur,
+    carbon_dioxide = carbon | oxygen,
+    hematite = iron | oxygen,
+    magnetite = iron | oxygen | silicon,
     
 };
+    
+} // namespace element
 
 } // namespace manic
 
