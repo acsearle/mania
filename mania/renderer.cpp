@@ -322,7 +322,7 @@ void game::draw() {
     
     vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
         
-    static const char* _translate[] = {
+    static const char* _translate_opcode[] = {
         "noop",
         "load",
         "store",
@@ -351,6 +351,17 @@ void game::draw() {
         "halt",
         "barrier",
         "mutex",
+        "greater_than",
+        "less_than_or_equal_to",
+        "greater_than_or_equal_to",
+        "not_equal_to",
+        "complement",
+        "negate",
+        "shift_left",
+        "shift_right",
+    };
+
+    static const char* _translate_value[] = {
         "0",
         "1",
         "2",
@@ -367,6 +378,9 @@ void game::draw() {
         "D",
         "E",
         "F",
+    };
+    
+    static const char* _translate_address[] = {
         "northeast",
         "southeast",
         "southwest",
@@ -379,36 +393,15 @@ void game::draw() {
     
     auto translate = [&](u64 x) {
         using namespace instruction;
-        if (x & INSTRUCTION_FLAG) {
-            x = (x & OPCODE_MASK) >> OPCODE_SHIFT;
-            if (x < _opcode_enum_size) {
-                return _translate[x];
-            } else {
-                return "missing";
-            }
+        if (is_instruction(x)) {
+            x = opcode_of(x) >> OPCODE_SHIFT;
+            return _translate_opcode[x];
         } else {
-            return _translate[(x & 0xF) + _opcode_enum_size];
+            return _translate_value[(x & 0xF)];
         }
     };
     
     {
-        /*
-        auto a = std::max<i64>(_camera_position.x >> 6, 0);
-        auto b = std::max<i64>(_camera_position.y >> 6, 0);
-        auto c = std::min<i64>((_camera_position.x + _width + 64) >> 6, _thing._board.rows());
-        auto d = std::min<i64>((_camera_position.y + _height + 64) >> 6, _thing._board.columns());
-        
-        for (i64 i = a; i != c; ++i) {
-            for (i64 j = b; j != d; ++j) {
-                u64 k = _thing._board(i, j);
-                blit3(translate(k), {i * 64, j * 64});
-                if (k & instruction::INSTRUCTION_FLAG) {
-                    string_view u(_translate[(k & 0x7) + instruction::_opcode_enum_size + 16]);
-                    blit3(u, {i * 64, j * 64});
-                }
-            }
-        }
-         */
         
         for (auto&& z : _thing._board) {
             auto key = z.key;
@@ -422,7 +415,7 @@ void game::draw() {
                         u64 k = z.value(i, j);
                         blit3(translate(k), {(i + key.x) * 64, (j + key.y) * 64});
                         if (k & instruction::INSTRUCTION_FLAG) {
-                            string_view u(_translate[(k & 0x7) + instruction::_opcode_enum_size + 16]);
+                            string_view u(_translate_address[(k & 0x7)]);
                             blit3(u, {(i + key.x) * 64, (j + key.y) * 64});
                         }
                     }
@@ -433,6 +426,10 @@ void game::draw() {
     
     for (u64 i = 0; i != 63; ++i) {
         for (entity* p : _thing._entities[i]) {
+            
+            // clip this list to screen
+            // and draw in proper order (top to bottom, left to right?)
+            
             auto u = p->x * 64;
             auto v = p->y * 64;
             u64 k = 0;
@@ -482,14 +479,14 @@ void game::draw() {
         vec2 offset(-16, -16);
         using namespace instruction;
         blit5(translate(_selected_opcode), selectee * 64 - _camera_position);
-        blit5(_translate[((_selected_opcode) & 7) + _opcode_enum_size + 16], selectee * 64 - _camera_position);
+        blit5(_translate_address[((_selected_opcode) & 7)], selectee * 64 - _camera_position);
         
     } else {
         blit5("reticule", selectee * 64 - _camera_position);
     }
 
-    for (i64 i = 0; i != instruction::_opcode_enum_size; ++i) {
-        string_view v = translate(instruction::opcode((instruction::opcode_enum) i));
+    for (i64 i = 0; i != _width / 64; ++i) {
+        string_view v = translate(instruction::opcode((instruction::opcode_enum) (i << instruction::OPCODE_SHIFT)));
         blit4("button", {i * 64, _height - 64});
         blit4(v, {i * 64, _height - 64});
     }
@@ -551,10 +548,14 @@ void game::key_down(u32 c) {
             }
             break;
         case 'q': {
+            using namespace instruction;
             entity* p = entity::make();
             p->x = selectee.x;
             p->y = selectee.y;
-            _thing._entities[_thing.counter & 63].push_back(p);
+            if (is_vacant(_thing._board(p->x, p->y))) {
+                instruction::occupy(_thing._board(p->x, p->y));
+                _thing._entities[_thing.counter & 63].push_back(p);
+            }
         }
             
         default:
@@ -587,9 +588,7 @@ void game::mouse_up(u64 x) {
     if (_screen_mouse.y > _height - 64) {
         i64 j = _screen_mouse.x;
         j >>= 6;
-        if (j < instruction::_opcode_enum_size) {
-            _selected_opcode = instruction::opcode((instruction::opcode_enum) j);
-        }
+        _selected_opcode = instruction::opcode((instruction::opcode_enum) (j << instruction::OPCODE_SHIFT));
     } else {
         if (_selected_opcode) {
             vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,

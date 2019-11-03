@@ -14,6 +14,7 @@ world::world() {
         
     entity* m = entity::make();
     m->x = 8; m->y = 8; m->a = 0x3; m->d = 0x10;
+    instruction::occupy(_board(m->x, m->y));
     _entities[0].push_back(m); // mcu at centre, heading north, primed for 4 loops
     
     using namespace instruction;
@@ -63,17 +64,20 @@ void world::exec(entity& x) {
                 q = &_board(x.x + 1, x.y);
                 break;
         }
-        *q &= ~OBSTRUCTION_FLAG;
+        // bug: this will trigger when we spawn a new entity
+        assert(is_occupied(*q)); // we had a lock on our old cell
+        assert(!is_conserved(*q)); // we aren't colliding with a physical object
+        vacate(*q);
+    } else if (x.s == newborn) {
+        x.s = entering;
     }
     
-    // newborn entities need to skip to here and not overwrite the cell their
-    // direction indicates they came from
 
     if (x.s != exiting) {
         i64 u = x.x;
         i64 v = x.y;
         u64 instruction_ = _board(u, v);
-        u64 opcode_ = (instruction_ & OPCODE_MASK) >> OPCODE_SHIFT;
+        u64 opcode_ = instruction_ & OPCODE_MASK;
         u64 target = instruction_ & ADDRESS_MASK;
         u64* p = nullptr;
         u64* q = nullptr;
@@ -127,93 +131,163 @@ void world::exec(entity& x) {
                 break;
         }
         
-        // Here, consider switching on the quantity opcode_ | state_
-        // Most opcodes want to exec on first runthrough
-        // Some opcodes have special behaviour when waiting or blocked
-        
         // perform the operation
         switch (opcode_ | x.s) {
-            case noop: // NOOP
                 
+            case noop:
+            default:
+                // most values are not opcodes
+                // when the opcode is changed while an entity is waiting on it
+                x.s = exiting;
                 break;
+
             case load: // LOAD target into accumulator
                 x.a = *p;
+                x.s = exiting;
                 break;
+
             case store: // STORE accumulator into target
                 *p = x.a;
+                x.s = exiting;
                 break;
+                
             case add: // ADD target to accumulator
                 x.a += *p;
+                x.s = exiting;
                 break;
+                
             case sub: // SUB target from accumulator
                 x.a -= *p;
+                x.s = exiting;
                 break;
+                
             case bitwise_and: // AND
                 x.a &= *p;
+                x.s = exiting;
                 break;
+                
             case bitwise_or: // OR
                 x.a |= *p;
+                x.s = exiting;
                 break;
+                
             case bitwise_xor: // XOR
                 x.a ^= *p;
+                x.s = exiting;
                 break;
+                
             case decrement: // DEC
                 --*p;
+                x.s = exiting;
                 break;
+                
             case decrement_saturate: // SATURATING DECREMENT (TURN CCW IF DIRECTION NONZERO)
                 if (*p)
                     --*p;
+                x.s = exiting;
                 break;
+                
             case increment: // INC
                 ++*p;
+                x.s = exiting;
                 break;
+                
             case increment_saturate: // SATURATING INCREMENT (TURN CW IF DIRECTION NONZERO)
                 if (~*p)
                     ++*p;
+                x.s = exiting;
                 break;
+                
             case and_complement_of:
                 x.a &= ~*p;
+                x.s = exiting;
                 break;
+                
             case flip_decrement: // flip
                 --*p;
                 _board(x.x, x.y) = opcode(flip_increment, register_d);
+                x.s = exiting;
                 break;
+                
             case flip_increment: // flip
                 ++*p;
                 _board(x.x, x.y) = opcode(flip_decrement, register_d);
                 break;
+
             case instruction::swap:
                 std::swap(x.a, *p);
+                x.s = exiting;
                 break;
-
-            case kill:
-                // how to remove self from queue, while iterating?
-                x.s = waiting;
-                break;
-
-            case fork:
-                // how to add to queue, while iterating?
-            break;
                 
-            case conservative_or:
+            case conservative_or: // "load bits"?
                 x.a |= std::exchange(*p, x.a & *p);
+                x.s = exiting;
                 break;
-            case conservative_and:
+                
+            case conservative_and: // "store bits"?
                 x.a &= std::exchange(*p, x.a | *p);
+                x.s = exiting;
                 break;
+                
             case less_than:
-                x.d = x.a < *p;
+                x.d += x.a < *p;
+                x.s = exiting;
                 break;
+
+            case greater_than:
+                x.d += x.a > *p;
+                x.s = exiting;
+                break;
+
+            case less_than_or_equal_to:
+                x.d += x.a <= *p;
+                x.s = exiting;
+                break;
+                
+            case greater_than_or_equal_to:
+                x.d += x.a >= *p;
+                x.s = exiting;
+                break;
+
             case equal_to:
-                x.d = (x.a == *p);
+                x.d += (x.a == *p);
+                x.s = exiting;
                 break;
+
+            case not_equal_to:
+                x.d += (x.a != *p);
+                x.s = exiting;
+                break;
+
+            case compare:
+                x.d = (*p < x.a) - (x.a < *p); // which way around is best?
+                x.s = exiting;
+                break;
+                
+            case complement:
+                *p = ~*p;
+                x.s = exiting;
+                break;
+                
+            case negate:
+                *p = -*p;
+                break;
+
             case clear:
                 *p = 0;
+                x.s = exiting;
                 break;
-            case compare:
-                x.d = (*p < x.a) - (x.a < *p);
+            
+            case shift_left:
+                x.a <<= *p;
+                x.s = exiting;
                 break;
-                
+
+            case shift_right:
+                x.a >>= *p;
+                x.s = exiting;
+                break;
+
             case dump | entering:
                 // fallthrough
             case dump | waiting:
@@ -227,12 +301,19 @@ void world::exec(entity& x) {
                 }
                 break;
                 
+            case kill:
             case halt:
                 x.s = waiting;
+                // fallthrough
+            case halt | waiting:
+            case kill | waiting:
                 break;
                 
             case barrier | entering:
-                if (*p) --*p;
+                if (*p)
+                    --*p; // decrement the barrier
+                else
+                    *p = 1; // we have entered an expired barrier; reinitialize to (2 - 1)
                 // fallthrough
             case barrier | waiting:
                 x.s = *p ? waiting : exiting;
@@ -248,17 +329,9 @@ void world::exec(entity& x) {
                     x.s = exiting;
                 }
                 break;
-                
-            default:
-                // most values are not opcodes
-                break;
-                
+                                
         }
         
-        // cleanup the state, otherwise we have to set x.s = exiting in every
-        // clause
-        if (x.s == entering)
-            x.s = exiting;
     }
     
     if (x.s == exiting) {
@@ -281,10 +354,10 @@ void world::exec(entity& x) {
                 break;
         }
         // Check if we can claim it
-        if (!(*q & OBSTRUCTION_MASK)) {
+        if (!is_occupied(*q)) {
             // step forward
             x.s = entering; // set travelling state
-            *q |= OBSTRUCTION_FLAG; // claim the destination cell
+            occupy(*q);
             switch (x.d & 3) { // jump into it
                 case 0:
                     x.y -= 1;
