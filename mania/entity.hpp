@@ -18,14 +18,28 @@
 namespace manic {
 
 struct entity {
-    
-    u64 type; // make the type explicit rather than screw with vtbl id
-    
-    // MCU has a 2d location in a plane of memory cells, instead of a function
-    // pointer into 1d memory
-    
+            
     i64 x;
     i64 y;
+    
+    u64 i;
+    
+    
+    entity() {
+        x = 0;
+        y = 0;
+        static u64 unique_id = 0;
+        i = unique_id++;
+    }
+    
+    virtual ~entity() = default;
+    
+    virtual void tick(space<u64>&) = 0;
+
+
+};
+
+struct mcu : entity {
     
     // MCU has a 'microstate' that allows it to perform operations over multiple
     // cycles.  The most common is being obstructed, where it must wait for
@@ -76,17 +90,25 @@ struct entity {
     // Code and data are mingled together, but diagonal access means it is easy
     // to keep them locally separate on two complementary grids.
     
-    u64 i; // identity, serial number
-    
-    static entity* make() {
-        entity* p = (entity*) calloc(1, sizeof(entity));
+    mcu() {
+        s =  /* instruction::newborn*/ 0x0A00'0000'0000'0000ull;
+        a = 0;
+        b = 0;
+        c = 0;
+        d = 0;
+    }
+        
+    static mcu* make() {
+        mcu* p = new mcu;
         p->s = /* instruction::newborn*/ 0x0A00'0000'0000'0000ull;
         return p;
     }
     
+    virtual void tick(space<u64>&) override;
+    
 };
 
-inline std::ostream& operator<<(std::ostream& s, const manic::entity& x) {
+inline std::ostream& operator<<(std::ostream& s, const manic::mcu& x) {
     return (s << std::hex << "entity{x=" << x.x << ",y=" << x.y << ",a=" << x.a << ",d=" << x.d << "}");
 }
 
@@ -100,8 +122,8 @@ struct world {
     // or an opcode.  One bit is reserved to indicate if an MCU may enter the
     // cell; MCUs lock and unlock cells using this mechanism as they move
     // around the board, preventing collisions (like Factorio, deadlock is
-    // possible if there are N MCUs in a loop of N nodes; unlike Factorio, the
-    // MCUs have unit extent and thus cannot deadlock #-shaped intersections)
+    // possible if there are N MCUs in a loop of N nodes, with 2 and 4 node
+    // loops (head-on collision and two-lane road intersections) possible)
     
     space<u64> _board;
     

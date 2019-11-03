@@ -12,7 +12,7 @@ namespace manic {
 
 world::world() {
         
-    entity* m = entity::make();
+    mcu* m = mcu::make();
     m->x = 8; m->y = 8; m->a = 0x3; m->d = 0x10;
     instruction::occupy(_board(m->x, m->y));
     _entities[0].push_back(m); // mcu at centre, heading north, primed for 4 loops
@@ -39,7 +39,10 @@ world::world() {
     
 }
 
-void world::exec(entity& x) {
+
+void mcu::tick(space<u64>& _board) {
+    
+    auto& x = *this;
     
     // instructions are opcode:target
     // target for operation may be the cell NE SE SW NW or the register
@@ -429,7 +432,8 @@ void world::exec(entity& x) {
 
 void world::tick() {
     for (entity* p : _entities[counter & 63]) {
-        exec(*p);
+        assert(p);
+        p->tick(_board);
     }
     ++counter;
 }

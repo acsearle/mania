@@ -425,10 +425,12 @@ void game::draw() {
     }
     
     for (u64 i = 0; i != 63; ++i) {
-        for (entity* p : _thing._entities[i]) {
+        for (entity* q : _thing._entities[i]) {
             
             // clip this list to screen
             // and draw in proper order (top to bottom, left to right?)
+            
+            if (mcu* p = dynamic_cast<mcu*>(q)) {
             
             auto u = p->x * 64;
             auto v = p->y * 64;
@@ -472,6 +474,8 @@ void game::draw() {
             blit3(z, {u+32, v+32});
             sprintf(z, "%llX", p->d);
             blit3(z, {u-32, v+32});
+                
+            }
         }
     }
 
@@ -549,7 +553,7 @@ void game::key_down(u32 c) {
             break;
         case 'q': {
             using namespace instruction;
-            entity* p = entity::make();
+            entity* p = mcu::make();
             p->x = selectee.x;
             p->y = selectee.y;
             if (is_vacant(_thing._board(p->x, p->y))) {
