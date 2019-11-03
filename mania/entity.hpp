@@ -116,6 +116,16 @@ struct smelter : entity {
     
 };
 
+struct silo : entity {
+    
+    rleq<u64> _queue;
+    
+    virtual void tick(space<u64>&) override;
+    
+    silo(i64 x, i64 y) : entity(x, y) {}
+
+};
+
 inline std::ostream& operator<<(std::ostream& s, const manic::mcu& x) {
     return (s << std::hex << "entity{x=" << x.x << ",y=" << x.y << ",a=" << x.a << ",d=" << x.d << "}");
 }
@@ -152,6 +162,7 @@ struct world {
     // MCUs?
     
     vector<entity*> _entities[64];
+    usize _next_insert;
     
     world();
     

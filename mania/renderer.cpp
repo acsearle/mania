@@ -414,6 +414,8 @@ void game::draw() {
     
     {
         
+        // PERFORMANCE BUG:
+        // Don't iterate through table, instead identify visible things
         for (auto&& z : _thing._board) {
             auto key = z.key;
             if (
@@ -435,6 +437,10 @@ void game::draw() {
         }
     }
     
+    // Don't iterate through all MCUs, we only need those that are on visible
+    // chunks
+    
+    // Maintain per-surface-chunk list of MCUs?
     for (u64 i = 0; i != 63; ++i) {
         for (entity* q : _thing._entities[i]) {
             
@@ -510,27 +516,28 @@ void game::draw() {
         blit4("button", {i * 64, _height - 64});
         blit4(v, {i * 64, _height - 64});
     }
-             
-        
-    _thing.tick();
-    
     
     //_atlas.push_sprite_translated(_animation[frame & 31], {100, 100});
         
     glClearColor(0.5, 0.6, 0.4, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     
+    /*
     if (false) {
         _atlas.discard();
         _atlas.push_atlas_translated({0, 0});
         glClearColor(0.5, 0.5, 0.5, 0.5);
         glClear(GL_COLOR_BUFFER_BIT);
-    }
+    }*/
     
     
     auto n = _atlas._vertices.size() / 6;
     
     _atlas.commit();
+
+    for (int i = 0; i != 1; ++i) {
+        _thing.tick();
+    }
 
     {
         char s[128];

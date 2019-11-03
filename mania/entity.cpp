@@ -12,13 +12,21 @@
 
 namespace manic {
 
-world::world() {
+world::world() : _next_insert(0) {
     
+    
+/*
     push_back(new mine(4, 4, element::carbon));
-
     push_back(new mine(8, 4, element::hematite));
-
     push_back(new smelter(12, 4));
+    push_back(new silo(16, 2));
+ */
+
+    push_back(new mine(7, 8, element::carbon));
+    push_back(new mine(9, 8, element::hematite));
+    push_back(new smelter(8, 8));
+    push_back(new silo(10, 6));
+
 
     
     /*
@@ -469,6 +477,21 @@ void smelter::tick(space<u64>& _board) {
 
 }
 
+void silo::tick(space<u64>& _board) {
+    using namespace instruction;
+    
+    u64* a = &_board(this->x + 1, this->y - 1);
+    u64* c = &_board(this->x - 1, this->y + 1);
+    
+    if (_queue.size() && !is_occupied(*a))
+        *a = _queue.pop_front();
+    if (is_item(*c)) {
+        _queue.push_back(*c);
+        *c = 0;
+    }
+
+}
+
 void world::tick() {
     for (entity* p : _entities[counter & 63]) {
         assert(p);
@@ -479,7 +502,8 @@ void world::tick() {
 
 void world::push_back(entity* p) {
     instruction::occupy(_board(p->x, p->y));
-    _entities[counter & 63].push_back(p);
+    _entities[_next_insert & 63].push_back(p);
+    _next_insert += 5 * 5;
 }
 
 } // namespace manic
