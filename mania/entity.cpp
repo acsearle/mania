@@ -132,7 +132,7 @@ void world::exec(entity& x) {
         }
         
         // perform the operation
-        switch (opcode_ | x.s) {
+        switch (opcode_ | (x.s & MICROSTATE_MASK)) {
                 
             case noop:
             default:

@@ -261,7 +261,16 @@ namespace instruction {
 //         perhaps
 //     * DIRECTION is ruled out; can't see any advantage here; coal always goes
 //       west???
-
+//
+// * What is the difference between number zero, opcode zero, item zero and
+//   ghost zero?  They all compare equal, but have different answers for tags.
+//   Do we need to check we never write out a physical zero?  What if we
+//   decrement a ghost or opcode to zero, then increment it back up, does it
+//   become a number?  Yes, that seems okay.
+//
+// * ghosts and items have to be comparable, but it's better if other
+//   heterogeneous combinations aren't comparable.  Does this mean we mask
+//   out only some of the tag bits for equality comparison?
 
 
 // allocation of word:
@@ -331,89 +340,125 @@ namespace instruction {
 
 
 
-const u64    OCCUPIED_FLAG = 0x8000'0000'0000'0000ull;
-const u64 INSTRUCTION_FLAG = 0x4000'0000'0000'0000ull;
-const u64        ITEM_FLAG = 0x2000'0000'0000'0000ull;
-const u64   CONSERVED_FLAG = 0x1000'0000'0000'0000ull;
+constexpr u64    OCCUPIED_FLAG = 0x8000'0000'0000'0000ull;
+constexpr u64 INSTRUCTION_FLAG = 0x4000'0000'0000'0000ull;
+constexpr u64        ITEM_FLAG = 0x2000'0000'0000'0000ull;
+constexpr u64   CONSERVED_FLAG = 0x1000'0000'0000'0000ull;
 
 constexpr bool is_occupied(u64 x) { return x & OCCUPIED_FLAG; }
 constexpr bool is_instruction(u64 x) { return x & INSTRUCTION_FLAG; }
 constexpr bool is_item(u64 x) { return x & ITEM_FLAG; }
 constexpr bool is_conserved(u64 x) { return x & CONSERVED_FLAG; }
 
+constexpr bool is_ghost(u64 x) { return is_item(x) && !is_conserved(x); }
+
 constexpr bool is_vacant(u64 x) { return !is_occupied(x); }
 
 inline void occupy(u64& x) { x |=  OCCUPIED_FLAG; }
 inline void vacate(u64& x) { x &=~ OCCUPIED_FLAG; }
 
-const u64        TAG_MASK = 0x7000'0000'0000'0000ull;
-const u64      NUMBER_TAG = 0x0000'0000'0000'0000ull;
-const u64 INSTRUCTION_TAG = INSTRUCTION_FLAG;
-const u64       GHOST_TAG = ITEM_FLAG;
-const u64    MATERIAL_TAG = OCCUPIED_FLAG | ITEM_FLAG | CONSERVED_FLAG;
+constexpr u64        TAG_MASK = 0x7000'0000'0000'0000ull;
+constexpr u64      NUMBER_TAG = 0x0000'0000'0000'0000ull;
+constexpr u64 INSTRUCTION_TAG = INSTRUCTION_FLAG;
+constexpr u64       GHOST_TAG = ITEM_FLAG;
+constexpr u64    MATERIAL_TAG = OCCUPIED_FLAG | ITEM_FLAG | CONSERVED_FLAG;
 
 constexpr u64 ghost_of(u64 x) { return x &~ (OCCUPIED_FLAG | CONSERVED_FLAG); }
 
-const u64 VALUE_MASK = 0x0FFF'FFFF'FFFF'FFFFull;
+constexpr u64 VALUE_MASK = 0x0FFF'FFFF'FFFF'FFFFull;
+constexpr u64 FLAGS_MASK = 0xF000'0000'0000'0000ull;
 
 constexpr u64 value_of(u64 x) { return x & VALUE_MASK; }
 
+constexpr i64 signed_of(u64 x) {
+    x &= VALUE_MASK;
+    if (x & 0x0800'0000'0000'0000) {
+        x &= 0xF000'0000'0000'0000;
+    }
+    return static_cast<i64>(x);
+}
+
+
 // Opcode structure definitions
 
-const u64 MICROSTATE_SHIFT = 58;
-const u64 MICROSTATE_MASK = 0x0C00'0000'0000'0000ull;
+constexpr u64 MICROSTATE_SHIFT = 58;
+constexpr u64 MICROSTATE_MASK = 0x0C00'0000'0000'0000ull;
 
 constexpr u64 OPCODE_SHIFT = 32;
-const u64 OPCODE_MASK  = 0x03FF'FFFF'0000'0000ull;
-const u64 OPCODE_BASIS = 0x0000'0001'0000'0000ull;
+constexpr u64 OPCODE_MASK  = 0x03FF'FFFF'0000'0000ull;
+constexpr u64 OPCODE_BASIS = 0x0000'0001'0000'0000ull;
 
-const u64 ADDRESS_SHIFT = 0;
-const u64 ADDRESS_MASK = 0x0007ull;
+constexpr u64 ADDRESS_SHIFT = 0;
+constexpr u64 ADDRESS_MASK = 0x0007ull;
 
-const u64 REGISTER_FLAG = 0x0004ull;
+constexpr u64 REGISTER_FLAG = 0x0004ull;
+
+// To compare values, we want to include some flag and exclude others
+// * OCCUPIED_FLAG is excluded so we can compare things while another entity runs over them
+// * INSTRUCTION_FLAG is included so instructions are not comparable to numbers, ghosts or items
+// * ITEM_FLAG is included so items and ghosts are not comparable to instructions or numbers
+// * CONSERVED_FLAG is excluded so ghosts are comparable to items
+// Signed comparisons become problematic?
+constexpr u64 EQUALITY_MASK = ~(OCCUPIED_FLAG | CONSERVED_FLAG);
 
 constexpr u64 opcode_of(u64 x) {
     assert(is_instruction(x));
     return (x & OPCODE_MASK);
 }
+
+// enums are quite awful!
+
+constexpr u64 _opcode_enum_maker(u64 x) {
+    return x << OPCODE_SHIFT;
+}
+
 enum opcode_enum : u64 {
-    noop = 0ull << OPCODE_SHIFT,
-    load = 1ull << OPCODE_SHIFT,
-    store = 3ull << OPCODE_SHIFT,
-    add = 4ull << OPCODE_SHIFT,
-    sub = 5ull << OPCODE_SHIFT,
-    bitwise_and = 6ull << OPCODE_SHIFT,
-    bitwise_or = 7ull << OPCODE_SHIFT,
-    bitwise_xor = 8ull << OPCODE_SHIFT,
-    decrement = 9ull << OPCODE_SHIFT,
-    decrement_saturate = 10ull << OPCODE_SHIFT,
-    increment = 11ull << OPCODE_SHIFT,
-    increment_saturate = 12ull << OPCODE_SHIFT,
-    flip_increment = 13ull << OPCODE_SHIFT,
-    flip_decrement = 14ull << OPCODE_SHIFT,
-    swap = 15ull << OPCODE_SHIFT,
-    kill = 16ull << OPCODE_SHIFT,
-    fork = 17ull << OPCODE_SHIFT,
-    conservative_or = 18ull << OPCODE_SHIFT,
-    conservative_and = 19ull << OPCODE_SHIFT,
-    less_than = 20ull << OPCODE_SHIFT,
-    equal_to = 21ull << OPCODE_SHIFT,
-    clear = 22ull << OPCODE_SHIFT,
-    compare = 23ull << OPCODE_SHIFT,
-    and_complement_of = 24ull << OPCODE_SHIFT,
-    dump = 25ull << OPCODE_SHIFT,
-    halt = 26ull << OPCODE_SHIFT,
-    barrier = 27ull << OPCODE_SHIFT,
-    mutex = 28ull << OPCODE_SHIFT,
-    greater_than = 29ull << OPCODE_SHIFT,
-    less_than_or_equal_to = 30ull << OPCODE_SHIFT,
-    greater_than_or_equal_to = 31ull << OPCODE_SHIFT,
-    not_equal_to = 32ull << OPCODE_SHIFT,
-    complement = 33ull << OPCODE_SHIFT,
-    negate = 34ull << OPCODE_SHIFT,
-    shift_left = 35ull << OPCODE_SHIFT,
-    shift_right = 36ull << OPCODE_SHIFT,
+    noop = _opcode_enum_maker( 0ull ),
+    load = _opcode_enum_maker( 1ull ),
+    store = _opcode_enum_maker( 2ull ),
+    add = _opcode_enum_maker( 3ull ),
+    sub = _opcode_enum_maker( 4ull ),
+    bitwise_and = _opcode_enum_maker( 5ull ),
+    bitwise_or = _opcode_enum_maker( 6ull ),
+    bitwise_xor = _opcode_enum_maker( 7ull ),
+    decrement = _opcode_enum_maker( 8ull ),
+    decrement_saturate = _opcode_enum_maker( 9ull ),
+    increment = _opcode_enum_maker( 10ull ),
+    increment_saturate = _opcode_enum_maker( 11ull ),
+    flip_increment = _opcode_enum_maker( 12ull ),
+    flip_decrement = _opcode_enum_maker( 13ull ),
+    swap = _opcode_enum_maker( 14ull ),
+    kill = _opcode_enum_maker( 15ull ),
+    fork = _opcode_enum_maker( 16ull ),
+    conservative_or = _opcode_enum_maker( 17ull ),
+    conservative_and = _opcode_enum_maker( 18ull ),
+    less_than = _opcode_enum_maker( 19ull ),
+    equal_to = _opcode_enum_maker( 20ull ),
+    clear = _opcode_enum_maker( 21ull ),
+    compare = _opcode_enum_maker( 22ull ),
+    and_complement_of = _opcode_enum_maker( 23ull ),
+    dump = _opcode_enum_maker( 24ull ),
+    halt = _opcode_enum_maker( 25ull ),
+    barrier = _opcode_enum_maker( 26ull ),
+    mutex = _opcode_enum_maker( 27ull ),
+    greater_than = _opcode_enum_maker( 28ull ),
+    less_than_or_equal_to = _opcode_enum_maker( 29ull ),
+    greater_than_or_equal_to = _opcode_enum_maker( 30ull ),
+    not_equal_to = _opcode_enum_maker( 31ull ),
+    complement = _opcode_enum_maker( 32ull ),
+    negate = _opcode_enum_maker( 33ull ),
+    shift_left = _opcode_enum_maker( 34ull ),
+    shift_right = _opcode_enum_maker( 35ull ),
+    turn_back = _opcode_enum_maker( 36ull ), // replace with add D immediate, set D immediate?
+    turn_north = _opcode_enum_maker( 37ull ),
+    turn_east = _opcode_enum_maker( 38ull ),
+    turn_south = _opcode_enum_maker( 39ull ),
+    turn_west = _opcode_enum_maker( 40ull ),
+    turn_cw = _opcode_enum_maker( 41ull ),
+    turn_cccw = _opcode_enum_maker( 42ull ),
 };
+
+constexpr u64 _opcode_enum_size = 42;
 
 enum address_enum : u64 {
     northeast = 0,
