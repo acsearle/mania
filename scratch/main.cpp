@@ -8,11 +8,45 @@
 #include <iostream>
 
 #include "image.hpp"
-#include "json.hpp"
+#include "debug.hpp"
+#include "projections.hpp"
 
 namespace manic {
 
 void foo() {
+    
+    auto a = from_png_and_multiply_alpha("/Users/acsearle/Documents/pov/silo00.png");
+    auto b = a(0,0);
+    DUMP(vec4(b));
+    
+    DUMP(pow(b.r / 255.0, 2.2));
+    
+    DUMP(0.04045 * 255.0);
+        
+    DUMP(pow(0.5, 1.0/2.2) * 255);
+    
+    auto sRGB = [](double u) {
+        if (u <= 0.04045) {
+            return u / 12.92;
+        } else {
+            return pow((u + 0.055) / 1.055, 2.4);
+        }
+    };
+    
+    DUMP(sRGB(b.r / 255.0));
+    
+    auto isRGB = [](double u) {
+        if (u < 0.0031308) {
+            return 12.92 * u;
+        } else {
+            return 1.055 * pow(u, 1.0/2.4) - 0.055;
+        }
+    };
+    
+    DUMP(isRGB(0.5) * 255.0);
+
+    
+    /*
     auto n = 1024;
     image a(n, n);
     
@@ -38,12 +72,17 @@ void foo() {
         }
         printf("\n");
     }
-    
+    */
 }
-}
+} /// namespace foo
+
+
+//int main_projections(int argc, char** argv);
+
 
 int main(int argc, char** argv) {
-    manic::foo();
+    //manic::foo();
+    main_projections( argc,  argv);
 }
 
 

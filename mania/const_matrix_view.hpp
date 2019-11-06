@@ -119,13 +119,73 @@ namespace manic {
     template<typename T>
     T rms(const_matrix_view<T> a) {
         T p = 0.0;
+                   T q = 0.0;
         for (auto row : a)
-            for (auto x : row)
+            for (auto x : row) {
+                q += x;
                 p += x * x;
+            }
+        
         p /= a.rows() * a.columns();
         return sqrt(p);
     }
-    
+                   template<typename T>
+                   T variance(const_matrix_view<T> a) {
+                       T p = 0.0;
+                       for (auto row : a)
+                           for (auto x : row) {
+                               p += x * x;
+                           }
+                       
+                       p /= a.rows() * a.columns();
+                       return p;
+                   }
+
+                   template<typename T>
+                   T mean(const_matrix_view<T> a) {
+                       T p = 0.0;
+                       for (auto row : a)
+                           for (auto x : row)
+                               p += x;
+                       p /= a.rows() * a.columns();
+                       return p;
+                   }
+
+                   
+    template<typename T>
+    T min(const_matrix_view<T> a) {
+        T p = a(0, 0);
+        for (auto row : a)
+            for (auto x : row)
+                p = std::min(p, x);
+        return p;
+    }
+            
+    template<typename T>
+    T max(const_matrix_view<T> a) {
+        T p = a(0, 0);
+        for (auto row : a)
+            for (auto x : row)
+                p = std::max(p, x);
+        return p;
+    }
+
+            
+            template<typename T>
+            T stddev(const_matrix_view<T> a) {
+                T p = 0.0;
+                           T q = 0.0;
+                for (auto row : a)
+                    for (auto x : row) {
+                        q += x;
+                        p += x * x;
+                    }
+                   auto N = a.rows() * a.columns();
+                   p /= N;
+                   q /= N;
+                return sqrt(p - q * q);
+            }
+
     
 }
 

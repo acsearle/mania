@@ -39,7 +39,7 @@ using namespace manic;
     template<typename T> constexpr GLenum format<vec<T, 1>> = GL_RED;
     template<typename T> constexpr GLenum format<vec<T, 2>> = GL_RG;
     template<typename T> constexpr GLenum format<vec<T, 3>> = GL_RGB;
-    template<typename T> constexpr GLenum format<vec<T, 4>> = GL_RGBA;
+template<typename T> constexpr GLenum format<vec<T, 4>> = GL_RGBA;
     
     
     // Infer type from a struct

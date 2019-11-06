@@ -20,19 +20,19 @@ void application::draw() {
 }
 
 void application::key_up(manic::u32 c) {
-    std::cout << "key_up: '" << c << "'" << std::endl;
+    //std::cout << "key_up: '" << c << "'" << std::endl;
     if (_keyboard_state.contains(c)) {
         _keyboard_state.erase(c);
     }
 }
 
 void application::key_down(manic::u32 c) {
-    std::cout << "key_down: '" << c << "'" << std::endl;
+    //std::cout << "key_down: '" << c << "'" << std::endl;
     _keyboard_state.insert(c, true);
 }
 
 void application::mouse_moved(double x, double y) {
-    std::cout << "mouse_moved: " << x << ", " << y << std::endl;
+    //std::cout << "mouse_moved: " << x << ", " << y << std::endl;
     _mouse_window.x = x;
     _mouse_window.y = y;
 }

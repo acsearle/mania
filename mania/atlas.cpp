@@ -16,7 +16,8 @@ atlas::atlas(GLsizei n) : _packer(n), _size(n) {
     gl::vertex::bind();
     _texture.bind(GL_TEXTURE_2D);
     glTexImage2D(GL_TEXTURE_2D, 0,
-                 gl::format<pixel>,
+                 // gl::format<pixel>,
+                 GL_SRGB8_ALPHA8,
                  n, n,
                  0,
                  gl::format<pixel>, gl::type<pixel>,

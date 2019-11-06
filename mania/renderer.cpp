@@ -28,6 +28,7 @@
 #include "entity.hpp"
 #include "instruction.hpp"
 #include "elements.hpp"
+#include "terrain2.hpp"
 
 namespace manic {
 
@@ -53,6 +54,9 @@ struct game : application {
     string _text;
     
     short _lineheight;
+    
+    terrain2 _terrain;
+    
     
     u64 _selected_opcode;
         
@@ -128,6 +132,8 @@ game::game()
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+    
+    glEnable(GL_FRAMEBUFFER_SRGB);
     
     glBindAttribLocation(_program, (GLuint) gl::attribute::position, "position");
     glBindAttribLocation(_program, (GLuint) gl::attribute::texCoord, "texCoord");
@@ -291,7 +297,7 @@ vec2 game::bound(string_view v) {
 
 
 void game::draw() {
-
+    
     auto old_t = mach_absolute_time();
 
     static int frame = 0;
@@ -413,29 +419,42 @@ void game::draw() {
     };
     
     {
-        
-        // PERFORMANCE BUG:
-        // Don't iterate through table, instead identify visible things
-        for (auto&& z : _thing._board) {
-            auto key = z.key;
-            if (
-                ( key.x       * 64 < (i64) (_width  + _camera_position.x)) &&
-                ((key.x + 16) * 64 >           _camera_position.x) &&
-                ( key.y       * 64 < (i64) (_height + _camera_position.y)) &&
-                ((key.y + 16) * 64 >           _camera_position.y)) {
-                for (i64 i = 0; i != 16; ++i) {
-                    for (i64 j = 0; j != 16; ++j) {
-                        u64 k = z.value(i, j);
-                        blit3(translate(k), {(i + key.x) * 64, (j + key.y) * 64});
-                        if (instruction::is_instruction(k)) {
-                            string_view u(_translate_address[(k & 0x7)]);
-                            blit3(u, {(i + key.x) * 64, (j + key.y) * 64});
-                        }
-                    }
+        // Draw terrain layer
+        i64 x_lo = ((i64) _camera_position.x) >> 6;
+        i64 x_hi = ((i64) (_camera_position.x + _width + 63)) >> 6;
+        i64 y_lo = ((i64) _camera_position.y) >> 6;
+        i64 y_hi = ((i64) (_camera_position.y + _width + 63)) >> 6;
+        for (i64 x = x_lo; x != x_hi; ++x)
+            for (i64 y= y_lo; y != y_hi; ++y) {
+                // Perf: look up chunks once and then draw the block
+                if (_terrain(x, y) > 0) {
+                    blit3("sand_tile", {x*64, y*64});
+                } else {
+                    blit3("water_tile", {x*64, y*64});
                 }
             }
-        }
     }
+    
+    
+    
+    {
+        // Draw cell layer
+        i64 x_lo = ((i64) _camera_position.x) >> 6;
+        i64 x_hi = ((i64) (_camera_position.x + _width + 63)) >> 6;
+        i64 y_lo = ((i64) _camera_position.y) >> 6;
+        i64 y_hi = ((i64) (_camera_position.y + _width + 63)) >> 6;
+        for (i64 x = x_lo; x != x_hi; ++x)
+            for (i64 y= y_lo; y != y_hi; ++y) {
+                // Perf: look up chunks once and then draw the block
+                u64 k = _thing._board(x, y);
+                blit3(translate(k), {x * 64, y * 64});
+                if (instruction::is_instruction(k)) {
+                    string_view u(_translate_address[(k & 0x7)]);
+                    blit3(u, {x * 64, y * 64});
+                }
+            }
+    }
+
     
     // Don't iterate through all MCUs, we only need those that are on visible
     // chunks
@@ -518,8 +537,9 @@ void game::draw() {
     }
     
     //_atlas.push_sprite_translated(_animation[frame & 31], {100, 100});
-        
-    glClearColor(0.5, 0.6, 0.4, 0);
+
+    // With total redraw, clearing may or may not be necessary
+    glClearColor(0.1, 0.0, 0.1, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
     
     /*

@@ -586,8 +586,8 @@ blenderer::blenderer()
 : _program("basic") {
     
     //png_thing();
-    //auto pattern = manic::image::from_png("/Users/acsearle/Downloads/basn6a08.png");
-    auto pattern = manic::image::from_png("/Users/acsearle/Downloads/tbrn2c08.png");
+    //auto pattern = manic::image::from_png_and_multiply_alpha("/Users/acsearle/Downloads/basn6a08.png");
+    auto pattern = manic::image::from_png_and_multiply_alpha("/Users/acsearle/Downloads/tbrn2c08.png");
     // Premultiply alpha:
     auto p = pattern._data;
     for (int i = 0; i != pattern._width * pattern._height; ++i) {

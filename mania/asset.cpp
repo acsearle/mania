@@ -21,7 +21,7 @@ table3<string, sprite> load_asset(string_view asset_name, atlas& atl) {
                     a(i + 1, j).a = std::max(a(i + 1, j).a, a(i, j).a);
     };
     
-    image a = from_png(asset_name + ".png");
+    image a = from_png_and_multiply_alpha(asset_name + ".png");
     clean_image(a);
     
     auto z = _string_from_file(asset_name + ".json");

@@ -17,117 +17,73 @@
 #include "string.hpp"
 
 namespace manic {
-    
-    using std::exchange;
-    using std::move;
-    using std::forward;
 
-    
-    
+// Images are in the preferred format for OpenGL texture upload, alpha-
+// premultiplied colors in sRGB color space.
+//
+// libpng loads sRGB with non-premultiplied alpha.  This is not particularly
+// useful for any purpose?, so we are OK to always premultiply the alpha.
+// Lots of work for nothing though if it has trivial or absent alpha.
+//
+// Linear RGB with premultipled alpha is required for correct filtering.
+//
+// We need another image format, linear RGB represented as f32, for filtering
+// and compositing?
+//
+// Emmissives are their own texture layer so the fact they can't be represented
+// in non-premultiplied-alpha pngs is irrelevant.
 
-    
+using pixel = vec<u8, 4>;
+using image = matrix<pixel>;
 
-    using pixel = vec<unsigned char, 4>;
+using imagef = matrix<vec4>;
 
-    /*
-    template<typename T>
-    class column_vector_view {
-        struct column_vector_iterator {
-            
-        };
-    };
-     */
-    
-    using image = matrix<pixel>;
-    
-    //class image {
-        
-        // libpng and OpenGL both utilize row-major storage for images.
-        // Unfortunately this implies that the coordinate system for images is
-        // (row, column) = (y, x)
-        
-    //public:
-        
-        /*pixel* _allocation;
-        pixel* _data;
-    
-        ptrdiff_t _width;
-        ptrdiff_t _height;
-        ptrdiff_t _stride;
-        
-        image() : _allocation(nullptr), _data(nullptr) {}
-        image(image const&) = delete;
-        image(image&& r)
-        : _allocation(exchange(r._allocation, nullptr))
-        , _data(exchange(r._data, nullptr))
-        , _width(exchange(r._width, 0))
-        , _height(exchange(r._height, 0))
-        , _stride(exchange(r._stride, 0)) {
-        }
-        ~image() { free(_allocation); }
-        image& operator=(image const&) = delete;
-        image& operator=(image&& r) {
-            image(move(r)).swap(*this);
-            return *this;
-        }
-        
-        void swap(image& r) {
-            using std::swap;
-            swap(_data, r._data);
-            swap(_width, r._width);
-            swap(_height, r._height);
-            swap(_stride, r._stride);
-        }
-         */
-        
-        image from_png(string_view);
-        //static image with_size(ptrdiff_t width, ptrdiff_t height);
-        void to_png(const image&, const char*);
-        
-        void multiply_alpha(image& a);
-        void divide_alpha(image& a);
-        
-        //void crop(ptrdiff_t x, ptrdiff_t y, ptrdiff_t w, ptrdiff_t h);
-        
-        void halve(image&);
-        
-        void bevel(image&);
-        
-        //pixel& operator()(ptrdiff_t i, ptrdiff_t j);
-        
-        //void draw_rect(ptrdiff_t x, ptrdiff_t y, ptrdiff_t width, ptrdiff_t height, pixel c);
-        
-        //void clear(pixel c);
+image from_png_and_multiply_alpha(string_view);
+void to_png(image const&, char const*);
 
-void dilate(image&);
+void multiply_alpha(image& a);
 
-void compose(matrix_view<pixel> background, const_matrix_view<pixel> foreground);
-        
-
-    //};
-    
-    
-    void blur(matrix_view<pixel> a, const_matrix_view<pixel> b);
-    
-    /*
-    template<typename T, typename U, typename V>
-    void filter_rows(matrix_view<T> dest, const_matrix_view<U> src, const_vector_view<V> filter) {
-        for (auto i = 0; i != dest.rows(); ++i)
-            for (auto j = 0; j != dest.columns(); ++j)
-                dest(i, j) = dot(src.sub(i, j, 1, filter.size()).front(), filter);
-    }
-    
-    template<typename T, typename U, typename V>
-    void filter_columns(matrix_view<T> dest, const matrix_view<U> src, const_vector_view<T> filter) {
-        for (auto i = 0; i != dest.rows(); ++i)
-            for (auto j = 0; j != dest.columns(); ++j)
-                dest(i, j) = dot(src.sub(i, j, filter.size(), 1), filter);
-    }
-*/
-
-vec<i64, 2> prune(matrix_view<pixel>& a);
-
+inline f32 from_sRGB(f32 u) {
+    return ((u <= 0.04045f)
+            ? (u / 12.92f)
+            : (std::powf((u + 0.055f) / 1.055f, 2.4f)));
 }
 
+extern f32* _from_sRGB_table;
+
+inline f32 from_sRBG(u8 u) {
+    return _from_sRGB_table[u];
+}
+
+inline f32 to_sRGB(f32 u) {
+    return ((u <= 0.0031308f)
+            ? (u * 12.92f)
+            : (1.055f * powf(u, 1.0f / 2.4f) - 0.055f));
+}
+
+extern u8 (*_multiply_alpha_table)[256];
+
+inline pixel multiply_alpha(pixel x) {
+    return pixel{
+        _multiply_alpha_table[x.a][x.r],
+        _multiply_alpha_table[x.a][x.g],
+        _multiply_alpha_table[x.a][x.g],
+        x.a
+    };
+}
+
+extern u8 (*_divide_alpha_table)[256];
+
+inline pixel divide_alpha(pixel x) {
+    return pixel{
+        _multiply_alpha_table[x.a][x.r],
+        _multiply_alpha_table[x.a][x.g],
+        _multiply_alpha_table[x.a][x.g],
+        x.a
+    };
+}
+
+
+} // namespace manic
 
 #endif /* image_hpp */
