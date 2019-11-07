@@ -12,7 +12,9 @@
 
 namespace manic {
 
-world::world() : _next_insert(0) {
+world::world()
+: _next_insert(0)
+, _terrain(_terrain_generator(0)) {
     
     
 /*
@@ -514,7 +516,7 @@ void world::push_back(entity* p) {
 }
 
 void world::did_exit(i64 i, i64 j, u64 d) {
-    _terrain(i, j) = 2 + !(d & 1);
+    _terrain({i, j}) = 2 + !(d & 1);
 }
 
 } // namespace manic

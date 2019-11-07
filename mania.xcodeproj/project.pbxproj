@@ -188,7 +188,6 @@
 		CAE2F1BB2216B97000B832F6 /* deque-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "deque-test.cpp"; sourceTree = "<group>"; };
 		CAE2F1BC2216B97000B832F6 /* deque.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = deque.hpp; sourceTree = "<group>"; };
 		CAE2F1BE2216EBAB00B832F6 /* catch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = catch.hpp; sourceTree = "<group>"; };
-		CAEB6602236AE3BB00C28580 /* space.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = space.hpp; sourceTree = "<group>"; };
 		CAEB6606236C34A400C28580 /* reflector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = reflector.cpp; sourceTree = "<group>"; };
 		CAEB6607236C34A400C28580 /* reflector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = reflector.hpp; sourceTree = "<group>"; };
 		CAEB660C236D3B3500C28580 /* animation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = animation.cpp; sourceTree = "<group>"; };
@@ -473,7 +472,6 @@
 				CAD3B2272363A2E5001DA73B /* rleq.cpp */,
 				CAD3B2282363A2E5001DA73B /* rleq.hpp */,
 				CA72B7BB221A8E9400AC9441 /* scrapyard */,
-				CAEB6602236AE3BB00C28580 /* space.hpp */,
 				CAEB66252374004100C28580 /* space2.hpp */,
 				CA0EB12922201ADB00DAE8CF /* terrain.cpp */,
 				CA0EB12A22201ADB00DAE8CF /* terrain.hpp */,

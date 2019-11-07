@@ -356,7 +356,7 @@ void game::draw() {
         for (i64 x = x_lo; x != x_hi; ++x) {
             for (i64 y = y_lo; y != y_hi; ++y) {
                 const char* z = nullptr;
-                switch (_thing._terrain(x, y)) {
+                switch (_thing._terrain({x, y})) {
                     case 0: z = "tile0"; break;
                     case 1: z = "tileF"; break;
                     case 2: z = "tracks_h"; break;
