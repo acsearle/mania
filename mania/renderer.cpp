@@ -54,9 +54,7 @@ struct game : application {
     string _text;
     
     short _lineheight;
-    
-    terrain2 _terrain;
-    
+        
     
     u64 _selected_opcode;
         
@@ -222,10 +220,13 @@ vec2 game::bound(string_view v) {
 
 void game::draw() {
     
-    auto old_t = mach_absolute_time();
+    static auto old_t = mach_absolute_time();
 
     static int frame = 0;
     frame += 1;
+    
+    //_width = 2048;
+    //_height = 2048;
     
     glViewport(0, 0, (GLsizei) _width, (GLsizei) _height);
     
@@ -235,7 +236,11 @@ void game::draw() {
         0, 0, 1, 0,
         0, 0, 0, 1
     };
-        
+    
+    //_camera_position.x += sin(frame * 0.1);
+    //_camera_position.y += cos(frame * 0.1);
+
+    
     glUniformMatrix4fv(glGetUniformLocation(_program, "transform"), 1, GL_TRUE, transform);
     
     static double angle = 0.0;
@@ -344,33 +349,25 @@ void game::draw() {
     
     {
         // Draw terrain layer
-        i64 x_lo = ((i64) _camera_position.x - 32) >> 6;
-        i64 x_hi = ((i64) (_camera_position.x + _width + 31)) >> 6;
-        i64 y_lo = ((i64) _camera_position.y - 32) >> 6;
-        i64 y_hi = ((i64) (_camera_position.y + _width + 31)) >> 6;
-        for (i64 x = x_lo; x != x_hi; ++x)
-            for (i64 y= y_lo; y != y_hi; ++y) {
-                // Perf: look up chunks once and then draw the block
-                //if (_terrain(x, y) > 0) {
-                //    blit3("sand_tile", {x*64, y*64});
-                //} else {
-                //    blit3("water_tile", {x*64, y*64});
-                //}
-                int i = 0;
-                if (_terrain(x + 1, y) > 0)
-                    i |= 1;
-                if (_terrain(x + 1, y + 1) > 0)
-                    i |= 2;
-                if (_terrain(x, y + 1) > 0)
-                    i |= 4;
-                if (_terrain(x, y) > 0)
-                    i |= 8;
-                char z[10];
-                sprintf(z, "tile%X", i);
-                blit3(z, {x*64+32,y*64+32});
+        i64 x_lo = ((i64) _camera_position.x) >> 6;
+        i64 x_hi = ((i64) (_camera_position.x + (i64) _width + 63)) >> 6;
+        i64 y_lo = ((i64) _camera_position.y) >> 6;
+        i64 y_hi = ((i64) (_camera_position.y + (i64) _height + 63)) >> 6;
+        for (i64 x = x_lo; x != x_hi; ++x) {
+            for (i64 y = y_lo; y != y_hi; ++y) {
+                const char* z = nullptr;
+                switch (_thing._terrain(x, y)) {
+                    case 0: z = "tile0"; break;
+                    case 1: z = "tileF"; break;
+                    case 2: z = "tracks_h"; break;
+                    case 3: z = "tracks_v"; break;
+                    default:
+                        assert(false);
+                }
+                blit3(z, {x*64,y*64});
             }
+        }
     }
-    
     
     
     {
@@ -475,7 +472,8 @@ void game::draw() {
     //_atlas.push_sprite_translated(_animation[frame & 31], {100, 100});
 
     // With total redraw, clearing may or may not be necessary
-    glClearColor(0.1, 0.0, 0.1, 0.0);
+    //glClearColor(0.1, 0.0, 0.1, 0.0);
+    glClearColor(1, 1, 1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
     
     
@@ -500,9 +498,11 @@ void game::draw() {
         auto new_t = mach_absolute_time();
         sprintf(s, "%.2f ms | %lu quads\n%lux%lu\nf%d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
         scribe(s, {_font.charmap[' '].advance, _font.height});
+        old_t = new_t;
     }
 
     _atlas.commit();
+
 
 }
 

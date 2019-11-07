@@ -58,9 +58,10 @@ world::world() : _next_insert(0) {
 }
 
 
-void mcu::tick(space<u64>& _board) {
+void mcu::tick(world& _world) {
     
     auto& x = *this;
+    auto& _board = _world._board;
     
     // instructions are opcode:target
     // target for operation may be the cell NE SE SW NW or the register
@@ -429,6 +430,7 @@ void mcu::tick(space<u64>& _board) {
             // step forward
             x.s = entering; // set travelling state
             occupy(*q);
+            _world.did_exit(x.x, x.y, x.d);
             switch (x.d & 3) { // jump into it
                 case 0:
                     x.y -= 1;
@@ -449,8 +451,9 @@ void mcu::tick(space<u64>& _board) {
 }
 
 
-void mine::tick(space<u64>& _board) {
-    
+void mine::tick(world& _world) {
+    auto& _board = _world._board;
+
     using namespace instruction;
     u64* p = &_board(this->x, this->y + 1);
     assert(p);
@@ -460,8 +463,10 @@ void mine::tick(space<u64>& _board) {
     
 }
 
-void smelter::tick(space<u64>& _board) {
+void smelter::tick(world& _world) {
     
+    auto& _board = _world._board;
+
     using namespace instruction;
     using namespace element;
     
@@ -477,8 +482,10 @@ void smelter::tick(space<u64>& _board) {
 
 }
 
-void silo::tick(space<u64>& _board) {
+void silo::tick(world& _world) {
     using namespace instruction;
+    
+    auto& _board = _world._board;
     
     u64* a = &_board(this->x + 1, this->y - 1);
     u64* c = &_board(this->x - 1, this->y + 1);
@@ -495,7 +502,7 @@ void silo::tick(space<u64>& _board) {
 void world::tick() {
     for (entity* p : _entities[counter & 63]) {
         assert(p);
-        p->tick(_board);
+        p->tick(*this);
     }
     ++counter;
 }
@@ -504,6 +511,10 @@ void world::push_back(entity* p) {
     instruction::occupy(_board(p->x, p->y));
     _entities[_next_insert & 63].push_back(p);
     _next_insert += 5 * 5;
+}
+
+void world::did_exit(i64 i, i64 j, u64 d) {
+    _terrain(i, j) = 2 + !(d & 1);
 }
 
 } // namespace manic

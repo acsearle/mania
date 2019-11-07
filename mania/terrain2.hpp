@@ -18,12 +18,12 @@ namespace manic {
 
 struct terrain2 {
     
-    using T = double;
+    using T = u8;
     
     // to speed lookup, consider
     // * reducing depth of indices
     // * storing T* instead and constructing view from implicit 16x16 knowledge
-    mutable table3<vec<i64, 2>, matrix<double>> _table;
+    mutable table3<vec<i64, 2>, matrix<T>> _table;
     
     static const i64 N = 16;
     static const i64 MASK = N - 1;
@@ -39,11 +39,20 @@ struct terrain2 {
         return v;
     }
     
-    void write(i64 i, i64 j, double v) const {
+    matrix<T> _make_for(i64 i, i64 j) {
+        auto a = terrain(i & ~MASK, j & ~MASK, N, N, 0);
+        matrix<u8> b(N, N);
+        for (i = 0; i != N; ++i)
+            for (j = 0; j != N; ++j)
+                b(i, j) = (a(i, j) > 0);
+        return b;
+    }
+    
+    void write(i64 i, i64 j, double v) {
         auto key = _make_key(vec<i64, 2>(i, j));
         matrix<T>* p = _table.try_get(key);
         if (!p)
-            p = &_table.insert(key, terrain(i & ~MASK, i & ~MASK, N, N, 0)).value;
+            p = &_table.insert(key, _make_for(i, j)).value;
         assert(p);
         (*p)(i & MASK, j & MASK) = v;
         // notify observer?
@@ -82,12 +91,12 @@ struct terrain2 {
         return p ? &(*p)(ij.x & MASK, ij.y & MASK) : nullptr;
     }
     
-    T& _get_unsafe(vec<i64, 2> ij) const {
+    T& _get_unsafe(vec<i64, 2> ij) {
         auto key = _make_key(ij);
         // perfect location for entry API
         auto p = _table.try_get(key);
         if (!p) {
-            p = &_table.insert(key, terrain(ij.x & ~MASK, ij.y & ~MASK, N, N, 0)).value;
+            p = &_table.insert(key, _make_for(ij.x, ij.y)).value;
         }
         assert(p);
         T* q = &(*p)(ij.x & MASK, ij.y & MASK);

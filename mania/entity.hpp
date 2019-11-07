@@ -12,6 +12,7 @@
 #include "matrix.hpp"
 #include "space.hpp"
 #include "vector.hpp"
+#include "terrain2.hpp"
 
 #include "rleq.hpp"
 
@@ -19,6 +20,8 @@ namespace manic {
 
 // Base class for things that have a location and tick (will anything not have
 // a location, but tick?)
+
+struct world;
 
 struct entity {
             
@@ -32,7 +35,7 @@ struct entity {
     
     virtual ~entity() = default;
     
-    virtual void tick(space<u64>&) = 0;
+    virtual void tick(world&) = 0;
 
 };
 
@@ -94,13 +97,13 @@ struct mcu : entity {
         c = 0;
     }
     
-    virtual void tick(space<u64>&) override;
+    virtual void tick(world&) override;
     
 };
 
 struct mine : entity {
     
-    virtual void tick(space<u64>&) override;
+    virtual void tick(world&) override;
     
     u64 m;
     
@@ -110,7 +113,7 @@ struct mine : entity {
 
 struct smelter : entity {
     
-    virtual void tick(space<u64>&) override;
+    virtual void tick(world&) override;
     
     smelter(i64 x, i64 y) : entity(x, y) {}
     
@@ -120,7 +123,7 @@ struct silo : entity {
     
     rleq<u64> _queue;
     
-    virtual void tick(space<u64>&) override;
+    virtual void tick(world&) override;
     
     silo(i64 x, i64 y) : entity(x, y) {}
 
@@ -144,6 +147,7 @@ struct world {
     // loops (head-on collision and two-lane road intersections) possible)
     
     space<u64> _board;
+    terrain2 _terrain;
     
     // MCUs take turns to act on the board.  A queue is the obvious data
     // structure.  However, we want to spread the computational load across
@@ -173,6 +177,8 @@ struct world {
     void exec(entity&);
     
     void push_back(entity*);
+    
+    void did_exit(i64 i, i64 j, u64 d);
     
 }; // struct world
 
