@@ -43,7 +43,7 @@ struct terrain2 {
         auto key = _make_key(vec<i64, 2>(i, j));
         matrix<T>* p = _table.try_get(key);
         if (!p)
-            p = &_table.insert(key, terrain(i & ~MASK, i & ~MASK, N*16, N*16, 0)).value;
+            p = &_table.insert(key, terrain(i & ~MASK, i & ~MASK, N, N, 0)).value;
         assert(p);
         (*p)(i & MASK, j & MASK) = v;
         // notify observer?
@@ -87,7 +87,7 @@ struct terrain2 {
         // perfect location for entry API
         auto p = _table.try_get(key);
         if (!p) {
-            p = &_table.insert(key, terrain(ij.x & ~MASK, ij.y & ~MASK, N*16, N*16, 0)).value;
+            p = &_table.insert(key, terrain(ij.x & ~MASK, ij.y & ~MASK, N, N, 0)).value;
         }
         assert(p);
         T* q = &(*p)(ij.x & MASK, ij.y & MASK);

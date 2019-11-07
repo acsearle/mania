@@ -87,21 +87,6 @@ application& application::get() {
     return x;
 }
 
-// As a general principle, we want to use nested local coordinates as much as
-// possible, because we access and copy lots of coordinates.  Using doubles
-// everywhere is convenient but squanders memory bandwidth, and limits
-// precision.  Obviously this is overkill for small worlds/projects.
-// As we dig into structures, offsets can accumulate
-
-// Is there a fundamental coordinate?  A pixel?  A sub-pixel?  If so, entities
-// need float storage.  Are entities rendered at non-integer co-ordinates?  If
-// so, we need GL_LINEAR, and we need to carefuly arrange tiles so they are
-// always rendered in the same order, and have enough overlap to blend properly.
-// * No, we just need to have border pixels supplied so GL_LINEAR works properly
-//
-// Conclusion: to support non-integer camera zooms, we need GL_LINEAR rendering.
-// Tiles must supply border pixels as well to supply GL_LINEAR what it needs.
-
 game::game()
 : _program("basic")
 , _atlas(1024) {
@@ -154,67 +139,6 @@ game::game()
     _periodic.insert(iron, "iron");
 
 }
-
-// Rendering engine:
-//
-// Rendering unscaled asserts requires:
-//
-// Float x, float y
-// Integer asset tag
-//
-// Implicit is
-//
-// The texture atlas to use
-// The layer so populated / the ordering
-//
-// Everything
-// - Layers 0..n
-//   - Atlases 0..n
-//     - (x, y, identifier)
-//
-// If we make the implicit atlas, layer and ordering explicit we have to do
-// more work.  Fair tradeoff?
-//
-// Imagine trees in adjacent chunks; all at the same player, but all overdrawing
-// each other.  Z-buffer solves this for 3d geometry but we want to use alpha
-// heavily for shadows and smooth edges.  So we have to sort something,
-// somewhere.  We will tend to emit large runs of sorted order, so the sort
-// can benefit from this for the right algorithm.
-//
-// While the problem is acute when viewing along a coordinate axis, isometric
-// still suffers from it: a large sprite in one chunk can overhang a small
-// sprite in another.  Do we need to render chunks by row?
-//
-// When multiple atlases are in play, the pathological case occurs when
-// entities from different atlases are stacked in front of each other.  i.e.
-// every time a run of the same atlas breaks, we have to change texture and
-// issue a new draw command, or we have to pass a texture id in with each
-// vertex.
-//
-// We can ban this case by restricting layers to a single atlas, but this is
-// still problematic--we can only have one layer for overlappy things like
-// trees, power poles, buildings, i.e. things that live at the same z-level.
-//
-// tiles < ore < grass < belts < plates <
-// trees, buildings, poles, creatures
-// < robots < clouds
-//
-// Objects that don't overhang their exclusive footprint are precious; a set of
-// these can be rendered in any order.  Is this why assemblers are rhomboid?
-//
-// So layers can either be nonoverlapping and multi-atlas, or overlapping and
-// single atlas?  A weird restriction.
-//
-// Shadows are a devastating example of this.  They can't be cast properly
-// onto non-flat surfaces anyway (terrain, tiles, plates layers).
-//
-// What if we render shadows separately, with a special shader, that accumulates
-// them properly, and then renders them back onto main target?  Expensive but
-// high quality.  A lone item shadows everything on the ground correctly (but
-// also true of naive method), crowded objects don't deepen shadows (better)
-// and don't cast on each other (vs. casting wrongly on each other).  Hmm.
-
-
 
 void game::resize(usize width, usize height) {
     
@@ -420,18 +344,30 @@ void game::draw() {
     
     {
         // Draw terrain layer
-        i64 x_lo = ((i64) _camera_position.x) >> 6;
-        i64 x_hi = ((i64) (_camera_position.x + _width + 63)) >> 6;
-        i64 y_lo = ((i64) _camera_position.y) >> 6;
-        i64 y_hi = ((i64) (_camera_position.y + _width + 63)) >> 6;
+        i64 x_lo = ((i64) _camera_position.x - 32) >> 6;
+        i64 x_hi = ((i64) (_camera_position.x + _width + 31)) >> 6;
+        i64 y_lo = ((i64) _camera_position.y - 32) >> 6;
+        i64 y_hi = ((i64) (_camera_position.y + _width + 31)) >> 6;
         for (i64 x = x_lo; x != x_hi; ++x)
             for (i64 y= y_lo; y != y_hi; ++y) {
                 // Perf: look up chunks once and then draw the block
-                if (_terrain(x, y) > 0) {
-                    blit3("sand_tile", {x*64, y*64});
-                } else {
-                    blit3("water_tile", {x*64, y*64});
-                }
+                //if (_terrain(x, y) > 0) {
+                //    blit3("sand_tile", {x*64, y*64});
+                //} else {
+                //    blit3("water_tile", {x*64, y*64});
+                //}
+                int i = 0;
+                if (_terrain(x + 1, y) > 0)
+                    i |= 1;
+                if (_terrain(x + 1, y + 1) > 0)
+                    i |= 2;
+                if (_terrain(x, y + 1) > 0)
+                    i |= 4;
+                if (_terrain(x, y) > 0)
+                    i |= 8;
+                char z[10];
+                sprintf(z, "tile%X", i);
+                blit3(z, {x*64+32,y*64+32});
             }
     }
     
@@ -542,22 +478,22 @@ void game::draw() {
     glClearColor(0.1, 0.0, 0.1, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
     
-    /*
-    if (false) {
+    
+    
+    /*{
         _atlas.discard();
-        _atlas.push_atlas_translated({0, 0});
+        _atlas.push_atlas_translated(_camera_position);
         glClearColor(0.5, 0.5, 0.5, 0.5);
         glClear(GL_COLOR_BUFFER_BIT);
     }*/
     
     
-    auto n = _atlas._vertices.size() / 6;
     
-    _atlas.commit();
-
     for (int i = 0; i != 1; ++i) {
         _thing.tick();
     }
+
+    auto n = _atlas._vertices.size() / 6;
 
     {
         char s[128];
@@ -565,7 +501,9 @@ void game::draw() {
         sprintf(s, "%.2f ms | %lu quads\n%lux%lu\nf%d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
         scribe(s, {_font.charmap[' '].advance, _font.height});
     }
-    
+
+    _atlas.commit();
+
 }
 
 void game::key_down(u32 c) {

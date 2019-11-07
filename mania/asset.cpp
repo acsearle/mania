@@ -34,9 +34,11 @@ table3<string, sprite> load_asset(string_view asset_name, atlas& atl) {
     for (size_t i = 0; i != d.size(); ++i) {
         json const& e = d[i];
         for (size_t j = 0; j != e.size(); ++j) {
+            if (!e[j].as_string().empty()) {
             result.insert(e[j].as_string(),
                           atl.place(a.sub(i * c, j * c, c, c),
                                     vec2(0, 0)));
+            }
         }
         
     }
