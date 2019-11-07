@@ -14,6 +14,8 @@
 #include "const_matrix_iterator.hpp"
 #include "const_column_vector_view.hpp"
 
+#include "vec.hpp"
+
 namespace manic {
     
     template<typename T>
@@ -77,6 +79,10 @@ namespace manic {
             return *(_begin + i * _stride + j);
         }
         
+        T& operator()(vec<ptrdiff_t, 2> ij) {
+            return operator()(ij.x, ij.y);
+        }
+
         const_vector_view<T> front() const { return *begin(); }
         const_vector_view<T> back() const { return begin()[_rows - 1]; }
         

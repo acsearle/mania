@@ -41,29 +41,34 @@ struct space2 {
     space2(F const& f) : _generator(f) {}
     space2(F&& f) : _generator(std::move(f)) {}
     
+    static vec<i64, 2> _high(vec<i64, 2> xy) {
+        return vec<i64, 2>{xy.x & ~MASK, xy.y & ~MASK};
+    }
+
+    static vec<i64, 2> _low(vec<i64, 2> xy) {
+        return vec<i64, 2>{xy.x & MASK, xy.y & MASK};
+    }
+    
     bool contains(vec<i64, 2> xy) {
-        vec<i64, 2> uv(xy.x & ~MASK, xy.y & ~MASK);
-        return _table.contains(uv);
+        return _table.contains(_high(xy));
     }
         
     matrix<T>& get_chunk(vec<i64, 2> xy) {
-        vec<i64, 2> uv(xy.x & ~MASK, xy.y & ~MASK);
+        auto uv = _high(xy);
         return _table.get_or_insert_with(uv, _generator(uv));
     }
 
     matrix<T>* try_get_chunk(vec<i64, 2> xy) {
-        vec<i64, 2> uv(xy.x & ~MASK, xy.y & ~MASK);
-        return _table.try_get(uv);
+        return _table.try_get(_high(xy));
     }
     
     T* try_get(vec<i64, 2> xy) {
-        vec<i64, 2> uv(xy.x & ~MASK, xy.y & ~MASK);
-        matrix<T>* p = _table.try_get(uv);
-        return p ? (*p)(xy.x & MASK, xy.y & MASK) : nullptr;
+        matrix<T>* p = _table.try_get(_high(xy));
+        return p ? (*p)(_low(xy)) : nullptr;
     }
     
     T& get(vec<i64, 2> xy) {
-        return get_chunk(xy)(xy.x & MASK, xy.y & MASK);
+        return get_chunk(xy)(_low(xy));
     }
 
     T& operator()(vec<i64, 2> xy) {

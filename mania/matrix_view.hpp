@@ -99,6 +99,10 @@ namespace manic {
             assert(j < this->_columns);
             return *(this->_begin + i * this->_stride + j);
         }
+                   
+        T& operator()(vec<ptrdiff_t, 2> ij) {
+            return operator()(ij.x, ij.y);
+        }
         
         void swap(matrix_view<T> v) {
             for (ptrdiff_t i = 0; i != this->_rows; ++i)
