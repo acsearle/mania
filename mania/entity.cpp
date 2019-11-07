@@ -99,16 +99,16 @@ void mcu::tick(world& _world) {
         u64* q = nullptr;
         switch (x.d & 3) {
             case 0:
-                q = &_board(x.x, x.y + 1);
+                q = &_board({x.x, x.y + 1});
                 break;
             case 1:
-                q = &_board(x.x - 1, x.y);
+                q = &_board({x.x - 1, x.y});
                 break;
             case 2:
-                q = &_board(x.x, x.y - 1);
+                q = &_board({x.x, x.y - 1});
                 break;
             case 3:
-                q = &_board(x.x + 1, x.y);
+                q = &_board({x.x + 1, x.y});
                 break;
         }
         // bug: this will trigger when we spawn a new entity
@@ -123,7 +123,7 @@ void mcu::tick(world& _world) {
     if (x.s != exiting) {
         i64 u = x.x;
         i64 v = x.y;
-        u64 instruction_ = _board(u, v);
+        u64 instruction_ = _board({u, v});
         u64 opcode_ = instruction_ & OPCODE_MASK;
         u64 target = instruction_ & ADDRESS_MASK;
         u64* p = nullptr;
@@ -135,16 +135,16 @@ void mcu::tick(world& _world) {
         switch (target) {
                 // a diagonally adjacent cell of the board
             case northeast:
-                ++u; --v; p = &_board(u, v); // NE
+                ++u; --v; p = &_board({u, v}); // NE
                 break;
             case southeast:
-                ++u; ++v; p = &_board(u, v); // SE
+                ++u; ++v; p = &_board({u, v}); // SE
                 break;
             case southwest:
-                --u; ++v; p = &_board(u, v); // SW
+                --u; ++v; p = &_board({u, v}); // SW
                 break;
             case northwest:
-                --u; --v; p = &_board(u, v); // NW
+                --u; --v; p = &_board({u, v}); // NW
                 break;
             case register_a:
                 p = &x.a;
@@ -165,16 +165,16 @@ void mcu::tick(world& _world) {
         
         switch (x.d & 3) {
             case 0:
-                q = &_board(x.x, x.y - 1);
+                q = &_board({x.x, x.y - 1});
                 break;
             case 1:
-                q = &_board(x.x + 1, x.y);
+                q = &_board({x.x + 1, x.y});
                 break;
             case 2:
-                q = &_board(x.x, x.y + 1);
+                q = &_board({x.x, x.y + 1});
                 break;
             case 3:
-                q = &_board(x.x - 1, x.y);
+                q = &_board({x.x - 1, x.y});
                 break;
         }
         
@@ -254,13 +254,13 @@ void mcu::tick(world& _world) {
                 
             case flip_decrement: // flip
                 try_mutate(*p, *p - 1);
-                _board(x.x, x.y) = (_board(x.x, x.y) & ~OPCODE_MASK) | flip_increment;
+                _board({x.x, x.y}) = (_board({x.x, x.y}) & ~OPCODE_MASK) | flip_increment;
                 x.s = exiting;
                 break;
                 
             case flip_increment: // flip
                 try_mutate(*p, *p + 1);
-                _board(x.x, x.y) = (_board(x.x, x.y) & ~OPCODE_MASK) | flip_decrement;
+                _board({x.x, x.y}) = (_board({x.x, x.y}) & ~OPCODE_MASK) | flip_decrement;
                 x.s = exiting;
                 break;
 
@@ -413,16 +413,16 @@ void mcu::tick(world& _world) {
         u64* q = nullptr;
         switch (x.d & 3) {
             case 0:
-                q = &_board(x.x, x.y - 1);
+                q = &_board({x.x, x.y - 1});
                 break;
             case 1:
-                q = &_board(x.x + 1, x.y);
+                q = &_board({x.x + 1, x.y});
                 break;
             case 2:
-                q = &_board(x.x, x.y + 1);
+                q = &_board({x.x, x.y + 1});
                 break;
             case 3:
-                q = &_board(x.x - 1, x.y);
+                q = &_board({x.x - 1, x.y});
                 break;
         }
         // Check if we can claim it
@@ -455,7 +455,7 @@ void mine::tick(world& _world) {
     auto& _board = _world._board;
 
     using namespace instruction;
-    u64* p = &_board(this->x, this->y + 1);
+    u64* p = &_board({this->x, this->y + 1});
     assert(p);
     if (!(*p & (OCCUPIED_FLAG | CONSERVED_FLAG))) {
         *p = m;
@@ -470,9 +470,9 @@ void smelter::tick(world& _world) {
     using namespace instruction;
     using namespace element;
     
-    u64* a = &_board(this->x + 1, this->y - 1);
-    u64* b = &_board(this->x + 1, this->y + 1);
-    u64* c = &_board(this->x - 1, this->y + 1);
+    u64* a = &_board({this->x + 1, this->y - 1});
+    u64* b = &_board({this->x + 1, this->y + 1});
+    u64* c = &_board({this->x - 1, this->y + 1});
     
     if ((*c == carbon) && (*b == hematite) && !is_occupied(*a)) {
         *c = 0;
@@ -487,8 +487,8 @@ void silo::tick(world& _world) {
     
     auto& _board = _world._board;
     
-    u64* a = &_board(this->x + 1, this->y - 1);
-    u64* c = &_board(this->x - 1, this->y + 1);
+    u64* a = &_board({this->x + 1, this->y - 1});
+    u64* c = &_board({this->x - 1, this->y + 1});
     
     if (_queue.size() && !is_occupied(*a))
         *a = _queue.pop_front();
@@ -508,7 +508,7 @@ void world::tick() {
 }
 
 void world::push_back(entity* p) {
-    instruction::occupy(_board(p->x, p->y));
+    instruction::occupy(_board({p->x, p->y}));
     _entities[_next_insert & 63].push_back(p);
     _next_insert += 5 * 5;
 }

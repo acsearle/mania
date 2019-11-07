@@ -139,10 +139,7 @@ struct table3 {
     
     raw_vector<_raw_entry> _vector;
     usize _occupants;
-    
-    _raw_entry* _front;
-    _raw_entry* _back;
-    
+        
     u64 _mask() const { return _vector._capacity - 1; }
     
     static const u64 HIGH_BIT = u64(1) << 63;
@@ -208,10 +205,6 @@ struct table3 {
                 _raw_entry* p = &_raw_entry_at(i);
                 relocate(p, &e);
                 ++_occupants;
-                if (p < _front)
-                    _front = p;
-                if (p > _back)
-                    _back = p;
                 return *p;
             } else if ((_hash_at(i) == e._hash) && (_key_at(i) == e._entry.key)) {
                 _raw_entry_at(i).~_raw_entry();
@@ -235,9 +228,7 @@ struct table3 {
     
     table3()
     : _vector()
-    , _occupants(0)
-    , _front(nullptr)
-    , _back(nullptr) {
+    , _occupants(0) {
     }
     
     table3(const table3&) = delete;
@@ -275,8 +266,6 @@ struct table3 {
         using std::swap;
         swap(_vector, r._vector);
         swap(_occupants, r._occupants);
-        swap(_front, r._front);
-        swap(_back, r._back);
     }
     
     void clear() {
@@ -286,8 +275,6 @@ struct table3 {
                 e._hash = 0; // would block memset be better?
             }
         _occupants = 0;
-        _front = nullptr;
-        _back = nullptr;
     }
     
     void clear_and_reserve(usize n) {
@@ -298,8 +285,6 @@ struct table3 {
             _destroy_all();
             _occupants = 0;
             _vector = raw_vector<_raw_entry>(n);
-            _front = _vector.end();
-            _back = _vector.begin();
         }
     }
     
@@ -309,8 +294,6 @@ struct table3 {
             raw_vector<_raw_entry> v(n);
             v.swap(_vector);
             _occupants = 0;
-            _front = _vector.end();
-            _back = _vector.begin();
             for (auto& e : v) {
                 if (e._hash)
                     _insert_relocate(e);
@@ -324,8 +307,6 @@ struct table3 {
             raw_vector<_raw_entry> v(n);
             v.swap(_vector);
             _occupants = 0;
-            _front = _vector.end();
-            _back = _vector.begin();
             for (auto& e : v) {
                 if (e._hash)
                     _insert_relocate(e);
@@ -396,16 +377,7 @@ struct table3 {
         e.emplace(std::forward<Keylike>(k), std::forward<Valuelike>(v));
         return _insert_relocate(*e)._entry;
     }
-    
-    template<typename Keylike, typename Fn>
-    value_type& get_or_insert_with(Keylike&& k, Fn&& f) {
-        value_type* p = try_get(k);
-        if (p)
-            return *p;
-        else
-            return insert(std::forward<Keylike>(k), std::forward<Fn>(f)()).value;
-    }
-    
+        
     template<typename Keylike>
     void erase(Keylike&& k) {
         const u64 h = _table_hash(hash(k));
@@ -419,15 +391,6 @@ struct table3 {
                 }
                 _raw_entry_at(i)._hash = 0;
                 --_occupants;
-                if (_occupants) {
-                    while (!_back->_hash)
-                        --_back;
-                    while (!_front->_hash)
-                        ++_front;
-                } else {
-                    _back = _vector.begin();
-                    _front = _vector.end();
-                }
                 return;
             } else if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))) {
                 return;
@@ -435,6 +398,99 @@ struct table3 {
             ++i;
         }
     }
+    
+    template<typename Keylike, typename Valuelike>
+    value_type& get_or_insert(Keylike&& k, Valuelike&& v) {
+        reserve(_occupants + 1);
+        const u64 h = _table_hash(hash(k));
+        u64 i = h;
+        for (;;) {
+            if (_hash_at(i) == 0) {
+                new (&_raw_entry_at(i)) _raw_entry(h, std::forward<Keylike>(k), std::forward<Valuelike>(v));
+                ++_occupants;
+                return _value_at(i);
+            } else if (_hash_at(i) && _key_at(i) == k) {
+                return _value_at(i);
+            } else if (_displacement_at(i) < ((i - h) & _mask())) {
+                // We are a better fit for this slot, kick everybody until the
+                // next free slot back one place
+                u64 j = i;
+                do {
+                    ++j;
+                } while (_hash_at(j));
+                // This is almost always a block memcpy except when j has
+                // wrapped across the boundary; do it piecewise to handle
+                // this case
+                while (j != i) {
+                    memcpy(_raw_entry_at(j), _raw_entry_at(j - 1), sizeof(_raw_entry));
+                    --j;
+                }
+                new (&_raw_entry_at(i)) _raw_entry(h, std::forward<Keylike>(k), std::forward<Valuelike>(v));
+                ++_occupants;
+                return _value_at(i);
+            }
+            ++i;
+        }
+        
+    }
+    
+    template<typename Keylike, typename F>
+    value_type& get_or_insert_with(Keylike&& k, F&& f) {
+        reserve(_occupants + 1);
+        const u64 h = _table_hash(hash(k));
+        u64 i = h;
+        for (;;) {
+            if (_hash_at(i) == 0) {
+                new (&_raw_entry_at(i)) _raw_entry(h, std::forward<Keylike>(k), std::forward<F>(f)());
+                ++_occupants;
+                return _value_at(i);
+            } else if (_hash_at(i) && _key_at(i) == k) {
+                return _value_at(i);
+            } else if (_displacement_at(i) < ((i - h) & _mask())) {
+                // We are a better fit for this slot, kick everybody until the
+                // next free slot back one place
+                u64 j = i;
+                do {
+                    ++j;
+                } while (_hash_at(j));
+                // This is almost always a block memcpy except when j has
+                // wrapped across the boundary; do it piecewise to handle
+                // this case
+                while (j != i) {
+                    memcpy(&_raw_entry_at(j), &_raw_entry_at(j - 1), sizeof(_raw_entry));
+                    --j;
+                }
+                new (&_raw_entry_at(i)) _raw_entry(h, std::forward<Keylike>(k), std::forward<F>(f)());
+                ++_occupants;
+                return _value_at(i);
+            }
+            ++i;
+        }
+        
+    }
+    
+    /*
+     _raw_entry& _insert_relocate(_raw_entry& e) {
+         u64 i = e._hash;
+         for (;;) {
+             if (_hash_at(i) == 0) {
+                 _raw_entry* p = &_raw_entry_at(i);
+                 relocate(p, &e);
+                 ++_occupants;
+                 return *p;
+             } else if ((_hash_at(i) == e._hash) && (_key_at(i) == e._entry.key)) {
+                 _raw_entry_at(i).~_raw_entry();
+                 relocate(&_raw_entry_at(i), &e);
+                 return _raw_entry_at(i);
+             } else if (_displacement_at(i) < ((i - e._hash) & _mask())) {
+                 using std::swap;
+                 swap(e, _raw_entry_at(i));
+             }
+             ++i;
+         }
+     }
+     */
+    
     
     table3<u64, u64> _histogram() const {
         table3<u64, u64> x;
@@ -451,23 +507,19 @@ struct table3 {
     }
     
     iterator begin() {
-        _raw_entry* p = _occupants ? (_back + 1) : _front;
-        return iterator(_raw_entry_iterator(_front, p));
+        return iterator(_raw_entry_iterator(_vector.begin(), _vector.end()));
     }
     
     iterator end() {
-        _raw_entry* p = _occupants ? (_back + 1) : _front;
-        return iterator(_raw_entry_iterator(p, p));
+        return iterator(_raw_entry_iterator(_vector.end(), _vector.end()));
     }
     
     const_iterator begin() const {
-        _raw_entry* p = _occupants ? (_back + 1) : _front;
-        return const_iterator(_const_raw_entry_iterator(_front, p));
+        return const_iterator(_const_raw_entry_iterator(_vector.begin(), _vector.end()));
     }
     
     const_iterator end() const {
-        _raw_entry* p = _occupants ? (_back + 1) : _front;
-        return const_iterator(_const_raw_entry_iterator(_front, p));
+        return const_iterator(_const_raw_entry_iterator(_vector.end(), _vector.end()));
     }
     
     const_iterator cbegin() const {
@@ -477,27 +529,6 @@ struct table3 {
     const_iterator cend() const {
         return end();
     }
-    
-    entry& front() {
-        assert(_occupants);
-        return _front->_entry;
-    }
-    
-    entry const& front() const {
-        assert(_occupants);
-        return _front->_entry;
-    }
-    
-    entry& back() {
-        assert(_occupants);
-        return _back->_entry;
-    }
-    
-    entry const& back() const {
-        assert(_occupants);
-        return _back->_entry;
-    }
-    
     
     }; // class table3
     

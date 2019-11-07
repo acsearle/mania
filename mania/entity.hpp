@@ -10,7 +10,7 @@
 #define thing_hpp
 
 #include "matrix.hpp"
-#include "space.hpp"
+#include "space2.hpp"
 #include "vector.hpp"
 #include "terrain2.hpp"
 
@@ -146,7 +146,7 @@ struct world {
     // possible if there are N MCUs in a loop of N nodes, with 2 and 4 node
     // loops (head-on collision and two-lane road intersections) possible)
     
-    space<u64> _board;
+    space2<u64> _board;
     terrain2 _terrain;
     
     // MCUs take turns to act on the board.  A queue is the obvious data

@@ -46,8 +46,6 @@
 		CAD3B248236808D0001DA73B /* parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B245236808D0001DA73B /* parse.cpp */; };
 		CAD3B24C23695080001DA73B /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B24A23695080001DA73B /* application.cpp */; };
 		CAD3B24D23695080001DA73B /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAD3B24A23695080001DA73B /* application.cpp */; };
-		CAEB6603236AE3BB00C28580 /* space.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6601236AE3BB00C28580 /* space.cpp */; };
-		CAEB6604236AE3BB00C28580 /* space.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6601236AE3BB00C28580 /* space.cpp */; };
 		CAEB6608236C34A400C28580 /* reflector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6606236C34A400C28580 /* reflector.cpp */; };
 		CAEB6609236C34A400C28580 /* reflector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6606236C34A400C28580 /* reflector.cpp */; };
 		CAEB660B236C3B9100C28580 /* enum.hpp in Resources */ = {isa = PBXBuildFile; fileRef = CAD3B24423680864001DA73B /* enum.hpp */; };
@@ -190,7 +188,6 @@
 		CAE2F1BB2216B97000B832F6 /* deque-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "deque-test.cpp"; sourceTree = "<group>"; };
 		CAE2F1BC2216B97000B832F6 /* deque.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = deque.hpp; sourceTree = "<group>"; };
 		CAE2F1BE2216EBAB00B832F6 /* catch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = catch.hpp; sourceTree = "<group>"; };
-		CAEB6601236AE3BB00C28580 /* space.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = space.cpp; sourceTree = "<group>"; };
 		CAEB6602236AE3BB00C28580 /* space.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = space.hpp; sourceTree = "<group>"; };
 		CAEB6606236C34A400C28580 /* reflector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = reflector.cpp; sourceTree = "<group>"; };
 		CAEB6607236C34A400C28580 /* reflector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = reflector.hpp; sourceTree = "<group>"; };
@@ -203,6 +200,7 @@
 		CAEB661B23729D0C00C28580 /* terrain2.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = terrain2.hpp; sourceTree = "<group>"; };
 		CAEB661F2372CD2D00C28580 /* projections.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = projections.cpp; sourceTree = "<group>"; };
 		CAEB66202372CD2D00C28580 /* projections.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = projections.hpp; sourceTree = "<group>"; };
+		CAEB66252374004100C28580 /* space2.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = space2.hpp; sourceTree = "<group>"; };
 		CAEECDFA235A5ABD002D1E2F /* sentinel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sentinel.h; sourceTree = "<group>"; };
 		CAEECDFB235BD649002D1E2F /* unicode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = unicode.cpp; sourceTree = "<group>"; };
 		CAEECDFC235BD649002D1E2F /* unicode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = unicode.hpp; sourceTree = "<group>"; };
@@ -365,22 +363,22 @@
 		CA72B7BC221A8EE200AC9441 /* utility */ = {
 			isa = PBXGroup;
 			children = (
-				CA0EB1492222CBC200DAE8CF /* table3.hpp */,
-				CAD3B2402366D4F2001DA73B /* string.hpp */,
-				CAEECDFB235BD649002D1E2F /* unicode.cpp */,
-				CAEECDFC235BD649002D1E2F /* unicode.hpp */,
-				CA0EB1482222BD8100DAE8CF /* maybe.hpp */,
 				CA284D781FF1C41300565175 /* bit_ptr.hpp */,
+				CA44D79922FAEB5A004B76D7 /* capture.hpp */,
+				CA44D79422FAE449004B76D7 /* enumerate.hpp */,
+				CA0EB13D22210F8000DAE8CF /* filter_iterator.hpp */,
 				CA72C7651F20A0AA006FEDF1 /* hash.hpp */,
 				CA0EB12E22201CB700DAE8CF /* indirect.hpp */,
-				CA999588205935AD005436C8 /* zip.hpp */,
-				CA0EB137222023F100DAE8CF /* stride_ptr.hpp */,
-				CA0EB13D22210F8000DAE8CF /* filter_iterator.hpp */,
-				CA0EB13E222113E400DAE8CF /* transform_iterator.hpp */,
-				CA44D79422FAE449004B76D7 /* enumerate.hpp */,
-				CA44D79922FAEB5A004B76D7 /* capture.hpp */,
+				CA0EB1482222BD8100DAE8CF /* maybe.hpp */,
 				CA56F4AF2355D8DB003A5981 /* memory.h */,
 				CAEECDFA235A5ABD002D1E2F /* sentinel.h */,
+				CA0EB137222023F100DAE8CF /* stride_ptr.hpp */,
+				CAD3B2402366D4F2001DA73B /* string.hpp */,
+				CA0EB1492222CBC200DAE8CF /* table3.hpp */,
+				CA0EB13E222113E400DAE8CF /* transform_iterator.hpp */,
+				CAEECDFB235BD649002D1E2F /* unicode.cpp */,
+				CAEECDFC235BD649002D1E2F /* unicode.hpp */,
+				CA999588205935AD005436C8 /* zip.hpp */,
 			);
 			name = utility;
 			sourceTree = "<group>";
@@ -475,8 +473,8 @@
 				CAD3B2272363A2E5001DA73B /* rleq.cpp */,
 				CAD3B2282363A2E5001DA73B /* rleq.hpp */,
 				CA72B7BB221A8E9400AC9441 /* scrapyard */,
-				CAEB6601236AE3BB00C28580 /* space.cpp */,
 				CAEB6602236AE3BB00C28580 /* space.hpp */,
+				CAEB66252374004100C28580 /* space2.hpp */,
 				CA0EB12922201ADB00DAE8CF /* terrain.cpp */,
 				CA0EB12A22201ADB00DAE8CF /* terrain.hpp */,
 				CAEB661A23729D0C00C28580 /* terrain2.cpp */,
@@ -632,7 +630,6 @@
 				CAEB660F236D3B3500C28580 /* animation.cpp in Sources */,
 				CAD3B2382365919E001DA73B /* atlas.cpp in Sources */,
 				CAD3B248236808D0001DA73B /* parse.cpp in Sources */,
-				CAEB6604236AE3BB00C28580 /* space.cpp in Sources */,
 				CAEB6609236C34A400C28580 /* reflector.cpp in Sources */,
 				CAEB6618237157F000C28580 /* debug.cpp in Sources */,
 				CA0EB14B2222CBD700DAE8CF /* table3-test.cpp in Sources */,
@@ -681,7 +678,6 @@
 				CA3FF5E42079A828009F006F /* int.cpp in Sources */,
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
 				CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */,
-				CAEB6603236AE3BB00C28580 /* space.cpp in Sources */,
 				CA0EB15F223471D400DAE8CF /* packer.cpp in Sources */,
 				CAEB6608236C34A400C28580 /* reflector.cpp in Sources */,
 				CA0EB15622311F3600DAE8CF /* ordset.cpp in Sources */,

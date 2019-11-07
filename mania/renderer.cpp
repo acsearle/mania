@@ -379,7 +379,7 @@ void game::draw() {
         for (i64 x = x_lo; x != x_hi; ++x)
             for (i64 y= y_lo; y != y_hi; ++y) {
                 // Perf: look up chunks once and then draw the block
-                u64 k = _thing._board(x, y);
+                u64 k = _thing._board({x, y});
                 blit3(translate(k), {x * 64, y * 64});
                 if (instruction::is_instruction(k)) {
                     string_view u(_translate_address[(k & 0x7)]);
@@ -522,20 +522,20 @@ void game::key_down(u32 c) {
             if (_selected_opcode) {
                 ++_selected_opcode;
             } else {
-                ++_thing._board(i, j);
+                ++_thing._board({i, j});
             }
             break;
         case 'R':
             if (_selected_opcode) {
                 --_selected_opcode;
             } else {
-                --_thing._board(i, j);
+                --_thing._board({i, j});
             }
             break;
         case 'q': {
             using namespace instruction;
             entity* p = new mcu(selectee.x, selectee.y, 0);
-            if (is_vacant(_thing._board(p->x, p->y))) {
+            if (is_vacant(_thing._board({p->x, p->y}))) {
                 _thing.push_back(p);
             }
         }
@@ -557,7 +557,7 @@ void game::mouse_down(u64 x) {
         vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
                              - _mouse_window.y * 2 + _height + _camera_position.y);
         vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
-        _thing._board(selectee.x, selectee.y) = 0;
+        _thing._board({selectee.x, selectee.y}) = 0;
     }
 }
 
@@ -576,7 +576,7 @@ void game::mouse_up(u64 x) {
             vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
                                  - _mouse_window.y * 2 + _height + _camera_position.y);
             vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
-            _thing._board(selectee.x, selectee.y) = _selected_opcode;
+            _thing._board({selectee.x, selectee.y}) = _selected_opcode;
             std::cout << "writing" << std::hex << _selected_opcode << std::endl;
         }
     }
