@@ -5,12 +5,131 @@
 //  Copyright © 2018 Antony Searle. All rights reserved.
 //
 
+/*
 #include <iostream>
 
 #include "image.hpp"
 #include "debug.hpp"
 #include "projections.hpp"
+*/
 
+#include <type_traits>
+#include <iostream>
+
+// placeholder type eliding class
+struct py {
+            
+    template<typename T>
+    static py from(T&&);
+    
+    template<typename T>
+    T to();
+    
+};
+
+extern py None;
+
+template<typename R, typename T>
+py apply(R (T::* p)(), py& target) {
+    if constexpr (std::is_void_v<R>) {
+        (target.to<T&>().*p)();
+        return None;
+    } else {
+        return py::from((target.to<T&>().*p)());
+    }
+}
+
+template<typename R, typename T, typename A1>
+py apply(R (T::* p)(A1), py& target, py& arg1) {
+    if constexpr (std::is_void_v<R>) {
+        (target.to<T&>().*p)(arg1.to<A1>());
+        return None;
+    } else {
+        return py::from((target.to<T&>().*p)(arg1.to<A1>()));
+    }
+}
+
+// probably some parameter pack magic allows arbitrary arguments (but does
+// python deliver its arguments as a single tuple?)
+
+struct widget {
+    
+    void foo() { std::cout << "side effect" << std::endl; }
+    int bar() { return 7; }
+    int baz(int x) { return x * 2; }
+    
+    void qux(int) { std::cout << "quint" << std::endl; };
+    void qux(double) { std::cout << "quble" << std::endl; };
+    
+};
+
+#define MACRO(X, Y) py wrap_##X##_##Y(py& a) { return apply(& X :: Y, a); }
+MACRO(widget, foo)
+
+int main(int argc, char** argv) {
+    auto a = py::from(widget{});
+    auto b = apply(&widget::foo, a);
+    auto b2 = wrap_widget_foo(a); // if you need a concrete instance
+    auto c = apply(&widget::bar, a);
+    auto d = apply(&widget::baz, a, c);
+    
+    // if overloads render the name ambiguous, cast to disambiguate
+    auto e = apply(static_cast<void (widget::*)(int)>(&widget::qux), a, c);
+    return 0;
+}
+
+
+
+
+/*
+template<typename...> struct typelist {};
+
+template<typename>
+struct introspect_method {};
+
+template<typename R, typename T, typename... Args>
+struct introspect_method<R (T::*)(Args...)> {
+    using return_t = R;
+    using object_t = T;
+    using args_t = typelist<Args...>;
+};
+
+#define INTROSPECT(T, F) introspect_method<decltype(&T::F)>;
+
+struct widget {
+    int foo();
+    void bar(int);
+};
+
+int main(int argc, char** argv) {
+    std::cout << INTROSPECT(widget, foo)::return_t << std::endl;
+}
+*/
+
+/*
+struct widget {
+    int foo();
+    void bar(int);
+};
+
+template<typename>
+struct analyzer {
+};
+
+template<typename A, typename B, typename... Args>
+struct analyzer<A (B::*)(Args...)> {
+    using return_t = A;
+};
+
+int main(int argc, char** argv) {
+
+    std::cout << std::is_void_v<decltype(std::declval<widget>().foo())> << std::endl;
+    std::cout << std::is_void_v<decltype(std::declval<widget>().bar(7))> << std::endl;
+
+    return 0;
+}
+*/
+/*
 namespace manic {
 
 void foo() {
@@ -46,7 +165,6 @@ void foo() {
     DUMP(isRGB(0.5) * 255.0);
 
     
-    /*
     auto n = 1024;
     image a(n, n);
     
@@ -72,19 +190,21 @@ void foo() {
         }
         printf("\n");
     }
-    */
-}
-} /// namespace foo
+ 
+} // namespace foo
 
 
 //int main_projections(int argc, char** argv);
 
 
+
 int main(int argc, char** argv) {
     //manic::foo();
-    main_projections( argc,  argv);
+    //main_projections( argc,  argv);
+    
+    
 }
-
+*/
 
 /*
 #include "thing.hpp"

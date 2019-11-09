@@ -15,47 +15,11 @@ namespace manic {
 world::world()
 : _next_insert(0)
 , _terrain(_terrain_generator(0)) {
-    
-    
-/*
-    push_back(new mine(4, 4, element::carbon));
-    push_back(new mine(8, 4, element::hematite));
-    push_back(new smelter(12, 4));
-    push_back(new silo(16, 2));
- */
 
-    push_back(new mine(7, 8, element::carbon));
-    push_back(new mine(9, 8, element::hematite));
-    push_back(new smelter(8, 8));
-    push_back(new silo(10, 6));
-
-
-    
-    /*
-    mcu* m = new mcu(8, 8, 0x10);
-    instruction::occupy(_board(m->x, m->y));
-    _entities[0].push_back(m); // mcu at centre, heading north, primed for 4 loops
-    
-    using namespace instruction;
-    
-    _board(8, 7) = opcode(fork, northeast); // fork
-    _board(8, 6) = opcode(decrement_saturate, register_d);
-    _board(6, 6) = opcode(decrement_saturate, register_d);
-    _board(6, 9) = opcode(decrement_saturate, register_d);
-    _board(8, 9) = opcode(decrement_saturate, register_d);
-    
-    _board(8, 1) = opcode(kill); // terminate after escaping loop
-    
-    _board(9, 4) = opcode(flip_decrement, register_d);
-    
-    //_board(7, 4) = opcode(load, register_d);
-    _board(6, 4) = opcode(and_complement_of, southeast);
-    _board(7, 5) = 0x1;
-    //_board(5, 4) = opcode(store, register_d);
-    
-    _board(2, 4) = opcode(kill);
-    _board(14, 4) = opcode(kill);
-     */
+    push_back(new mine(4, 8, element::carbon));
+    push_back(new mine(8, 8, element::hematite));
+    push_back(new smelter(12, 8));
+    push_back(new silo(16, 8));
     
 }
 
@@ -186,7 +150,8 @@ void mcu::tick(world& _world) {
             case noop:
             default:
                 // most values are not opcodes
-                // when the opcode is changed while an entity is waiting on it
+                // when the opcode is changed while an entity is waiting on it,
+                // we default to exiting
                 x.s = exiting;
                 break;
 

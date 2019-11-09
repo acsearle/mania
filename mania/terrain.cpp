@@ -28,6 +28,18 @@ void _terrain_perturb(uint64_t seed, ptrdiff_t i, ptrdiff_t j, matrix_view<doubl
             a(s, t) += _terrain_noise(seed, i + s, j + t);
 }
 
+// TODO: When we are filtering the exploded values, 5/8ths of the values we
+// encounter are zeros!  We can do better if we make a combined explode-filter-
+// into-transpose operation we call twice.
+
+// TODO: For tiling purposes we sometimes want to only generate nonzero values
+// in some region (but still filter them into an expanded region).
+
+// TODO: Provide explicit control over the amplitude and seed of each octave.
+// We don't always want "scale free" (if that's what default settings yield)
+
+// TODO: Compute the variance of the output (or normalize it).
+
 void _terrain_recurse(ptrdiff_t i,
                       ptrdiff_t j,
                       ptrdiff_t rows,
@@ -45,7 +57,8 @@ void _terrain_recurse(ptrdiff_t i,
         
     }
     
-    // Expand our working size to account for filter losses
+    assert(!(filter.size() & 1));
+    // Expand our working size to account for filter shrinkage
     i -= filter.size() / 2;
     j -= filter.size() / 2;
     rows += filter.size();
@@ -96,7 +109,7 @@ void _terrain_recurse(ptrdiff_t i,
     //std::cout << "mean:" << mean(a) << std::endl;
     
     //std::cout << "minmax: " << min(a) << ", " << max(a) << std::endl;
-    std::cout << "variance:" << variance(a) << std::endl;
+    std::cout << "variance after filter:" << variance(a) << std::endl;
 
 }
 
@@ -114,18 +127,26 @@ matrix<double> terrain(ptrdiff_t i,
     for (ptrdiff_t i = 0; i != 16; ++i) {
         filter[i] = exp(-sqr(i - 7.5) / 8.0);
     }
-    filter *= sqrt(8.0) / sum(filter);
+    filter *= sqrt(4.0 * 2.0) / sum(filter);
+    // The filter scale:
+    //     sqrt: the filter is applied twice
+    //      4.0: expanding the image 2x2 reduces amplitude by 4
+    //      2.0: expanding the image 2x2 reduces the slopes by 2
+    //           (this is implicitly a choice about the shape of the power
+    //           spectrum)
     
     
     {
-        // Variance of the uniform distribution from a to b is (b - a)^2/12 = 1/3
+        // Variance of the uniform distribution from a to b is (b - a)^2 / 12
+        // When the inputs are [-1, 1] from filtering the expanded noise,
         double v = 0.0;
         for (int i = 0 ; i != filter.size(); i += 2) {
             for (int j = 0 ; j != filter.size(); j += 2) {
-                v += pow(filter[i] * filter[j] * 2, 2);
+                v += (pow(filter[i] * filter[j] * 2.0, 2) / 12.0);
             }
         }
-        v /= 12;
+        // Result of filter is approximately normally distributed as a sum of
+        // multiple uniform distributions.
         DUMP(v);
         DUMP(sqrt(v));
     }

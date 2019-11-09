@@ -45,6 +45,7 @@ struct game : application {
     table3<string, sprite> _tiles;
     vector<sprite> _animation_h;
     vector<sprite> _animation_v;
+    vector<sprite> _buildings;
     
     table3<u64, string> _periodic;
 
@@ -87,7 +88,7 @@ application& application::get() {
 
 game::game()
 : _program("basic")
-, _atlas(1024) {
+, _atlas(2048) {
 
     _tiles = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
     _font = build_font(_atlas);
@@ -101,8 +102,10 @@ game::game()
     
     //std::cout << load("enum", "hpp") << std::endl;
     
-    _animation_h = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepper", {1, 0});
-    _animation_v = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepperv", {0, (float)(1.0/sqrt(2.0))});
+    _animation_h = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepper", {1, 0}, 32);
+    _animation_v = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepperv", {0, (float)(1.0/sqrt(2.0))}, 32);
+    
+    _buildings = load_animation(_atlas, "/Users/acsearle/Documents/pov/silo", {0,0}, 5);
 
     
     // _lineheight = manic::build_font(_font, _advances);
@@ -169,6 +172,7 @@ void game::blit5(string_view v, vec2 xy) {
 
 
 void game::scribe(string_view v, vec2 xy) {
+    /*
     {
         _solid.a.position = xy;
         _solid.b.position = xy + bound(v);;
@@ -178,6 +182,7 @@ void game::scribe(string_view v, vec2 xy) {
         _solid.b.color = pixel{0, 0, 0, 192};
         _atlas.push_sprite(_solid);
     }
+     */
     auto start = xy;
     pixel col = { 255, 255, 255, 255 };
     // char const* p = v.data();
@@ -247,16 +252,16 @@ void game::draw() {
     angle += 0.01;
     
     if (_keyboard_state.contains('w')) {
-        _camera_position.y -= 2;
-    }
-    if (_keyboard_state.contains('a')) {
-        _camera_position.x -= 2;
-    }
-    if (_keyboard_state.contains('s')) {
         _camera_position.y += 2;
     }
-    if (_keyboard_state.contains('d')) {
+    if (_keyboard_state.contains('a')) {
         _camera_position.x += 2;
+    }
+    if (_keyboard_state.contains('s')) {
+        _camera_position.y -= 2;
+    }
+    if (_keyboard_state.contains('d')) {
+        _camera_position.x -= 2;
     }
 
     vec2 world_mouse{
@@ -265,6 +270,10 @@ void game::draw() {
     
     vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
         
+    // This section is a series of nasty hacks.  In a polished version we want
+    // to go directly from integer terrain, instruction etc. codes to sprite
+    // indices; vs current intermediate conversion to strings.  To do this it
+    // will help to have enum reflection.
     static const char* _translate_opcode[] = {
         "noop",
         "load",
@@ -349,10 +358,15 @@ void game::draw() {
     
     {
         // Draw terrain layer
+        //
+        // Importantly, this scales with the number of tiles drawn, not the
+        // number of chunks instantiated
         i64 x_lo = ((i64) _camera_position.x) >> 6;
         i64 x_hi = ((i64) (_camera_position.x + (i64) _width + 63)) >> 6;
         i64 y_lo = ((i64) _camera_position.y) >> 6;
         i64 y_hi = ((i64) (_camera_position.y + (i64) _height + 63)) >> 6;
+        // Perf: we can lookup chunks and then render subsets of them to save
+        // hashtable lookups
         for (i64 x = x_lo; x != x_hi; ++x) {
             for (i64 y = y_lo; y != y_hi; ++y) {
                 const char* z = nullptr;
@@ -372,6 +386,8 @@ void game::draw() {
     
     {
         // Draw cell layer
+        //
+        // Scales with number of cells, not number of instantiated chunks
         i64 x_lo = ((i64) _camera_position.x) >> 6;
         i64 x_hi = ((i64) (_camera_position.x + _width + 63)) >> 6;
         i64 y_lo = ((i64) _camera_position.y) >> 6;
@@ -388,85 +404,104 @@ void game::draw() {
             }
     }
 
-    
-    // Don't iterate through all MCUs, we only need those that are on visible
-    // chunks
-    
-    // Maintain per-surface-chunk list of MCUs?
-    for (u64 i = 0; i != 63; ++i) {
-        for (entity* q : _thing._entities[i]) {
-            
-            // clip this list to screen
-            // and draw in proper order (top to bottom, left to right?)
 
-            auto u = q->x * 64;
-            auto v = q->y * 64;
-
-            if (mcu* p = dynamic_cast<mcu*>(q)) {
+    {
+        // Draw entities
+        //
+        // Problems:
+        //
+        // Iterates every entity.  Should only do work proportional to number
+        // on screen.
+        //
+        // Doesn't draw them in correct order.  Should draw by y (for
+        // occultation) then by x (for shadows).
+        
+        int zz = 0;
+        for (u64 i = 0; i != 63; ++i) {
+            for (entity* q : _thing._entities[i]) {
                 
-                u64 k = 0;
-                if (!p->s) {
-                    auto f = (i - _thing.counter) & 63;
-                    switch (p->d & 3) {
-                        case 0:
-                            v += f;
-                            k = -f;
-                            break;
-                        case 1:
-                            u -= f;
-                            k = f;
-                            break;
-                        case 2:
-                            v -= f;
-                            k = +f;
-                            break;
-                        case 3:
-                            u += f;
-                            k = -f;
-                            break;
+                // clip this list to screen
+                // and draw in proper order (top to bottom, left to right?)
+                
+                auto u = q->x * 64;
+                auto v = q->y * 64;
+                
+                if (mcu* p = dynamic_cast<mcu*>(q)) {
+                    
+                    u64 k = 0;
+                    if (!p->s) {
+                        auto f = (i - _thing.counter) & 63;
+                        switch (p->d & 3) {
+                            case 0:
+                                v += f;
+                                k = -f;
+                                break;
+                            case 1:
+                                u -= f;
+                                k = f;
+                                break;
+                            case 2:
+                                v -= f;
+                                k = +f;
+                                break;
+                            case 3:
+                                u += f;
+                                k = -f;
+                                break;
+                        }
                     }
-                }
-                
-                if (p->d & 1) {
-                    _atlas.push_sprite_translated(_animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                    
+                    if (p->d & 1) {
+                        _atlas.push_sprite_translated(_animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                    } else {
+                        _atlas.push_sprite_translated(_animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                    }
+                    
+                    //char z[32];
+                    //sprintf(z, "house%llX", p->d & 3);
+                    //blit3(z, {u, v});
+                    //sprintf(z, "%llX", p->a);
+                    //blit3(z, {u-32, v-32});
+                    //sprintf(z, "%llX", p->b);
+                    //blit3(z, {u+32, v-32});
+                    //sprintf(z, "%llX", p->c);
+                    //blit3(z, {u+32, v+32});
+                    //sprintf(z, "%llX", p->d);
+                    //blit3(z, {u-32, v+32});
+                    blit3(translate(p->a), {u, v-24});
+                    
                 } else {
-                    _atlas.push_sprite_translated(_animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                    // some other kind of entity
+                    //blit3("house", {u, v});
+                    _atlas.push_sprite_translated(_buildings[zz % _buildings.size()], {u - _camera_position.x - 256 + 32, v - _camera_position.y - 256 + 32});
+                    ++zz;
                 }
-                
-                //char z[32];
-                //sprintf(z, "house%llX", p->d & 3);
-                //blit3(z, {u, v});
-                //sprintf(z, "%llX", p->a);
-                //blit3(z, {u-32, v-32});
-                //sprintf(z, "%llX", p->b);
-                //blit3(z, {u+32, v-32});
-                //sprintf(z, "%llX", p->c);
-                //blit3(z, {u+32, v+32});
-                //sprintf(z, "%llX", p->d);
-                //blit3(z, {u-32, v+32});
-                blit3(translate(p->a), {u, v-24});
-                
-            } else {
-                // some other kind of entity
-                blit3("house", {u, v});
             }
+        }
+        
+    }
+    
+    
+    {
+        // Draw whatever mouse is holding
+        if (_selected_opcode) {
+            vec2 offset(-16, -16);
+            using namespace instruction;
+            blit5(translate(_selected_opcode), selectee * 64 - _camera_position);
+            blit5(_translate_address[((_selected_opcode) & 7)], selectee * 64 - _camera_position);
+            
+        } else {
+            blit5("reticule", selectee * 64 - _camera_position);
         }
     }
 
-    if (_selected_opcode) {
-        vec2 offset(-16, -16);
-        using namespace instruction;
-        blit5(translate(_selected_opcode), selectee * 64 - _camera_position);
-        blit5(_translate_address[((_selected_opcode) & 7)], selectee * 64 - _camera_position);
-        
-    } else {
-        blit5("reticule", selectee * 64 - _camera_position);
-    }
-
-    for (i64 i = 0; i != _width / 64; ++i) {
-        string_view v = translate(instruction::opcode((instruction::opcode_enum) (i << instruction::OPCODE_SHIFT)));
-        blit4("button", {i * 64, _height - 64});
-        blit4(v, {i * 64, _height - 64});
+    {
+        // Draw opcode selector
+        for (i64 i = 0; i != _width / 64; ++i) {
+            string_view v = translate(instruction::opcode((instruction::opcode_enum) (i << instruction::OPCODE_SHIFT)));
+            blit4("button", {i * 64, _height - 64});
+            blit4(v, {i * 64, _height - 64});
+        }
     }
     
     //_atlas.push_sprite_translated(_animation[frame & 31], {100, 100});
@@ -478,12 +513,12 @@ void game::draw() {
     
     
     
-    /*{
+    if (_keyboard_state.contains('p')) {
         _atlas.discard();
         _atlas.push_atlas_translated(_camera_position);
-        glClearColor(0.5, 0.5, 0.5, 0.5);
+        glClearColor(0.7, 0.5, 0.3, 0.5);
         glClear(GL_COLOR_BUFFER_BIT);
-    }*/
+    }
     
     
     

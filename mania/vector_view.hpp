@@ -57,7 +57,8 @@ namespace manic {
             return *this = static_cast<const_vector_view<T>>(v);
         }
         
-        vector_view operator=(const_vector_view<T> v) {
+        template<typename U>
+        vector_view operator=(const_vector_view<U> v) {
             assert(this->size() == v.size());
             std::copy(v.begin(), v.end(), begin());
             return *this;

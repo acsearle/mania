@@ -93,9 +93,9 @@ namespace manic {
     
     template<typename T>
     ptrdiff_t operator-(const_matrix_iterator<T> a, const_matrix_iterator<T> b) {
-        assert(a._stride);
+        //assert(a._stride || !a._columns);
         assert(a._stride == b._stride);
-        return (a._begin - b._begin) / a._stride;
+        return a._stride ? (a._begin - b._begin) / a._stride : 0;
     }
     
 } // namespace manic

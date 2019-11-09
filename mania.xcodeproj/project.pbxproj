@@ -58,7 +58,6 @@
 		CAEB6619237157F000C28580 /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB6616237157F000C28580 /* debug.cpp */; };
 		CAEB661C23729D0C00C28580 /* terrain2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB661A23729D0C00C28580 /* terrain2.cpp */; };
 		CAEB661D23729D0C00C28580 /* terrain2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB661A23729D0C00C28580 /* terrain2.cpp */; };
-		CAEB661E23729D0C00C28580 /* terrain2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB661A23729D0C00C28580 /* terrain2.cpp */; };
 		CAEB66212372CD2D00C28580 /* projections.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB661F2372CD2D00C28580 /* projections.cpp */; };
 		CAEB66222372CD2D00C28580 /* projections.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB661F2372CD2D00C28580 /* projections.cpp */; };
 		CAEB66232372CD2D00C28580 /* projections.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAEB661F2372CD2D00C28580 /* projections.cpp */; };
@@ -654,7 +653,6 @@
 				CAD3B21C236064FD001DA73B /* json.cpp in Sources */,
 				CAEB66232372CD2D00C28580 /* projections.cpp in Sources */,
 				CAC2FF82221C091C00D8B4B2 /* povtools.cpp in Sources */,
-				CAEB661E23729D0C00C28580 /* terrain2.cpp in Sources */,
 				CAEB6619237157F000C28580 /* debug.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

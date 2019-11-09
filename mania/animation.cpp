@@ -11,16 +11,16 @@
 
 namespace manic {
 
-vector<sprite> load_animation(atlas& atl, string_view v, vec2 delta) {
+vector<sprite> load_animation(atlas& atl, string_view v, vec2 delta, int n) {
     
     vector<sprite> result;
     
-    for (int k = 0; k != 32; ++k) {
+    for (int k = 0; k != n; ++k) {
         char z[256];
         sprintf(z, "%02i.png", k);
         image a = from_png_and_multiply_alpha(v + z);
         // BUG: We have just taken an opaque image and premultiplied alpha,
-        // achieving notthing at great expense
+        // achieving nothing at great expense
         
         i64 i_min = a.columns();
         i64 i_max = 0;
@@ -41,8 +41,8 @@ vector<sprite> load_animation(atlas& atl, string_view v, vec2 delta) {
                 float alpha = 1.0f - from_sRGB(a(i, j).b / 255.0f) * f;
                 assert(0 <= alpha);
                 assert(alpha <= 1.0);
-                // Zero out blue channel
-                a(i, j).b = 0;
+                // Restore the blue channel
+                a(i, j).b = a(i, j).r;
                 // Set alpha channel
                 a(i, j).a = round(alpha * 255.0);
                 if (a(i, j).a) {
@@ -55,8 +55,8 @@ vector<sprite> load_animation(atlas& atl, string_view v, vec2 delta) {
                 // to coverage has already done the work of premultiplying
                 // alpha.  Thus their (linearized) value should be less than or
                 // equal to the alpha.
-                assert(from_sRGB(a(i, j).r / 255.0) <= alpha);
-                assert(from_sRGB(a(i, j).g / 255.0) <= alpha);
+                //assert(from_sRGB(a(i, j).r / 255.0) <= alpha);
+                //assert(from_sRGB(a(i, j).g / 255.0) <= alpha);
             }
         
         ++j_max;

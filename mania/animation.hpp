@@ -13,7 +13,7 @@
 
 namespace manic {
 
-vector<sprite> load_animation(atlas& atl, string_view v, vec2 delta);
+vector<sprite> load_animation(atlas& atl, string_view v, vec2 delta, int n);
 
 } // namespace manic
 

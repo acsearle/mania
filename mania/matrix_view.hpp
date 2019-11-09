@@ -39,7 +39,8 @@ namespace manic {
             return *this = static_cast<const_matrix_view<T>>(v);
         }
         
-        matrix_view& operator=(const_matrix_view<T> v) {
+        template<typename U>
+        matrix_view& operator=(const_matrix_view<U> v) {
             assert(this->_rows == v._rows);
             std::copy(v.begin(), v.end(), begin());
             return *this;
