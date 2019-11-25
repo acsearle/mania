@@ -13,6 +13,9 @@
 #include "vector_view.hpp"
 
 namespace manic {
+
+// General-purpose dynamic array.  Unlike std::vector and std::vec::Vec, it
+// does not begin at the beginning of its allocation
     
     template<typename T>
     struct vector : vector_view<T>, raw_vector<T> {

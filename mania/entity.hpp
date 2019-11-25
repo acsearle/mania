@@ -152,7 +152,7 @@ struct world {
     // possible if there are N MCUs in a loop of N nodes, with 2 and 4 node
     // loops (head-on collision and two-lane road intersections) possible)
     
-    space2<u64> _board;
+    space2<_space2_default<u64>> _board;
     terrain2 _terrain;
     
     // MCUs take turns to act on the board.  A queue is the obvious data

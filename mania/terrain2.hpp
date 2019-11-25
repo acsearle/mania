@@ -36,7 +36,7 @@ struct _terrain_generator {
     
 };
 
-using terrain2 = space2<u8, _terrain_generator>;
+using terrain2 = space2<_terrain_generator>;
 
 } // namespace manic
 

@@ -15,8 +15,8 @@
 
 namespace manic {
 
-// F(vec<i64, 2>) must yield a function object that yields an N x N matrix<T>
-//
+// F(vec<i64, 2>) must yield a function object that yields an N x N
+// subscriptable object
 
 template<typename T>
 struct _space2_default {
@@ -27,10 +27,13 @@ struct _space2_default {
     }
 };
 
-template<typename T, typename F = _space2_default<T>>
+template<typename F>
 struct space2 {
     
-    table3<vec<i64, 2>, matrix<T>> _table;
+    using M = std::decay_t<decltype(std::declval<F>()(std::declval<vec<i64, 2>>())())>;
+    using T = std::decay_t<decltype(std::declval<M>()(std::declval<vec<i64, 2>>()))>;
+    
+    table3<vec<i64, 2>, M> _table;
     F _generator;
     
     static constexpr i64 N = 16;
@@ -53,12 +56,12 @@ struct space2 {
         return _table.contains(_high(xy));
     }
         
-    matrix<T>& get_chunk(vec<i64, 2> xy) {
+    M& get_chunk(vec<i64, 2> xy) {
         auto uv = _high(xy);
         return _table.get_or_insert_with(uv, _generator(uv));
     }
 
-    matrix<T>* try_get_chunk(vec<i64, 2> xy) {
+    M* try_get_chunk(vec<i64, 2> xy) {
         return _table.try_get(_high(xy));
     }
     

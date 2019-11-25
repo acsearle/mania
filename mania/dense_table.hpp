@@ -18,7 +18,7 @@ template<typename K, typename V>
 struct dense_table {
     
     static_assert(std::is_integral_v<K>);
-    static_assert(std::is_trivial_v<V>);
+    static_assert(std::is_trivial_v<V>); // is_relocatable?
     
     raw_vector<V> _array;
     

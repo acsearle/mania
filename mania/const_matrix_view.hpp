@@ -31,17 +31,17 @@ struct const_matrix_view {
     
     
     T* _begin;
-    ptrdiff_t _columns;
-    ptrdiff_t _stride;
-    ptrdiff_t _rows;
+    isize _columns;
+    isize _stride;
+    isize _rows;
     
     const_matrix_view() = delete;
     const_matrix_view(const const_matrix_view&) = default;
     
     const_matrix_view(const T* ptr,
-                      ptrdiff_t columns,
-                      ptrdiff_t stride,
-                      ptrdiff_t rows)
+                      isize columns,
+                      isize stride,
+                      isize rows)
     : _begin(const_cast<T*>(ptr))
     , _columns(columns)
     , _stride(stride)
