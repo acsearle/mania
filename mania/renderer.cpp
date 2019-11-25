@@ -252,16 +252,16 @@ void game::draw() {
     angle += 0.01;
     
     if (_keyboard_state.contains('w')) {
-        _camera_position.y += 2;
-    }
-    if (_keyboard_state.contains('a')) {
-        _camera_position.x += 2;
-    }
-    if (_keyboard_state.contains('s')) {
         _camera_position.y -= 2;
     }
-    if (_keyboard_state.contains('d')) {
+    if (_keyboard_state.contains('a')) {
         _camera_position.x -= 2;
+    }
+    if (_keyboard_state.contains('s')) {
+        _camera_position.y += 2;
+    }
+    if (_keyboard_state.contains('d')) {
+        _camera_position.x += 2;
     }
 
     vec2 world_mouse{
@@ -478,6 +478,36 @@ void game::draw() {
                 }
             }
         }
+        
+    }
+    
+    {
+        // Draw UI
+        
+        int x = 500;
+        int y = 500;
+        int w = 200;
+        int h = 200;
+        sprite s = _tiles.get("water_tile");
+        
+        float c;
+        c = (s.a.position.x + s.b.position.x) / 2.0f;
+        float vx[] = { s.a.position.x, c, c + w, s.b.position.x + w };
+        c = (s.a.position.y + s.b.position.y) / 2.0f;
+        float vy[] = { s.a.position.y, c, c + h, s.b.position.y + h };
+        c = (s.a.texCoord.x + s.b.texCoord.x) / 2.0f;
+        float vu[] = { s.a.texCoord.x, c, c, s.b.texCoord.x };
+        c = (s.a.texCoord.y + s.b.texCoord.y) / 2.0f;
+        float vv[] = { s.a.texCoord.y, c, c, s.b.texCoord.y };
+        
+        for (int i = 0; i != 3; ++i)
+            for (int j = 0; j != 3; ++ j) {
+                sprite t = {
+                    {{vx[i], vy[j]}, {vu[i], vv[j]}, s.a.color},
+                    {{vx[i+1], vy[j+1]}, {vu[i+1], vv[j+1]}, s.a.color}
+                };
+                _atlas.push_sprite_translated(t, {x, y});
+            }
         
     }
     

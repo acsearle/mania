@@ -5,80 +5,62 @@
 //  Copyright © 2018 Antony Searle. All rights reserved.
 //
 
+#include "projections.hpp"
+
+int main(int argc, char** argv) {
+    main_projections(argc, argv);
+}
+
+
 /*
 #include <iostream>
 
 #include "image.hpp"
 #include "debug.hpp"
 #include "projections.hpp"
-*/
 
-#include <type_traits>
-#include <iostream>
+namespace manic {
 
-// placeholder type eliding class
-struct py {
+void foo() {
+    
+    image a = from_png_and_multiply_alpha("/Users/acsearle/Downloads/owen-crop.png");
+
+    pixel z[] = {
+        { 0, 0, 0, 255 },
+        { 85, 85, 85, 255 },
+        { 170, 170, 170, 255 },
+        { 170, 85, 85, 255 },
+        { 85, 170, 85, 255 },
+        { 85, 85, 170, 255 },
+        { 170, 170, 85, 255 }
+    };
+    
+    vector_view<pixel> y(z, z + 7);
+    
+    for (vector_view<pixel> b : a)
+        for (pixel& c : b) {
             
-    template<typename T>
-    static py from(T&&);
+            //c.r = (c.r < 128) ? 0 : 255;
+            //c.g = (c.g < 128) ? 0 : 255;
+            //c.b = (c.b < 128) ? 0 : 255;
+            c = *std::min_element(y.begin(), y.end(), [=](pixel u, pixel v) {
+                return distance(c, u) < distance(c, v);
+            });
+        }
     
-    template<typename T>
-    T to();
     
-};
-
-extern py None;
-
-template<typename R, typename T>
-py apply(R (T::* p)(), py& target) {
-    if constexpr (std::is_void_v<R>) {
-        (target.to<T&>().*p)();
-        return None;
-    } else {
-        return py::from((target.to<T&>().*p)());
-    }
+    to_png(a, "/Users/acsearle/Downloads/owen-posterize.png");
 }
 
-template<typename R, typename T, typename A1>
-py apply(R (T::* p)(A1), py& target, py& arg1) {
-    if constexpr (std::is_void_v<R>) {
-        (target.to<T&>().*p)(arg1.to<A1>());
-        return None;
-    } else {
-        return py::from((target.to<T&>().*p)(arg1.to<A1>()));
-    }
+
+
 }
-
-// probably some parameter pack magic allows arbitrary arguments (but does
-// python deliver its arguments as a single tuple?)
-
-struct widget {
-    
-    void foo() { std::cout << "side effect" << std::endl; }
-    int bar() { return 7; }
-    int baz(int x) { return x * 2; }
-    
-    void qux(int) { std::cout << "quint" << std::endl; };
-    void qux(double) { std::cout << "quble" << std::endl; };
-    
-};
-
-#define MACRO(X, Y) py wrap_##X##_##Y(py& a) { return apply(& X :: Y, a); }
-MACRO(widget, foo)
 
 int main(int argc, char** argv) {
-    auto a = py::from(widget{});
-    auto b = apply(&widget::foo, a);
-    auto b2 = wrap_widget_foo(a); // if you need a concrete instance
-    auto c = apply(&widget::bar, a);
-    auto d = apply(&widget::baz, a, c);
-    
-    // if overloads render the name ambiguous, cast to disambiguate
-    auto e = apply(static_cast<void (widget::*)(int)>(&widget::qux), a, c);
-    return 0;
+    manic::foo();
 }
 
-
+*/
 
 
 /*

@@ -346,7 +346,7 @@ return a;\
     template<typename T, std::size_t N>
     auto length(const vec<T, N>& a) {
         using std::sqrt;
-        return sqrt(dot(a));
+        return sqrt(dot(a, a));
     }
     
     template<typename T>

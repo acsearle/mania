@@ -13,9 +13,7 @@
 
 #include "common.hpp"
 
-namespace manic {
-
-namespace instruction {
+namespace manic::instruction {
 
 // desiderata for carving up the 64-bit words that occupy memory cells and
 // registers:
@@ -361,16 +359,12 @@ enum state_enum : u64 {
     newborn  = 0x0A00'0000'0000'0000ull,
 };
 
-const u64 STATE_MASK = 0xC000'0000;
-
 inline u64 opcode(opcode_enum op, address_enum ad = northeast) {
     assert(op == (op & OPCODE_MASK));
     assert(ad == (ad & ADDRESS_MASK));
     return INSTRUCTION_FLAG | op | ad;
 }
 
-} // namespace instruction
-
-} // namespace manic
+} // namespace manic::instruction
 
 #endif /* instruction_hpp */

@@ -94,7 +94,7 @@ namespace manic {
             }
             REQUIRE(s == N * (N - 1) / 2);
             
-            auto h = t.histogram();
+            auto h = t._histogram();
             
             for (auto& [k, v] : h) {
                 std::cout << "(" << k << ", " << v << ")\n";

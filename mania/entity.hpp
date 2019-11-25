@@ -16,6 +16,8 @@
 
 #include "rleq.hpp"
 
+#include "instruction.hpp"
+
 namespace manic {
 
 // Base class for things that have a location and tick (will anything not have
@@ -36,6 +38,10 @@ struct entity {
     virtual ~entity() = default;
     
     virtual void tick(world&) = 0;
+    
+    // Consier if virtual functions are good enough, or if we want to implement
+    // an explicit system of switch-on-type, or if we want to look at an entity
+    // component system
 
 };
 
@@ -91,7 +97,7 @@ struct mcu : entity {
     // to keep them locally separate on two complementary grids.
     
     mcu(i64 x, i64 y, u64 d_) : entity(x, y), d(d_) {
-        s =  /* instruction::newborn*/ 0x0A00'0000'0000'0000ull;
+        s = instruction::newborn;
         a = 0;
         b = 0;
         c = 0;
@@ -167,6 +173,37 @@ struct world {
     
     vector<entity*> _entities[64];
     usize _next_insert;
+    
+    // Idea 2: entities spend most of their time waiting (travelling is
+    // implemented as waiting and then jumping), wiating either until a point
+    // in the future (as when travelling or processing) or waiting on a cell
+    // to take on a new value (as in a mutex, barrier, or a blocking read/write
+    // to an empty/occupied cell).
+    
+    table3<u64, vector<entity*>> _waiting_on_time;
+    table3<vec<i64, 2>, vector<entity*>> _waiting_on_write;
+    
+    table3<vec<i64, 2>, vector<entity*>> _entities_in_chunk;
+    
+    // When waiting on a value, only a few local entities can be waiting?  If
+    // many entities are waiting on a value, does it make sense to break down
+    // the wait types (wait-for-zero, wait-for-zero-and-will-set-nonzero,
+    // wait-for-nonzero, wait-for-nonzero-and-will-set-zero) to avoid stampede
+    
+    // Make a unified chunk that contains terrain, cells, waiters on cells
+    // and entities-within?  Depends on access patterns.  Terrain accesed by
+    // rendering but not by entity code.
+    
+    // Can we execute entities by chunk without losing deterministic ordering?
+    
+    u64 read(vec<i64, 2> xy);
+    void write(vec<i64, 2> xy);
+    
+    
+    void save();
+    void load();
+    
+    
     
     world();
     

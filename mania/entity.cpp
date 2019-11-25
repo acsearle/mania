@@ -77,7 +77,6 @@ void mcu::tick(world& _world) {
                 q = &_board({x.x + 1, x.y});
                 break;
         }
-        // bug: this will trigger when we spawn a new entity
         assert(is_occupied(*q)); // we had a lock on our old cell
         assert(!is_conserved(*q)); // we aren't colliding with a physical object
         vacate(*q);

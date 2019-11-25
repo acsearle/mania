@@ -37,6 +37,7 @@ int gcd(int a, int b) {
 bool boring(int a, int b, int c, int d, int e, int f) {
     int r1 = magnitude2(a, b, c);
     
+    
     if (r1 == a*a)
         return true;
     if (r1 == b*b)
@@ -50,8 +51,7 @@ bool boring(int a, int b, int c, int d, int e, int f) {
     /*
     if (e*e+f*f == 0)
         return true;
-     */
-    
+    */
     
     if (gcd(gcd(gcd(gcd(gcd(a, b), c), d), e), f) > 1)
         return true;
@@ -81,6 +81,7 @@ double isometry(mat3 m) {
 };
 
 double merit(mat3 m) {
+    
     double g = std::abs(m._[6]);
     double h = std::abs(m._[7]);
     double i = std::abs(m._[8]);
@@ -88,6 +89,8 @@ double merit(mat3 m) {
     g /= r;
     h /= r;
     i /= r;
+    
+    return r;
     
     double merit = 1;
     using std::min;
@@ -143,7 +146,7 @@ int main_projections(int argc, char ** argv) {
     
     int N = 70; //ceil(sqrt(3) * 64.0);
     
-    for (int a = 0; a <= 0; ++a) {
+    for (int a = 0; a <= N; ++a) {
         int aa = a*a;
         int b_lim = floor(sqrt(N*N-aa)+0.1);
         for (int b = a; b <= b_lim; ++b) {
@@ -170,7 +173,7 @@ int main_projections(int argc, char ** argv) {
                         double g = (b*f-c*e)/r;
                         double h = (c*d-a*f)/r;
                         double i = (a*e-b*d)/r;
-                        
+                        /*
                         printf("(%d, %d, %d) -> %g\n"
                                "(%d, %d, %d)\n"
                                "(%g, %g, %g)\n"
@@ -181,6 +184,7 @@ int main_projections(int argc, char ** argv) {
                                h,
                                i
                                );
+                         */
                         validate(a,b,c,d,e,f);
                         
                         mat3 m = {{

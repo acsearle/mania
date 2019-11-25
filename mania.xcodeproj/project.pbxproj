@@ -17,6 +17,7 @@
 		CA0EB15622311F3600DAE8CF /* ordset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB15422311F3600DAE8CF /* ordset.cpp */; };
 		CA0EB15C2233C32800DAE8CF /* option.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB15A2233C32800DAE8CF /* option.cpp */; };
 		CA0EB15F223471D400DAE8CF /* packer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0EB15D223471D400DAE8CF /* packer.cpp */; };
+		CA0FEA962385639A00DFB473 /* pane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA0FEA942385639A00DFB473 /* pane.cpp */; };
 		CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA284D7D1FFE361900565175 /* preprocessor.cpp */; };
 		CA3FF5E42079A828009F006F /* int.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA3FF5E22079A828009F006F /* int.cpp */; };
 		CA44D79722FAE466004B76D7 /* enumerate-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA44D79622FAE466004B76D7 /* enumerate-test.cpp */; };
@@ -138,6 +139,8 @@
 		CA0EB15B2233C32800DAE8CF /* option.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = option.hpp; sourceTree = "<group>"; };
 		CA0EB15D223471D400DAE8CF /* packer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = packer.cpp; sourceTree = "<group>"; };
 		CA0EB15E223471D400DAE8CF /* packer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = packer.hpp; sourceTree = "<group>"; };
+		CA0FEA942385639A00DFB473 /* pane.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pane.cpp; sourceTree = "<group>"; };
+		CA0FEA952385639A00DFB473 /* pane.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pane.hpp; sourceTree = "<group>"; };
 		CA284D781FF1C41300565175 /* bit_ptr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bit_ptr.hpp; sourceTree = "<group>"; };
 		CA284D7D1FFE361900565175 /* preprocessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = preprocessor.cpp; sourceTree = "<group>"; };
 		CA3FF5E22079A828009F006F /* int.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = int.cpp; sourceTree = "<group>"; };
@@ -479,6 +482,8 @@
 				CA0EB14C222F9BA000DAE8CF /* text.cpp */,
 				CA0EB14D222F9BA000DAE8CF /* text.hpp */,
 				CA72B7BC221A8EE200AC9441 /* utility */,
+				CA0FEA942385639A00DFB473 /* pane.cpp */,
+				CA0FEA952385639A00DFB473 /* pane.hpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -674,6 +679,7 @@
 				CA3FF5E42079A828009F006F /* int.cpp in Sources */,
 				CAF889CD1F15064E005956A9 /* vbo.cpp in Sources */,
 				CA284D7F1FFE361900565175 /* preprocessor.cpp in Sources */,
+				CA0FEA962385639A00DFB473 /* pane.cpp in Sources */,
 				CA0EB15F223471D400DAE8CF /* packer.cpp in Sources */,
 				CAEB6608236C34A400C28580 /* reflector.cpp in Sources */,
 				CA0EB15622311F3600DAE8CF /* ordset.cpp in Sources */,
@@ -909,8 +915,10 @@
 					/usr/local/Cellar/libpng/1.6.36/lib,
 					/usr/local/Cellar/freetype/2.9.1/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = surly.mania;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
@@ -920,15 +928,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				INFOPLIST_FILE = mania/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/Cellar/libpng/1.6.36/lib,
 					/usr/local/Cellar/freetype/2.9.1/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = surly.mania;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Release;
 		};
