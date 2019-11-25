@@ -7,9 +7,9 @@
 		<key>mania-test.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
-		<key>mania.xcscheme</key>
+		<key>mania.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
@@ -17,25 +17,7 @@
 		<key>scratch.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
-		</dict>
-	</dict>
-	<key>SuppressBuildableAutocreation</key>
-	<dict>
-		<key>CA72B7A4221A7C5500AC9441</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>CA72B7B0221A7DB100AC9441</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>CAF889A01F14D618005956A9</key>
-		<dict>
-			<key>primary</key>
-			<true/>
+			<integer>2</integer>
 		</dict>
 	</dict>
 </dict>
