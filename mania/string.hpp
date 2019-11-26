@@ -9,86 +9,10 @@
 #ifndef string_hpp
 #define string_hpp
 
-#include <iostream>
-#include "unicode.hpp"
+#include "string_view.hpp"
+#include "vector.hpp"
 
 namespace manic {
-
-struct string_view {
-    
-    using const_iterator = utf8_iterator;
-    using iterator = const_iterator;
-    using value_type = u32;
-    
-    const_iterator a, b;
-    
-    string_view() : a(nullptr), b(nullptr) {}
-    string_view(char const* z) : a(z), b(z + strlen(z)) {}
-    string_view(char const* p, usize n) : a(p), b(p + n) {}
-    string_view(char const* p, char const* q) : a(p), b(q) {}
-    string_view(u8 const* p, u8 const* q) : a{p}, b{q} {}
-    string_view(const_iterator p, const_iterator q) : a(p), b(q) {}
-    string_view(string_view const&) = default;
-    
-    bool empty() const { return a == b; }
-    
-    const_iterator begin() const { return a; }
-    const_iterator end() const { return b; }
-    const_iterator cbegin() const { return a; }
-    const_iterator cend() const { return b; }
-    
-    u32 front() const { return *a; }
-    u32 back() const { utf8_iterator c(b); return *--c; }
-    
-    friend bool operator==(string_view a, string_view b);
-    
-    friend bool operator!=(string_view a, string_view b);
-    
-    friend bool operator<(string_view a, string_view b) {
-        return std::lexicographical_compare(a.a, a.b, b.a, b.b);
-    }
-    
-    friend bool operator>(string_view a, string_view b);
-    friend bool operator<=(string_view a, string_view b);
-    friend bool operator>=(string_view a, string_view b);
-    
-    
-    
-    // terse (dangerous?) operations useful for parsing
-    u32 operator*() const { return *a; }
-    string_view& operator++() { ++a; return *this; }
-    string_view& operator--() { --b; return *this; }
-    string_view operator++(int) { string_view old{*this}; ++a; return old; }
-    string_view operator--(int) { string_view old{*this}; --b; return old; }
-    explicit operator bool() const { return a != b; }
-    
-    const_vector_view<u8> as_bytes() const {
-        return const_vector_view<u8>(a._ptr, b._ptr);
-    }
-    
-    
-}; // struct string
-
-
-inline bool operator==(string_view a, string_view b) {
-    return std::equal(a.a, a.b, b.a, b.b);
-}
-
-
-inline bool operator!=(string_view a, string_view b) { return !(a == b); }
-inline bool operator>(string_view a, string_view b) { return b < a; }
-inline bool operator<=(string_view a, string_view b) { return !(b < a); }
-inline bool operator>=(string_view a, string_view b) { return !(a < b); }
-
-
-inline std::ostream& operator<<(std::ostream& a, string_view b) {
-    a.write((char const*) b.a._ptr, b.b._ptr - b.a._ptr);
-    return a;
-}
-
-
-
-
 
 struct string {
     
@@ -148,8 +72,8 @@ struct string {
     operator const_vector_view<u8>() const { return _bytes; }
     operator string_view() const { return string_view(begin(), end()); }
     
-    utf8_iterator begin() const { return utf8_iterator(_bytes.begin()); }
-    utf8_iterator end() const { return utf8_iterator(_bytes.end()); }
+    const_iterator begin() const { return utf8_iterator{_bytes.begin()}; }
+    const_iterator end() const { return utf8_iterator{_bytes.end()}; }
     
     u8 const* data() const { return _bytes.begin(); }
     

@@ -29,7 +29,6 @@
 		CAAB243E238BC9F000F1D85C /* vao.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23F8238BC9ED00F1D85C /* vao.cpp */; };
 		CAAB243F238BC9F000F1D85C /* pane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23F9238BC9ED00F1D85C /* pane.cpp */; };
 		CAAB2441238BC9F000F1D85C /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2400238BC9EE00F1D85C /* application.cpp */; };
-		CAAB2442238BC9F000F1D85C /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2406238BC9EE00F1D85C /* unicode.cpp */; };
 		CAAB2443238BC9F000F1D85C /* vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB240A238BC9EE00F1D85C /* vertex.cpp */; };
 		CAAB2445238BC9F000F1D85C /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2412238BC9EF00F1D85C /* animation.cpp */; };
 		CAAB2446238BC9F000F1D85C /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2416238BC9EF00F1D85C /* shader.cpp */; };
@@ -151,7 +150,6 @@
 		CAAB2403238BC9EE00F1D85C /* rleq.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rleq.hpp; sourceTree = "<group>"; };
 		CAAB2404238BC9EE00F1D85C /* vec.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vec.hpp; sourceTree = "<group>"; };
 		CAAB2405238BC9EE00F1D85C /* matrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = matrix.hpp; sourceTree = "<group>"; };
-		CAAB2406238BC9EE00F1D85C /* unicode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unicode.cpp; sourceTree = "<group>"; };
 		CAAB2407238BC9EE00F1D85C /* MyOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOpenGLView.h; sourceTree = "<group>"; };
 		CAAB2408238BC9EE00F1D85C /* matrix_view.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = matrix_view.hpp; sourceTree = "<group>"; };
 		CAAB2409238BC9EE00F1D85C /* rect.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rect.hpp; sourceTree = "<group>"; };
@@ -201,6 +199,7 @@
 		CAAB247D238BF37E00F1D85C /* string-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "string-test.cpp"; sourceTree = "<group>"; };
 		CAAB2480238CF1C400F1D85C /* world.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = world.cpp; sourceTree = "<group>"; };
 		CAAB2481238CF1C400F1D85C /* world.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = world.hpp; sourceTree = "<group>"; };
+		CAAB2484238CF40300F1D85C /* string_view.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string_view.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -473,9 +472,9 @@
 				CAAB23E5238BC9EC00F1D85C /* parse.cpp */,
 				CAAB23F6238BC9ED00F1D85C /* parse.hpp */,
 				CAAB23E9238BC9EC00F1D85C /* string.hpp */,
+				CAAB2484238CF40300F1D85C /* string_view.hpp */,
 				CAAB23C0238BC9EA00F1D85C /* text.cpp */,
 				CAAB2414238BC9EF00F1D85C /* text.hpp */,
-				CAAB2406238BC9EE00F1D85C /* unicode.cpp */,
 				CAAB23F7238BC9ED00F1D85C /* unicode.hpp */,
 			);
 			name = text;
@@ -615,7 +614,6 @@
 				CAAB2448238BC9F000F1D85C /* reflector.cpp in Sources */,
 				CAAB23A2238BC87B00F1D85C /* main.m in Sources */,
 				CAAB242F238BC9F000F1D85C /* renderer.cpp in Sources */,
-				CAAB2442238BC9F000F1D85C /* unicode.cpp in Sources */,
 				CAAB242E238BC9F000F1D85C /* program.cpp in Sources */,
 				CAAB2445238BC9F000F1D85C /* animation.cpp in Sources */,
 				CAAB2447238BC9F000F1D85C /* packer.cpp in Sources */,

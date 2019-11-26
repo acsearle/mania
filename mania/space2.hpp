@@ -15,6 +15,9 @@
 
 namespace manic {
 
+constexpr isize CHUNK_SIZE = 16;
+constexpr isize CHUNK_MASK = CHUNK_SIZE - 1;
+
 // F(vec<i64, 2>) must yield a function object that yields an N x N
 // subscriptable object
 
@@ -27,6 +30,28 @@ struct _space2_default {
     }
 };
 
+
+template<typename T>
+struct _dumb_matrix {
+    T* _ptr;
+    _dumb_matrix() : _ptr((T*) calloc(256, sizeof(T))) {}
+    _dumb_matrix(_dumb_matrix&& x) : _ptr(std::exchange(x._ptr, nullptr)) {}
+    ~_dumb_matrix() { free(_ptr); }
+    _dumb_matrix& operator=(_dumb_matrix&& x) {
+        _dumb_matrix tmp(std::move(x));
+        std::swap(_ptr, tmp._ptr);
+        return *this;
+    }
+    T& operator()(vec<i64, 2> xy) { return *(_ptr + xy.x * 16 + xy.y); }
+};
+
+template<typename T>
+struct _space2_inline {
+    auto operator()(vec<i64, 2>) const {
+        return []() { return _dumb_matrix<T>{}; };
+    }
+};
+    
 template<typename F>
 struct space2 {
     
@@ -66,7 +91,7 @@ struct space2 {
     }
     
     T* try_get(vec<i64, 2> xy) {
-        matrix<T>* p = _table.try_get(_high(xy));
+        M* p = _table.try_get(_high(xy));
         return p ? (*p)(_low(xy)) : nullptr;
     }
     
@@ -78,7 +103,7 @@ struct space2 {
         return get(xy);
     }
     
-};
+}; // struct space2
 
 } // namespace manic
 

@@ -9,10 +9,9 @@
 #ifndef unicode_hpp
 #define unicode_hpp
 
-#include <cstddef>
 #include <iterator>
 
-#include "vector.hpp"
+#include "common.hpp"
 
 namespace manic {
 
@@ -56,7 +55,6 @@ inline bool utf8validatez(u8* p) {
             return false;
         }
     }
-    abort();
 }
 
 inline u8* utf8_encode(u32 a, u8 b[4]) {
@@ -92,7 +90,7 @@ inline unsigned char* utf8advance_unsafe(unsigned char* p) {
     // encodings
     //
     //     0b0******* -> 1
-    //     0b10****** -> invalid
+    //     0b10****** -> invalid (marks a continuation byte)
     //     0b110***** -> 2
     //     0b1110**** -> 3
     //     0b11110*** -> 4
@@ -165,7 +163,7 @@ struct utf8_iterator {
     u32 operator*() const {
         if (!(_ptr[0] & 0x80))
             return *_ptr;
-        return _deref_multibyte();
+        return _deref_multibyte(); // slow path
     }
     
     u32 _deref_multibyte() const {
@@ -208,11 +206,7 @@ struct utf8_iterator {
         return nullptr != b._ptr;
     }
     
-    
-    }; // utf8_iterator
-    
-    
-    
+}; // utf8_iterator
     
 } // namespace manic
 

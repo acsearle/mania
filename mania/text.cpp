@@ -88,7 +88,7 @@ font build_font(atlas& atl) {
                     &face);
     assert(!e);
     
-    FT_Set_Pixel_Sizes(face, 0, 100);
+    FT_Set_Pixel_Sizes(face, 0, 32);
     
     FT_UInt gindex = 0;
     FT_ULong charcode = FT_Get_First_Char(face, &gindex);
