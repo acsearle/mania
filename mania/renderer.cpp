@@ -418,67 +418,65 @@ void game::draw() {
         // occultation) then by x (for shadows).
         
         int zz = 0;
-        // for (u64 i = 0; i != 63; ++i) {
-            for (entity* q : _thing._entities) {
+        for (entity* q : _thing._entities) {
+            
+            // clip this list to screen
+            // and draw in proper order (top to bottom, left to right?)
+            
+            auto u = q->x * 64;
+            auto v = q->y * 64;
+            
+            if (mcu* p = dynamic_cast<mcu*>(q)) {
                 
-                // clip this list to screen
-                // and draw in proper order (top to bottom, left to right?)
-                
-                auto u = q->x * 64;
-                auto v = q->y * 64;
-                
-                if (mcu* p = dynamic_cast<mcu*>(q)) {
-                    
-                    u64 k = 0;
-                    if (!p->s) {
-                        auto f = (p->next_turn - _thing.counter) & 63;
-                        switch (p->d & 3) {
-                            case 0:
-                                v += f;
-                                k = -f;
-                                break;
-                            case 1:
-                                u -= f;
-                                k = f;
-                                break;
-                            case 2:
-                                v -= f;
-                                k = +f;
-                                break;
-                            case 3:
-                                u += f;
-                                k = -f;
-                                break;
-                        }
+                u64 k = 0;
+                if (!p->s) {
+                    auto f = (p->t - _thing.counter) & 63;
+                    switch (p->d & 3) {
+                        case 0:
+                            v += f;
+                            k = -f;
+                            break;
+                        case 1:
+                            u -= f;
+                            k = f;
+                            break;
+                        case 2:
+                            v -= f;
+                            k = +f;
+                            break;
+                        case 3:
+                            u += f;
+                            k = -f;
+                            break;
                     }
-                    
-                    if (p->d & 1) {
-                        _atlas.push_sprite_translated(_animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
-                    } else {
-                        _atlas.push_sprite_translated(_animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
-                    }
-                    
-                    //char z[32];
-                    //sprintf(z, "house%llX", p->d & 3);
-                    //blit3(z, {u, v});
-                    //sprintf(z, "%llX", p->a);
-                    //blit3(z, {u-32, v-32});
-                    //sprintf(z, "%llX", p->b);
-                    //blit3(z, {u+32, v-32});
-                    //sprintf(z, "%llX", p->c);
-                    //blit3(z, {u+32, v+32});
-                    //sprintf(z, "%llX", p->d);
-                    //blit3(z, {u-32, v+32});
-                    blit3(translate(p->a), {u, v-24});
-                    
-                } else {
-                    // some other kind of entity
-                    //blit3("house", {u, v});
-                    _atlas.push_sprite_translated(_buildings[zz % _buildings.size()], {u - _camera_position.x - 256 + 32, v - _camera_position.y - 256 + 32});
-                    ++zz;
                 }
+                
+                if (p->d & 1) {
+                    _atlas.push_sprite_translated(_animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                } else {
+                    _atlas.push_sprite_translated(_animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                }
+                
+                //char z[32];
+                //sprintf(z, "house%llX", p->d & 3);
+                //blit3(z, {u, v});
+                //sprintf(z, "%llX", p->a);
+                //blit3(z, {u-32, v-32});
+                //sprintf(z, "%llX", p->b);
+                //blit3(z, {u+32, v-32});
+                //sprintf(z, "%llX", p->c);
+                //blit3(z, {u+32, v+32});
+                //sprintf(z, "%llX", p->d);
+                //blit3(z, {u-32, v+32});
+                blit3(translate(p->a), {u, v-24});
+                
+            } else {
+                // some other kind of entity
+                //blit3("house", {u, v});
+                _atlas.push_sprite_translated(_buildings[zz % _buildings.size()], {u - _camera_position.x - 256 + 32, v - _camera_position.y - 256 + 32});
+                ++zz;
             }
-        // }
+        }
         
     }
     

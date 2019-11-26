@@ -405,19 +405,11 @@ void mcu::tick(world& _world) {
                     break;
             }
             
-            _world
-            ._waiting_on_time
-            .get_or_insert_with(_world.counter + 64, [](){
-                return vector<entity*>{};
-            }).push_back(this);
-            this->next_turn = _world.counter + 64;
+            _world.wait_on_time(_world.counter + 64, this);
             
         } else {
             
-            _world
-            ._waiting_on_write
-            .get_or_insert_with(vq, [](){ return vector<entity*>{};})
-            .push_back(this);
+            _world.wait_on_write(vq, this);
             
         }
     }

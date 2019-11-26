@@ -23,6 +23,8 @@ struct entity {
             
     i64 x;
     i64 y;
+    u64 t = 0;
+
 
     entity(i64 x_, i64 y_)
     : x(x_)
@@ -98,9 +100,7 @@ struct mcu : entity {
     }
     
     virtual void tick(world&) override;
-    
-    u64 next_turn = 0;
-    
+        
 };
 
 struct mine : entity {

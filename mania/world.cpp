@@ -61,7 +61,7 @@ void world::push_back(entity* p) {
     // register for drawing
     _entities.push_back(p);
     // register for immediate execution
-    _waiting_on_time.get_or_insert_with(counter, []() {  return vector<entity*>{}; }).push_back(p);
+    wait_on_time(counter, p);
     // occupy cell, potentially enqueuing entities waiting on that cell
     vec<i64, 2> vq = {p->x, p->y};
     u64 q = read(vq);
@@ -72,6 +72,20 @@ void world::push_back(entity* p) {
 void world::did_exit(i64 i, i64 j, u64 d) {
     // make tracks
     _terrain({i, j}) = 2 + !(d & 1);
+}
+
+void world::wait_on_time(u64 t, entity* p) {
+    assert(p);
+    this->_waiting_on_time.get_or_insert_with(t, []() {
+        return vector<entity*>{};
+    }).push_back(p);
+    p->t = t;
+}
+
+void world::wait_on_write(vec<i64, 2> x, entity* p) {
+    this->_waiting_on_write.get_or_insert_with(x, [](){
+        return vector<entity*>{};
+    }).push_back(p);
 }
 
 
