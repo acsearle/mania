@@ -80,6 +80,7 @@ struct world {
     
     u64 read(vec<i64, 2> xy);
     void write(vec<i64, 2> xy, u64 v);
+    void _did_write(vec<i64, 2> xy); // hack until we clean up access
     
     world();
         

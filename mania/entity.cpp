@@ -79,7 +79,7 @@ void mcu::tick(world& _world) {
     if (x.s != exiting) {
         i64 u = x.x;
         i64 v = x.y;
-        u64 instruction_ = _board({u, v});
+        u64 instruction_ = _world.read({u, v});
         u64 opcode_ = instruction_ & OPCODE_MASK;
         u64 target = instruction_ & ADDRESS_MASK;
         u64* p = nullptr;
@@ -119,6 +119,8 @@ void mcu::tick(world& _world) {
                 break;
         }
         
+        _world._did_write({u, v});
+        
         switch (x.d & 3) {
             case 0:
                 q = &_board({x.x, x.y - 1});
@@ -146,14 +148,15 @@ void mcu::tick(world& _world) {
                 break;
 
             case load: // LOAD target into accumulator
-                if (!is_conserved(x.a))
+                // if (!is_conserved(x.a))
                     x.a = ghost_of(*p);
                 x.s = exiting;
                 break;
 
             case store: // STORE accumulator into target
-                if (!is_conserved(*p))
+                if (!is_conserved(*p)) {
                     *p = (*p & ~OCCUPIED_FLAG) | ghost_of(x.a);
+                }
                 x.s = exiting;
                 break;
                 
@@ -333,11 +336,22 @@ void mcu::tick(world& _world) {
                 x.s = waiting;
                 // fallthrough
             case halt | waiting:
-            case kill | waiting:
-                break;
+            case kill | waiting: {
+                // clear the space we occupy
+                u64 k = _world.read({this->x, this->y});
+                vacate(k);
+                _world.write({this->x, this->y}, k);
+                // remove ourselves from the draw list
+                for (auto& pe : _world._entities) {
+                    if (pe == this) {
+                        _world._entities.swap_remove(&pe - _world._entities.begin());
+                        delete this;
+                        return;
+                    }
+                }
+            } break;
                 
             case barrier | entering:
-                // jesus
                 if (*p)
                     --*p; // decrement the barrier
                 else
@@ -345,6 +359,9 @@ void mcu::tick(world& _world) {
                 // fallthrough
             case barrier | waiting:
                 x.s = *p ? waiting : exiting;
+                if (*p) {
+                    _world.wait_on_write({u, v}, this);
+                }
                 break;
                 
             case mutex | entering:
@@ -353,6 +370,7 @@ void mcu::tick(world& _world) {
                 // jesus
                 if (*p) {
                     x.s = waiting;
+                    _world.wait_on_write({u, v}, this);
                 } else {
                     *p = 1;
                     x.s = exiting;

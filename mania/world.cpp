@@ -44,18 +44,23 @@ void world::tick() {
     ++counter;
 }
 
-void world::write(vec<i64, 2> xy, u64 v) {
-    this->_board(xy) = v;
-    vector<entity*>* a = _waiting_on_write.try_get(xy);
-    if (a) {
-        _waiting_on_time[counter].append(a->begin(), a->end());
-        _waiting_on_write.erase(xy);
-    }
-}
-
 u64 world::read(vec<i64, 2> xy) {
     return this->_board(xy);
 }
+
+void world::write(vec<i64, 2> xy, u64 v) {
+    this->_board(xy) = v;
+    this->_did_write(xy);
+}
+
+void world::_did_write(vec<i64, 2> xy) {
+    vector<entity*>* a = this->_waiting_on_write.try_get(xy);
+    if (a) {
+        this->_waiting_on_time[this->counter].append(a->begin(), a->end());
+        this->_waiting_on_write.erase(xy);
+    }
+}
+
 
 void world::push_back(entity* p) {
     // register for drawing
