@@ -12,31 +12,65 @@
 namespace manic {
 
 world::world()
-: _next_insert(0)
+: counter(0)
 , _terrain(_terrain_generator(0)) {
 
     push_back(new mine(4, 8, element::carbon));
     push_back(new mine(8, 8, element::hematite));
     push_back(new smelter(12, 8));
     push_back(new silo(16, 8));
-    
 }
 
 void world::tick() {
-    for (entity* p : _entities[counter & 63]) {
-        assert(p);
-        p->tick(*this);
+    if (vector<entity*>* a = _waiting_on_time.try_get(counter)) {
+        vector<entity*> b;
+        while (a->size()) {
+            assert(b.empty());
+            swap(*a, b);
+            assert(a->empty());
+            while (!b.empty())
+                b.pop_front()->tick(*this);
+            // entities may have enqueued themselves at the current time, so
+            // we have more work to do, and they may have enqueued themselves
+            // at other times, triggering a table resize, so we must find the
+            // bin again
+            a = &_waiting_on_time[counter];
+        }
+        // no more work at this time
+        assert(_waiting_on_time[counter].empty());
+        _waiting_on_time.erase(counter);
     }
+    // advance the time
     ++counter;
 }
 
+void world::write(vec<i64, 2> xy, u64 v) {
+    this->_board(xy) = v;
+    vector<entity*>* a = _waiting_on_write.try_get(xy);
+    if (a) {
+        _waiting_on_time[counter].append(a->begin(), a->end());
+        _waiting_on_write.erase(xy);
+    }
+}
+
+u64 world::read(vec<i64, 2> xy) {
+    return this->_board(xy);
+}
+
 void world::push_back(entity* p) {
-    instruction::occupy(_board({p->x, p->y}));
-    _entities[_next_insert & 63].push_back(p);
-    _next_insert += 5 * 5;
+    // register for drawing
+    _entities.push_back(p);
+    // register for immediate execution
+    _waiting_on_time.get_or_insert_with(counter, []() {  return vector<entity*>{}; }).push_back(p);
+    // occupy cell, potentially enqueuing entities waiting on that cell
+    vec<i64, 2> vq = {p->x, p->y};
+    u64 q = read(vq);
+    instruction::occupy(q);
+    write(vq, q);
 }
 
 void world::did_exit(i64 i, i64 j, u64 d) {
+    // make tracks
     _terrain({i, j}) = 2 + !(d & 1);
 }
 

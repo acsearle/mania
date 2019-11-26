@@ -82,6 +82,8 @@ namespace manic {
             std::cout << std::endl;
         }
         
+        bool empty() const { return !_size; }
+        
     };
     
     

@@ -48,8 +48,8 @@ struct world {
     // constrains what we can guarantee about the relative order of forked
     // MCUs?
     
-    vector<entity*> _entities[64];
-    usize _next_insert;
+    vector<entity*> _entities;
+    //usize _next_insert;
     
     // Idea 2: entities spend most of their time waiting (travelling is
     // implemented as waiting and then jumping), wiating either until a point
@@ -57,10 +57,15 @@ struct world {
     // to take on a new value (as in a mutex, barrier, or a blocking read/write
     // to an empty/occupied cell).
     
+    u64 counter = 0;
+    
     table3<u64, vector<entity*>> _waiting_on_time;
     table3<vec<i64, 2>, vector<entity*>> _waiting_on_write;
     
-    table3<vec<i64, 2>, vector<entity*>> _entities_in_chunk;
+    void wait_on_write(vec<i64, 2>, entity*);
+    void wait_on_time(u64, entity*);
+
+    // table3<vec<i64, 2>, vector<entity*>> _entities_in_chunk;
     
     // When waiting on a value, only a few local entities can be waiting?  If
     // many entities are waiting on a value, does it make sense to break down
@@ -74,18 +79,10 @@ struct world {
     // Can we execute entities by chunk without losing deterministic ordering?
     
     u64 read(vec<i64, 2> xy);
-    void write(vec<i64, 2> xy);
-    
-    
-    void save();
-    void load();
-    
-    
+    void write(vec<i64, 2> xy, u64 v);
     
     world();
-    
-    u64 counter = 0;
-    
+        
     void tick();
     
     void exec(entity&);

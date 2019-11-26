@@ -418,8 +418,8 @@ void game::draw() {
         // occultation) then by x (for shadows).
         
         int zz = 0;
-        for (u64 i = 0; i != 63; ++i) {
-            for (entity* q : _thing._entities[i]) {
+        // for (u64 i = 0; i != 63; ++i) {
+            for (entity* q : _thing._entities) {
                 
                 // clip this list to screen
                 // and draw in proper order (top to bottom, left to right?)
@@ -431,7 +431,7 @@ void game::draw() {
                     
                     u64 k = 0;
                     if (!p->s) {
-                        auto f = (i - _thing.counter) & 63;
+                        auto f = (p->next_turn - _thing.counter) & 63;
                         switch (p->d & 3) {
                             case 0:
                                 v += f;
@@ -478,7 +478,7 @@ void game::draw() {
                     ++zz;
                 }
             }
-        }
+        // }
         
     }
     

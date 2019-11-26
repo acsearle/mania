@@ -51,24 +51,26 @@ void mcu::tick(world& _world) {
     
     if (x.s == entering) {
         // We are entering the cell for the first time; unobstruct our origin cell
-        u64* q = nullptr;
+        vec<i64, 2> vq;
         switch (x.d & 3) {
             case 0:
-                q = &_board({x.x, x.y + 1});
+                vq = {x.x, x.y + 1};
                 break;
             case 1:
-                q = &_board({x.x - 1, x.y});
+                vq = {x.x - 1, x.y};
                 break;
             case 2:
-                q = &_board({x.x, x.y - 1});
+                vq = {x.x, x.y - 1};
                 break;
             case 3:
-                q = &_board({x.x + 1, x.y});
+                vq = {x.x + 1, x.y};
                 break;
         }
-        assert(is_occupied(*q)); // we had a lock on our old cell
-        assert(!is_conserved(*q)); // we aren't colliding with a physical object
-        vacate(*q);
+        u64 q = _world.read(vq);
+        assert(is_occupied(q)); // we had a lock on our old cell
+        assert(!is_conserved(q)); // we aren't colliding with a physical object
+        vacate(q);
+        _world.write(vq, q);
     } else if (x.s == newborn) {
         x.s = entering;
     }
@@ -365,26 +367,28 @@ void mcu::tick(world& _world) {
         // The operation is complete; attempt to exit the cell
         
         // Locate next cell
-        u64* q = nullptr;
+        vec<i64, 2> vq;
         switch (x.d & 3) {
             case 0:
-                q = &_board({x.x, x.y - 1});
+                vq = {x.x, x.y - 1};
                 break;
             case 1:
-                q = &_board({x.x + 1, x.y});
+                vq = {x.x + 1, x.y};
                 break;
             case 2:
-                q = &_board({x.x, x.y + 1});
+                vq = {x.x, x.y + 1};
                 break;
             case 3:
-                q = &_board({x.x - 1, x.y});
+                vq = {x.x - 1, x.y};
                 break;
         }
         // Check if we can claim it
-        if (!is_occupied(*q)) {
+        u64 k = _world.read(vq);
+        if (!is_occupied(k)) {
             // step forward
             x.s = entering; // set travelling state
-            occupy(*q);
+            occupy(k);
+            _world.write(vq, k); // triggers waiters
             _world.did_exit(x.x, x.y, x.d);
             switch (x.d & 3) { // jump into it
                 case 0:
@@ -400,6 +404,21 @@ void mcu::tick(world& _world) {
                     x.x -= 1;
                     break;
             }
+            
+            _world
+            ._waiting_on_time
+            .get_or_insert_with(_world.counter + 64, [](){
+                return vector<entity*>{};
+            }).push_back(this);
+            this->next_turn = _world.counter + 64;
+            
+        } else {
+            
+            _world
+            ._waiting_on_write
+            .get_or_insert_with(vq, [](){ return vector<entity*>{};})
+            .push_back(this);
+            
         }
     }
     

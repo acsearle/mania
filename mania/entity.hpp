@@ -99,6 +99,8 @@ struct mcu : entity {
     
     virtual void tick(world&) override;
     
+    u64 next_turn = 0;
+    
 };
 
 struct mine : entity {
