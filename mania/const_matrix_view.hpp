@@ -22,8 +22,8 @@ template<typename T>
 struct const_matrix_view {
     
     using value_type = const_vector_view<T>;
-    using size_type = ptrdiff_t;
-    using difference_type = ptrdiff_t;
+    using size_type = isize;
+    using difference_type = isize;
     using reference = value_type;
     using const_reference = value_type;
     using iterator = const_matrix_iterator<T>;
@@ -54,42 +54,36 @@ struct const_matrix_view {
     const_matrix_view& operator=(const_matrix_view&&) = delete;
     
     const T* data() const { return _begin; }
-    ptrdiff_t columns() const { return _columns; }
-    ptrdiff_t width() const { return _columns; }
-    ptrdiff_t size() const { return _rows; }
-    ptrdiff_t rows() const { return _rows; }
-    ptrdiff_t height() const { return _rows; }
-    ptrdiff_t stride() const { return _stride; }
+    isize columns() const { return _columns; }
+    isize width() const { return _columns; }
+    isize size() const { return _rows; }
+    isize rows() const { return _rows; }
+    isize height() const { return _rows; }
+    isize stride() const { return _stride; }
     
     const_iterator begin() const { return const_iterator(_begin, _columns, _stride); }
     const_iterator end() const { return begin() + _rows; }
     const_iterator cbegin() const { return const_iterator(_begin, _columns, _stride); }
     const_iterator cend() const { return begin() + _rows; }
     
-    
-    const_vector_view<T> operator[](ptrdiff_t i) const {
+    const_vector_view<T> operator[](isize i) const {
         return const_vector_view<T>(_begin + i * _stride, _columns);
     }
     
-    const T& operator()(ptrdiff_t i, ptrdiff_t j) const {
-        assert(i >= 0);
-        assert(j >= 0);
-        assert(i < _rows);
-        assert(j < _columns);
-        return *(_begin + i * _stride + j);
-    }
+    const T& operator()(isize i, isize j) const;
     
-    T& operator()(vec<ptrdiff_t, 2> ij) {
+               
+    T& operator()(vec<isize, 2> ij) {
         return operator()(ij.x, ij.y);
     }
     
     const_vector_view<T> front() const { return *begin(); }
     const_vector_view<T> back() const { return begin()[_rows - 1]; }
     
-    const_matrix_view<T> sub(ptrdiff_t i,
-                             ptrdiff_t j,
-                             ptrdiff_t r,
-                             ptrdiff_t c) const {
+    const_matrix_view<T> sub(isize i,
+                             isize j,
+                             isize r,
+                             isize c) const {
         assert(0 <= i);
         assert(0 <= j);
         assert(0 < r);
@@ -107,7 +101,21 @@ struct const_matrix_view {
         }
     }
     
+    
+    const_column_vector_view<T> column(isize i) const {
+        return const_column_vector_view<T>(_begin + i, _stride, _rows);
+    }
+    
 }; // struct const_matrix_view
+
+template<typename T>
+const T& const_matrix_view<T>::operator()(isize i, isize j) const {
+    assert(i >= 0);
+    assert(j >= 0);
+    assert(i < _rows);
+    assert(j < _columns);
+    return *(_begin + i * _stride + j);
+}
 
 template<typename T>
 bool operator==(const_matrix_view<T> a, const_matrix_view<T> b) {

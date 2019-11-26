@@ -29,6 +29,7 @@
 #include "instruction.hpp"
 #include "elements.hpp"
 #include "terrain2.hpp"
+#include "world.hpp"
 
 namespace manic {
 
