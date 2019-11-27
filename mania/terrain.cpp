@@ -36,7 +36,7 @@ void _terrain_perturb(uint64_t seed, ptrdiff_t i, ptrdiff_t j, matrix_view<doubl
 // in some region (but still filter them into an expanded region).
 
 // TODO: Provide explicit control over the amplitude and seed of each octave.
-// We don't always want "scale free" (if that's what default settings yield)
+//       We don't always want "scale free" (if that's what default settings yield)
 
 // TODO: Compute the variance of the output (or normalize it).
 

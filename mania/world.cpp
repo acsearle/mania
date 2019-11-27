@@ -56,6 +56,9 @@ void world::write(vec<i64, 2> xy, u64 v) {
 void world::_did_write(vec<i64, 2> xy) {
     vector<entity*>* a = this->_waiting_on_write.try_get(xy);
     if (a) {
+        // if somebody is writing, we must be within world::tick
+        // ... unless the write originates from a UI action such as spawning a new entity?
+        assert(this->_waiting_on_time.contains(this->counter));
         this->_waiting_on_time[this->counter].append(a->begin(), a->end());
         this->_waiting_on_write.erase(xy);
     }
@@ -80,6 +83,7 @@ void world::did_exit(i64 i, i64 j, u64 d) {
 }
 
 void world::wait_on_time(u64 t, entity* p) {
+    assert(t >= counter);
     assert(p);
     this->_waiting_on_time.get_or_insert_with(t, []() {
         return vector<entity*>{};

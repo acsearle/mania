@@ -16,38 +16,34 @@
 
 namespace manic {
 
+
+// Abstract away if we are mutating the consensus state or the predicted state
+
+struct world_interface {
+    
+    world_interface() = default;
+    world_interface(world_interface const&) = delete;
+    virtual ~world_interface() = default;
+    world_interface& operator=(world_interface const&) = delete;
+    
+    virtual u64 read(vec<i64, 2>) const = 0;
+    virtual void write(vec<i64, 2>, u64) = 0;
+    
+    virtual void wait_on_write(vec<i64, 2>, entity*);
+    virtual void wait_on_time(u64, entity*);
+    
+};
+
 struct world {
-    
-    // State of world
-    
-    // The world is a 2D grid of memory cells.  Entities are "above" this plane,
-    // terrain is "below" (and mostly cosmetic).
-    // The interpretation of the value is complex.  It may either be a value
-    // or an opcode.  One bit is reserved to indicate if an MCU may enter the
-    // cell; MCUs lock and unlock cells using this mechanism as they move
-    // around the board, preventing collisions (like Factorio, deadlock is
-    // possible if there are N MCUs in a loop of N nodes, with 2 and 4 node
-    // loops (head-on collision and two-lane road intersections) possible)
-    
+
+    // Values in mutable cells, cells often empty
+    // Values represent numbers, lock/occupancy, etc.
     space2<_space2_inline<u64>> _board;
+
+    // Underlying terrain, every tile occupied
     terrain2 _terrain;
     
-    // MCUs take turns to act on the board.  A queue is the obvious data
-    // structure.  However, we want to spread the computational load across
-    // each frame, and we want MCUs to move at a predictable speed.
-    // * If we exec all MCUs in one frame, load spike
-    // * If we dispatch to another CPU, we have to clone data
-    // * If we process some one MCU each frame, they get slower as there are
-    //   more (even if CPU is not loaded)
-    // * If we process some fraction each frame, adding more MCUs makes the
-    //   existing ones jump forward a bit
-    //
-    // Idea: each MCU gets a turn every N (=64) ticks.  There are 64 queues,
-    // each MCU lives in one, and each tick executes a whole queue in order.
-    // A potential problem is if the queues become unbalanced; balancing them
-    // constrains what we can guarantee about the relative order of forked
-    // MCUs?
-    
+    // Bag of entities.
     vector<entity*> _entities;
     //usize _next_insert;
     
