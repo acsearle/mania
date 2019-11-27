@@ -80,7 +80,7 @@ struct delta_table {
     value_type* try_get(Keylike&& key) {
         std::optional<value_type>* p = _delta.try_get(key);
         if (p)
-            return p->has_value() ? &*p : nullptr;
+            return p->has_value() ? &**p : nullptr;
         if (_was_cleared)
             return nullptr;
         value_type* q = _table.try_get(key);
@@ -142,8 +142,8 @@ struct delta_table {
         value_type* q = !_was_cleared ? _table.try_get(key) : nullptr;
         if (!q)
             ++_size;
-        return &*_delta.insert(std::forward<Keylike>(key), q
-                               ? std::optional<value_type>(*q)
+        return *_delta.insert(std::forward<Keylike>(key), q
+                               ? std::optional<value_type>{*q}
                                : std::optional<value_type>(std::forward<Valuelike>(value))
                                ).value;
     }
@@ -156,15 +156,15 @@ struct delta_table {
                 ++_size;
                 p->emplace(std::forward<F>(f)());
             }
-            return *p;
+            return **p;
         }
         value_type* q = !_was_cleared ? _table.try_get(key) : nullptr;
         if (!q)
             ++_size;
-        return &*_delta.insert(std::forward<Keylike>(key), q
-                               ? std::optional<value_type>(*q)
-                               : std::optional<value_type>(std::forward<F>(f)())
-                               ).value;
+        return *_delta.insert(std::forward<Keylike>(key), q
+                              ? std::optional<value_type>{*q}
+                              : std::optional<value_type>(std::forward<F>(f)())
+                              ).value;
     }
     
     void revert() {

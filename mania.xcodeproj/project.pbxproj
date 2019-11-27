@@ -50,7 +50,8 @@
 		CAAB2466238BCAE800F1D85C /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAAB2464238BCAE800F1D85C /* libpng16.a */; };
 		CAAB247E238BF37E00F1D85C /* string-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB247D238BF37E00F1D85C /* string-test.cpp */; };
 		CAAB2482238CF1C400F1D85C /* world.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2480238CF1C400F1D85C /* world.cpp */; };
-		CAAB2489238E482C00F1D85C /* delta_table.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2487238E482C00F1D85C /* delta_table.cpp */; };
+		CAAB248B238E5C6E00F1D85C /* delta_table-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */; };
+		CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB248C238E5D7C00F1D85C /* tattler.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -201,8 +202,10 @@
 		CAAB2480238CF1C400F1D85C /* world.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = world.cpp; sourceTree = "<group>"; };
 		CAAB2481238CF1C400F1D85C /* world.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = world.hpp; sourceTree = "<group>"; };
 		CAAB2484238CF40300F1D85C /* string_view.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string_view.hpp; sourceTree = "<group>"; };
-		CAAB2487238E482C00F1D85C /* delta_table.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = delta_table.cpp; sourceTree = "<group>"; };
 		CAAB2488238E482C00F1D85C /* delta_table.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = delta_table.hpp; sourceTree = "<group>"; };
+		CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "delta_table-test.cpp"; sourceTree = "<group>"; };
+		CAAB248C238E5D7C00F1D85C /* tattler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tattler.cpp; sourceTree = "<group>"; };
+		CAAB248D238E5D7C00F1D85C /* tattler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = tattler.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -256,8 +259,8 @@
 		CAAB2394238BC87900F1D85C /* mania */ = {
 			isa = PBXGroup;
 			children = (
-				CAAB2486238E47E800F1D85C /* delta */,
 				CAAB2470238BDDCC00F1D85C /* array */,
+				CAAB2486238E47E800F1D85C /* delta */,
 				CAAB2477238BDFC800F1D85C /* io */,
 				CAAB246F238BDD8500F1D85C /* junkyard */,
 				CAAB246C238BDD5000F1D85C /* opengl */,
@@ -282,6 +285,9 @@
 				CAAB2450238BCA0100F1D85C /* table3-test.cpp */,
 				CAAB244F238BCA0000F1D85C /* zip-test.cpp */,
 				CAAB247D238BF37E00F1D85C /* string-test.cpp */,
+				CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */,
+				CAAB248C238E5D7C00F1D85C /* tattler.cpp */,
+				CAAB248D238E5D7C00F1D85C /* tattler.hpp */,
 			);
 			path = "mania-test";
 			sourceTree = "<group>";
@@ -496,7 +502,6 @@
 		CAAB2486238E47E800F1D85C /* delta */ = {
 			isa = PBXGroup;
 			children = (
-				CAAB2487238E482C00F1D85C /* delta_table.cpp */,
 				CAAB2488238E482C00F1D85C /* delta_table.hpp */,
 			);
 			name = delta;
@@ -620,7 +625,6 @@
 				CAAB243D238BC9F000F1D85C /* vbo.cpp in Sources */,
 				CAAB244D238BC9F000F1D85C /* json.cpp in Sources */,
 				CAAB242D238BC9F000F1D85C /* image.cpp in Sources */,
-				CAAB2489238E482C00F1D85C /* delta_table.cpp in Sources */,
 				CAAB2443238BC9F000F1D85C /* vertex.cpp in Sources */,
 				CAAB243F238BC9F000F1D85C /* pane.cpp in Sources */,
 				CAAB239A238BC87900F1D85C /* ViewController.m in Sources */,
@@ -651,8 +655,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				CAAB245B238BCA0100F1D85C /* enumerate-test.cpp in Sources */,
+				CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */,
 				CAAB2458238BCA0100F1D85C /* main-test.cpp in Sources */,
 				CAAB2457238BCA0100F1D85C /* table3-test.cpp in Sources */,
+				CAAB248B238E5C6E00F1D85C /* delta_table-test.cpp in Sources */,
 				CAAB2456238BCA0100F1D85C /* zip-test.cpp in Sources */,
 				CAAB245A238BCA0100F1D85C /* deque-test.cpp in Sources */,
 				CAAB247E238BF37E00F1D85C /* string-test.cpp in Sources */,

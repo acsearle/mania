@@ -1,36 +1,34 @@
 //
-//  table3-test.cpp
+//  delta_table-test.cpp
 //  mania-test
 //
-//  Created by Antony Searle on 24/2/19.
+//  Created by Antony Searle on 27/11/19.
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
-#include "table3.hpp"
+#include "delta_table.hpp"
 #include "debug.hpp"
 
-#include "tattler.hpp"
 #include "catch.hpp"
+#include "tattler.hpp"
 
 namespace manic {
         
-    TEST_CASE("table3") {
+    TEST_CASE("delta_table") {
         
         SECTION("regression") {
             
-            table3<u64, u64> x;
+            delta_table<u64, u64> x;
             REQUIRE_FALSE(x.contains(0));
             
         }
         
         SECTION("default") {
             
-            table3<u64, u64> t;
+            delta_table<u64, u64> t;
             REQUIRE(t.size() == 0);
-            REQUIRE(t.capacity() >= 0);
             REQUIRE_FALSE(t.contains(0));
             REQUIRE_FALSE(t.try_get(1));
-            REQUIRE(t.begin() == t.end());
         
             SECTION("insert") {
                 
@@ -58,7 +56,7 @@ namespace manic {
             
             const u64 N = 1'000'000;
             
-            table3<u64, u64> t;
+            delta_table<u64, u64> t;
             for (u64 i = 0; i != N; ++i) {
                 t.insert(i, hash(i));
             }
@@ -73,45 +71,13 @@ namespace manic {
                 u64 v = t.get(i);
                 REQUIRE(v == hash(i));
             }
-            
-            u64 s = 0;
-            for (auto&& [k, v] : t) {
-                s += k;
-            }
-            REQUIRE(s == N * (N - 1) / 2);
-            
-            auto h = t._histogram();
-            
-            for (auto& [k, v] : h) {
-                std::cout << "(" << k << ", " << v << ")\n";
-            }
-            
+                        
             for (u64 i = 0; i != N; ++i) {
                 t.erase(i);
-                REQUIRE(t.size() == N - 1 - i);
-                t.shrink_to_fit();
                 REQUIRE(t.size() == N - 1 - i);
             }
             
             REQUIRE(t.size() == 0);
-            
-            /*
-             
-            for (auto& k : keys(t)) {
-                std::cout << k << std::endl;
-            }
-            
-            for (auto& v : values(t)) {
-                std::cout << v << std::endl;
-            }
-            
-            for (auto& [k, v] : t) {
-                std::cout << "(" << k << ", " << v << ")\n";
-            }
-             
-             */
-            
-            
             
         }
         
@@ -119,7 +85,7 @@ namespace manic {
             
             const int N = 1'000'000;
             
-            table3<int, tattler> t;
+            delta_table<int, tattler> t;
             for (int i = 0; i != N; ++i) {
                 t.insert(i, tattler());
             }

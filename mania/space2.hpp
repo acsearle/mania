@@ -13,6 +13,8 @@
 #include "vec.hpp"
 #include "matrix.hpp"
 
+#include "delta_table.hpp"
+
 namespace manic {
 
 constexpr isize CHUNK_SIZE = 16;
@@ -33,16 +35,40 @@ struct _space2_default {
 
 template<typename T>
 struct _dumb_matrix {
+    
     T* _ptr;
-    _dumb_matrix() : _ptr((T*) calloc(256, sizeof(T))) {}
-    _dumb_matrix(_dumb_matrix&& x) : _ptr(std::exchange(x._ptr, nullptr)) {}
+    
+    _dumb_matrix()
+    : _ptr((T*) calloc(CHUNK_SIZE * CHUNK_SIZE, sizeof(T))) {
+    }
+  
+    _dumb_matrix(_dumb_matrix&& x)
+    : _ptr(std::exchange(x._ptr, nullptr)) {
+    }
+    
+    _dumb_matrix(_dumb_matrix const& x)
+    : _dumb_matrix() {
+        std::memcpy(_ptr, x._ptr, CHUNK_SIZE * CHUNK_SIZE * sizeof(T));
+    }
+    
     ~_dumb_matrix() { free(_ptr); }
+    
     _dumb_matrix& operator=(_dumb_matrix&& x) {
         _dumb_matrix tmp(std::move(x));
-        std::swap(_ptr, tmp._ptr);
+        using std::swap;
+        swap(_ptr, tmp._ptr);
         return *this;
     }
+    
+    _dumb_matrix& operator=(_dumb_matrix const& x) {
+        _dumb_matrix tmp{x};
+        using std::swap;
+        swap(_ptr, tmp._ptr);
+        return *this;
+    }
+    
     T& operator()(vec<i64, 2> xy) { return *(_ptr + xy.x * 16 + xy.y); }
+    
 };
 
 template<typename T>
@@ -58,7 +84,9 @@ struct space2 {
     using M = std::decay_t<decltype(std::declval<F>()(std::declval<vec<i64, 2>>())())>;
     using T = std::decay_t<decltype(std::declval<M>()(std::declval<vec<i64, 2>>()))>;
     
-    table3<vec<i64, 2>, M> _table;
+    // table3<vec<i64, 2>, M> _table;
+    delta_table<vec<i64, 2>, M> _table;
+    
     F _generator;
     
     static constexpr i64 N = 16;
