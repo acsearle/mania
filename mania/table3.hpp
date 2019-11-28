@@ -110,15 +110,15 @@ struct table3 {
         }
         
         template<typename X>
-        entry_type& and_insert(X&& v) {
+        value_type& and_insert(X&& v) {
             assert(_hash() & _KEY_BIT);
             if (_hash() & _VALUE_BIT)
                 value = std::forward<X>(v);
             else {
-                new (&value) value_type{std::forward<X>(v)};
+                new (&value) value_type(std::forward<X>(v));
                 _hash() |= _VALUE_BIT;
             }
-            return *this;
+            return value;
         }
         
         value_type& or_default() {
@@ -315,11 +315,11 @@ struct table3 {
             raw_vector<_entry_type> v(n);
             v.swap(_vector);
             _occupants = 0;
-            for (_entry_type& e : v)
-                if (e._hash & _KEY_BIT) {
-                    entry(std::move(e._key), e._hash).or_insert(std::move(e._value));
-                    e._key.~K();
-                    e._value.~value_type();
+            for (_entry_type& src : v)
+                if (src._hash & _KEY_BIT) {
+                    _entry_type& dest = _entry_unsafe(src._key, src._hash);
+                    assert(!(dest._hash & _KEY_BIT));
+                    std::memcpy(&dest, &src, sizeof(_entry_type));
                 }
         }
     }
@@ -330,10 +330,12 @@ struct table3 {
             raw_vector<_entry_type> v(n);
             v.swap(_vector);
             _occupants = 0;
-            for (auto& e : v) {
-                if (e._hash & _KEY_BIT)
-                    entry(std::move(e._key), e._hash).or_insert(std::move(e._value));
-            }
+            for (_entry_type& src : v)
+                if (src._hash & _KEY_BIT) {
+                    _entry_type& dest = _entry_unsafe(src._key, src._hash);
+                    assert(!(dest._hash & _KEY_BIT));
+                    std::memcpy(&dest, &src, sizeof(_entry_type));
+                }
         }
     }
     
@@ -451,19 +453,19 @@ struct table3 {
         erase(std::forward<Q>(k), hash(k));
     }
 
-    // postcondition: hash_map invariant may be violated, must be followed up with call to .or_
+    // postcondition: the hash map invariant has potentially been violated and
+    // if the entry is unoccupied a valid entry *must* be constructed in it
     template<typename Q>
-    entry_type& entry(Q&& k, u64 h) {
+    _entry_type& _entry_unsafe(Q&& k, u64 h) {
         reserve(_occupants + 1);
-        h |= _KEY_BIT;
-        h &= ~_VALUE_BIT;
+        h |= (_KEY_BIT | _VALUE_BIT);
         u64 i = h;
         for (;;) {
-            if (((_hash_at(i) & ~_VALUE_BIT) == h) && (_key_at(i) == k)) {
-                return reinterpret_cast<entry_type&>(_entry_at(i));
-            }
+            if ((_hash_at(i) == h) && (_key_at(i) == k))
+                return _entry_at(i);
             if (!_is_key_at(i)) {
-                goto emplace;
+                ++_occupants;
+                return _entry_at(i);
             }
             if (_is_key_at(i) && (_displacement_at(i) < _displacement_of(h, i))) {
                 // rob from the rich and give to the poor
@@ -475,37 +477,48 @@ struct table3 {
                     std::memcpy(&_entry_at(j), &_entry_at(j - 1), sizeof(_entry_type));
                     --j;
                 }
-                
+                // blank the slot
                 _hash_at(i) = 0;
-                goto emplace;
+                // we have inserted a blank slot where k will go, but we have
+                // not put it there yet; the invariant of the hash table is
+                // broken and must be repaired by setting _hash and constructing
+                // key and value
+                ++_occupants;
+                return _entry_at(i);
             }
             ++i;
         }
-    emplace:
-        _hash_at(i) = h;
-        new (&_key_at(i)) K(std::forward<Q>(k));
-        ++_occupants;
-        return reinterpret_cast<entry_type&>(_entry_at(i));
     }
     
+    template<typename Q>
+    entry_type& entry(Q&& k, u64 h) {
+        _entry_type& e = _entry_unsafe(k, h);
+        if (!(e._hash & _KEY_BIT)) {
+            e._hash = (h | _KEY_BIT) & ~_VALUE_BIT;
+            new (&e._key) K(std::forward<Q>(k));
+        }
+        return reinterpret_cast<entry_type&>(e);
+    }
+    
+    // postcondition: the invariant may be broken and to restore it we *must*
+    // call one of .or_insert, .or_emplace, .or_insert_with on the entry before
+    // performing any other operations
     template<typename Q>
     entry_type& entry(Q&& k) {
         return entry(std::forward<Q>(k), hash(k));
     }
-    
-    template<typename Q, typename X>
-    void insert(Q&& k, X&& value) {
-        insert(std::forward<Q>(k), hash(k), std::forward<X>(value));
-    }
-    
+        
     template<typename Q, typename X>
     void insert(Q&& k, u64 h, X&& value) {
         entry(std::forward<Q>(k), h).and_insert(std::forward<X>(value));
     }
 
-
-
-
+    // add or update the entry for k.  if a key comparing equal to k is already
+    // present, the old key is not updated
+    template<typename Q, typename X>
+    void insert(Q&& k, X&& value) {
+        insert(std::forward<Q>(k), hash(k), std::forward<X>(value));
+    }
 
     table3<u64, u64> _histogram() const {
         table3<u64, u64> x;
