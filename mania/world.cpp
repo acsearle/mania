@@ -85,14 +85,14 @@ void world::did_exit(i64 i, i64 j, u64 d) {
 void world::wait_on_time(u64 t, entity* p) {
     assert(t >= counter);
     assert(p);
-    this->_waiting_on_time.get_or_insert_with(t, []() {
+    this->_waiting_on_time.entry(t).or_insert_with([]() {
         return vector<entity*>{};
     }).push_back(p);
     p->t = t;
 }
 
 void world::wait_on_write(vec<i64, 2> x, entity* p) {
-    this->_waiting_on_write.get_or_insert_with(x, [](){
+    this->_waiting_on_write.entry(x).or_insert_with([](){
         return vector<entity*>{};
     }).push_back(p);
 }

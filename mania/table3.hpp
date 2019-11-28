@@ -381,7 +381,7 @@ struct table3 {
 
     // preconditions: contains(k), h == hash(k)
     template<typename Q>
-    value_type& get(Q&& k, u64 h) {
+    value_type& _get_unsafe(Q&& k, u64 h) const {
         assert(_occupants);
         h |= (_KEY_BIT | _VALUE_BIT);
         u64 i = h;
@@ -390,13 +390,24 @@ struct table3 {
         }
         return _value_at(i);
     }
-    
+
+    // preconditions: contains(k), h == hash(k)
+    template<typename Q>
+    value_type const& get(Q&& k, u64 h) const {
+        return _get_unsafe(std::forward<Q>(k), h);
+    }
+
     // preconditions: contains(k)
     template<typename Q>
     value_type& get(Q&& k) {
+        return const_cast<value_type&>(_get_unsafe(std::forward<Q>(k), hash(k)));
+    }
+
+    template<typename Q>
+    value_type const& get(Q&& k) const {
         return get(std::forward<Q>(k), hash(k));
     }
-    
+
     // precondition: contains(k)
     template<typename Q>
     value_type& operator[](Q&& k) {
@@ -484,7 +495,7 @@ struct table3 {
     
     template<typename Q, typename X>
     void insert(Q&& k, X&& value) {
-        insert(std::forward<Q>(k), hash(k), std::forward<V>(value));
+        insert(std::forward<Q>(k), hash(k), std::forward<X>(value));
     }
     
     template<typename Q, typename X>

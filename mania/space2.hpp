@@ -108,7 +108,7 @@ struct space2 {
         
     M& get_chunk(vec<i64, 2> xy) {
         auto uv = _high(xy);
-        return _table.get_or_insert_with(uv, _generator(uv));
+        return _table.entry(uv).or_insert_with(_generator(uv));
     }
 
     M* try_get_chunk(vec<i64, 2> xy) {
