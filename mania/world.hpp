@@ -14,8 +14,6 @@
 #include "terrain2.hpp"
 #include "vector.hpp"
 
-#include "delta_table.hpp"
-
 namespace manic {
 
 

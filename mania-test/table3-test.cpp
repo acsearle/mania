@@ -61,6 +61,7 @@ TEST_CASE("table3") {
         table3<u64, u64> t;
         for (u64 i = 0; i != N; ++i) {
             t.insert(i, hash(i));
+            REQUIRE(t.size() == i + 1);
         }
         REQUIRE(t.size() == N);
         

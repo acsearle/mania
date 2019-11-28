@@ -13,8 +13,6 @@
 #include "vec.hpp"
 #include "matrix.hpp"
 
-#include "delta_table.hpp"
-
 namespace manic {
 
 constexpr isize CHUNK_SIZE = 16;
@@ -84,8 +82,7 @@ struct space2 {
     using M = std::decay_t<decltype(std::declval<F>()(std::declval<vec<i64, 2>>())())>;
     using T = std::decay_t<decltype(std::declval<M>()(std::declval<vec<i64, 2>>()))>;
     
-    // table3<vec<i64, 2>, M> _table;
-    delta_table<vec<i64, 2>, M> _table;
+    table3<vec<i64, 2>, M> _table;
     
     F _generator;
     

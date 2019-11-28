@@ -50,9 +50,7 @@
 		CAAB2466238BCAE800F1D85C /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAAB2464238BCAE800F1D85C /* libpng16.a */; };
 		CAAB247E238BF37E00F1D85C /* string-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB247D238BF37E00F1D85C /* string-test.cpp */; };
 		CAAB2482238CF1C400F1D85C /* world.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2480238CF1C400F1D85C /* world.cpp */; };
-		CAAB248B238E5C6E00F1D85C /* delta_table-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */; };
 		CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB248C238E5D7C00F1D85C /* tattler.cpp */; };
-		CAAB2493238F47BF00F1D85C /* table4-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2492238F47BF00F1D85C /* table4-test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -204,11 +202,9 @@
 		CAAB2481238CF1C400F1D85C /* world.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = world.hpp; sourceTree = "<group>"; };
 		CAAB2484238CF40300F1D85C /* string_view.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = string_view.hpp; sourceTree = "<group>"; };
 		CAAB2488238E482C00F1D85C /* delta_table.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = delta_table.hpp; sourceTree = "<group>"; };
-		CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "delta_table-test.cpp"; sourceTree = "<group>"; };
 		CAAB248C238E5D7C00F1D85C /* tattler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tattler.cpp; sourceTree = "<group>"; };
 		CAAB248D238E5D7C00F1D85C /* tattler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = tattler.hpp; sourceTree = "<group>"; };
 		CAAB2490238EFC7200F1D85C /* table4.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = table4.hpp; sourceTree = "<group>"; };
-		CAAB2492238F47BF00F1D85C /* table4-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "table4-test.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -288,10 +284,8 @@
 				CAAB2450238BCA0100F1D85C /* table3-test.cpp */,
 				CAAB244F238BCA0000F1D85C /* zip-test.cpp */,
 				CAAB247D238BF37E00F1D85C /* string-test.cpp */,
-				CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */,
 				CAAB248C238E5D7C00F1D85C /* tattler.cpp */,
 				CAAB248D238E5D7C00F1D85C /* tattler.hpp */,
-				CAAB2492238F47BF00F1D85C /* table4-test.cpp */,
 			);
 			path = "mania-test";
 			sourceTree = "<group>";
@@ -660,11 +654,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				CAAB245B238BCA0100F1D85C /* enumerate-test.cpp in Sources */,
-				CAAB2493238F47BF00F1D85C /* table4-test.cpp in Sources */,
 				CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */,
 				CAAB2458238BCA0100F1D85C /* main-test.cpp in Sources */,
 				CAAB2457238BCA0100F1D85C /* table3-test.cpp in Sources */,
-				CAAB248B238E5C6E00F1D85C /* delta_table-test.cpp in Sources */,
 				CAAB2456238BCA0100F1D85C /* zip-test.cpp in Sources */,
 				CAAB245A238BCA0100F1D85C /* deque-test.cpp in Sources */,
 				CAAB247E238BF37E00F1D85C /* string-test.cpp in Sources */,

@@ -21,6 +21,7 @@
 #include "relocate.hpp"
 #include "string.hpp"
 #include "transform_iterator.hpp"
+#include "debug.hpp"
 
 namespace manic {
 
@@ -28,10 +29,10 @@ namespace manic {
 // against bad hashes.  We do not prevent users from mutating keys, which
 // violates the invariant.
 
-//template<typename Key, typename Value>
+//template<typename K, typename V>
 //struct table3 {
 //
-//    struct entry { Key key; Value value; };
+//    struct entry { K key; V value; };
 //
 //    explicit table3(usize n); // set capacity
 //
@@ -44,127 +45,181 @@ namespace manic {
 //    void clear_and_reserve(usize n);
 //    void shrink_to_fit();
 //
-//    bool contains(Key) const;
+//    bool contains(K) const;
 //    
-//    Value* try_get();
-//    Value const* try_get() const;
+//    V* try_get();
+//    V const* try_get() const;
 //
-//    Value& get();
-//    Value const& get() const;
+//    V& get();
+//    V const& get() const;
 //
-//    Value& operator[](Key);
-//    Value const& operator[](Key) const;
+//    V& operator[](K);
+//    V const& operator[](K) const;
 //
-//    void insert(Key, Value);
+//    void insert(K, V);
 //
-//    void erase(Key);
+//    void erase(K);
 //
 //    iterator begin();
 //    iterator end();
 //
 //};
- 
 
 
-template<typename Key, typename Value>
+
+template<typename K, typename V>
 struct table3 {
     
-    using key_type = Key;
-    using value_type = Value;
+    using key_type = std::add_const_t<K>;
+    using value_type = V;
     
-    struct entry {
+    static constexpr u64 _KEY_BIT = u64(1) << 63;
+    static constexpr u64 _VALUE_BIT = u64(1) << 62;
+    static constexpr u64 _HASH_MASK = (u64(1) << 62) - 1;
+    
+    struct _entry_type {
+        
+        K _key;
+        value_type _value;
+        u64 _hash;
+        
+        void _clear() {
+            if (_hash & _KEY_BIT) {
+                _key.~K();
+                if (_hash & _VALUE_BIT)
+                    _value.~value_type();
+                _hash = 0;
+            }
+        }
+        
+    };
+    
+    struct entry_type {
         
         key_type key;
         value_type value;
         
-        template<typename Keylike, typename Valuelike>
-        entry(Keylike&& k, Valuelike&& v)
-        : key(std::forward<Keylike>(k))
-        , value(std::forward<Valuelike>(v)) {
+        u64& _hash() { return reinterpret_cast<_entry_type&>(*this)._hash; }
+        
+        template<typename F>
+        entry_type& and_modify(F&& f) {
+            assert(_hash() & _KEY_BIT);
+            if (_hash() & _VALUE_BIT)
+                std::forward<F>(f)(value);
+            return *this;
         }
         
-    };
-    
-    struct _raw_entry {
-        
-        u64 _hash;
-        entry _entry;
-        
-        template<typename Keylike, typename Valuelike>
-        _raw_entry(Keylike&& k, Valuelike&& v)
-        : _raw_entry(_table_hash(hash(k)),
-        std::forward<Keylike>(k),
-                     std::forward<Valuelike>(v)) {
+        template<typename X>
+        entry_type& and_insert(X&& v) {
+            assert(_hash() & _KEY_BIT);
+            if (_hash() & _VALUE_BIT)
+                value = std::forward<X>(v);
+            else {
+                new (&value) value_type{std::forward<X>(v)};
+                _hash() |= _VALUE_BIT;
+            }
+            return *this;
         }
         
-        template<typename Keylike, typename Valuelike>
-        _raw_entry(u64 table_hash_hash_k, Keylike&& k, Valuelike&& v)
-        : _hash(table_hash_hash_k)
-        , _entry(std::forward<Keylike>(k),
-        std::forward<Valuelike>(v)) {
-            // assert(_hash == _table_hash(hash(k)));
+        value_type& or_default() {
+            assert(_hash() & _KEY_BIT);
+            if (!(_hash() & _VALUE_BIT)) {
+                new (&value) value_type;
+            }
         }
         
-    };
+        value_type& or_insert(value_type const& v) {
+            assert(_hash() & _KEY_BIT);
+            if (!(_hash() & _VALUE_BIT)) {
+                new (&value) value_type(v);
+                _hash() |= _VALUE_BIT;
+            }
+            return value;
+        }
+        
+        value_type& or_insert(value_type&& v) {
+            assert(_hash() & _KEY_BIT);
+            if (!(_hash() & _VALUE_BIT)) {
+                new (&value) value_type(std::move(v));
+                _hash() |= _VALUE_BIT;
+            }
+            return value;
+        }
+        
+        template<typename... Args>
+        value_type& or_emplace(Args&&... args) {
+            assert(_hash() & _KEY_BIT);
+            if (!(_hash() & _VALUE_BIT)) {
+                new (&value) value_type(std::forward<Args>(args)...);
+                _hash() |= _VALUE_BIT;
+            }
+            return value;
+        }
+        
+        template<typename F>
+        value_type& or_insert_with(F&& f) {
+            assert(_hash() & _KEY_BIT);
+            if (!(_hash() & _VALUE_BIT)) {
+                new (&value) value_type(std::forward<F>(f)());
+                _hash() |= _VALUE_BIT;
+            }
+            return value;
+        }
+        
+    }; // struct entry_type
     
     struct _is_occupied {
-        bool operator()(const _raw_entry& r) const {
-            return static_cast<bool>(r._hash);
+        bool operator()(_entry_type const& e) const {
+            return e._hash & _KEY_BIT;
         }
     };
     
-    using _raw_entry_iterator = filter_iterator<_raw_entry*, _raw_entry*, _is_occupied>;
-    using _const_raw_entry_iterator = filter_iterator<const _raw_entry*, const _raw_entry*, _is_occupied>;
+    using _iterator = filter_iterator<_entry_type*, _entry_type*, _is_occupied>;
+    using _const_iterator = filter_iterator<_entry_type const*, _entry_type const*, _is_occupied>;
     
-    struct _dot_entry {
-        entry& operator()(_raw_entry& r) const {
-            return r._entry;
+    struct _entry_cast {
+        entry_type& operator()(_entry_type& e) const {
+            return reinterpret_cast<entry_type&>(e);
         }
-        const entry& operator()(const _raw_entry& r) const {
-            return r._entry;
+        entry_type const& operator()(_entry_type const& e) const {
+            return reinterpret_cast<entry_type const&>(e);
         }
     };
     
-    using iterator = transform_iterator<_raw_entry_iterator, _dot_entry>;
-    using const_iterator = transform_iterator<_const_raw_entry_iterator, _dot_entry>;
+    using iterator = transform_iterator<_iterator, _entry_cast>;
+    using const_iterator = transform_iterator<_const_iterator, _entry_cast>;
     
-    
-    raw_vector<_raw_entry> _vector;
+    raw_vector<_entry_type> _vector;
     usize _occupants;
-        
+    
     u64 _mask() const { return _vector._capacity - 1; }
     
-    static const u64 HIGH_BIT = u64(1) << 63;
-    
-    static u64 _table_hash(u64 already_hashed) {
-        // We need a cheap way to rule out the hash ever being zero.  The
-        // high bit will never contribute to the index, and merely doubles
-        // the negligible rate of hash collisions.
-        return already_hashed | HIGH_BIT;
+    _entry_type& _entry_at(u64 i) const {
+        return _vector[i & _mask()];
     }
     
-    _raw_entry& _raw_entry_at(u64 h) const {
-        return _vector[h & _mask()];
+    u64& _hash_at(u64 i) const {
+        return _entry_at(i)._hash;
     }
     
-    u64 _hash_at(u64 h) const {
-        return _raw_entry_at(h)._hash;
+    bool _is_key_at(u64 i) const {
+        return _hash_at(i) & _KEY_BIT;
     }
     
-    entry& _entry_at(u64 h) const {
-        return _raw_entry_at(h)._entry;
+    K& _key_at(u64 i) const {
+        return _entry_at(i)._key;
     }
     
-    key_type& _key_at(u64 h) const {
-        return _entry_at(h).key;
+    value_type& _value_at(u64 i) const {
+        return _entry_at(i)._value;
     }
     
-    value_type& _value_at(u64 h) const {
-        return _entry_at(h).value;
+    u64 _displacement_at(u64 i) const {
+        return (i - _hash_at(i)) & _mask();
     }
     
-    u64 _displacement_at(u64 h) const {
-        return (h - _hash_at(h)) & _mask();
+    u64 _displacement_of(u64 h, u64 i) const {
+        return (i - h) & _mask();
     }
     
     usize _capacity_for_occupants(usize n) {
@@ -177,9 +232,10 @@ struct table3 {
         assert(!_vector._capacity || (_occupants < _vector._capacity));
         usize n = 0;
         for (usize i = 0; i != _vector._capacity; ++i) {
-            if (_hash_at(i)) {
+            if (_hash_at(i) & _KEY_BIT) {
+                assert(_hash_at(i) & _VALUE_BIT);
                 ++n;
-                assert(_hash_at(i) == _table_hash(hash(_key_at(i))));
+                assert((_hash_at(i) & _HASH_MASK) == (hash(_key_at(i)) & _HASH_MASK));
                 if (_hash_at(i - 1)) {
                     assert(_displacement_at(i) <= (_displacement_at(i - 1) + 1));
                 } else {
@@ -190,44 +246,27 @@ struct table3 {
         assert(_occupants == n);
     }
     
-    _raw_entry& _insert_relocate(_raw_entry& e) {
-        u64 i = e._hash;
-        for (;;) {
-            if (_hash_at(i) == 0) {
-                _raw_entry* p = &_raw_entry_at(i);
-                relocate(p, &e);
-                ++_occupants;
-                return *p;
-            } else if ((_hash_at(i) == e._hash) && (_key_at(i) == e._entry.key)) {
-                _raw_entry_at(i).~_raw_entry();
-                relocate(&_raw_entry_at(i), &e);
-                return _raw_entry_at(i);
-            } else if (_displacement_at(i) < ((i - e._hash) & _mask())) {
-                using std::swap;
-                swap(e, _raw_entry_at(i));
-            }
-            ++i;
-        }
-    }
-    
     void _destroy_all() {
-        for (_raw_entry& e : _vector) {
-            if (e._hash)
-                e.~_raw_entry();
-        }
+        for (_entry_type& e : _vector)
+            e._clear();
     }
-    
     
     table3()
     : _vector()
     , _occupants(0) {
     }
     
+    void swap(table3& y) {
+        using std::swap;
+        swap(_vector, y._vector);
+        swap(_occupants, y._occupants);
+    }
+    
     table3(const table3&) = delete;
     
-    table3(table3&& r)
+    table3(table3&& y)
     : table3() {
-        r.swap(*this);
+        this->swap(y);
     }
     
     explicit table3(usize n)
@@ -254,18 +293,8 @@ struct table3 {
     usize size() const { return _occupants; }
     bool empty() const { return !_occupants; }
     
-    void swap(table3& r) {
-        using std::swap;
-        swap(_vector, r._vector);
-        swap(_occupants, r._occupants);
-    }
-    
     void clear() {
-        for (_raw_entry& e : _vector)
-            if (e._hash) {
-                e.~_raw_entry();
-                e._hash = 0; // would block memset be better?
-            }
+        _destroy_all();
         _occupants = 0;
     }
     
@@ -276,219 +305,219 @@ struct table3 {
         } else {
             _destroy_all();
             _occupants = 0;
-            _vector = raw_vector<_raw_entry>(n);
+            _vector = raw_vector<_entry_type>(n);
         }
     }
     
     void reserve(usize n) {
         n = _capacity_for_occupants(n);
         if (n > _vector._capacity) {
-            raw_vector<_raw_entry> v(n);
+            raw_vector<_entry_type> v(n);
             v.swap(_vector);
             _occupants = 0;
-            for (auto& e : v) {
-                if (e._hash)
-                    _insert_relocate(e);
-            }
+            for (_entry_type& e : v)
+                if (e._hash & _KEY_BIT) {
+                    entry(std::move(e._key), e._hash).or_insert(std::move(e._value));
+                    e._key.~K();
+                    e._value.~value_type();
+                }
         }
     }
     
     void shrink_to_fit() {
         usize n = _capacity_for_occupants(_occupants);
         if (n < _vector._capacity) {
-            raw_vector<_raw_entry> v(n);
+            raw_vector<_entry_type> v(n);
             v.swap(_vector);
             _occupants = 0;
             for (auto& e : v) {
-                if (e._hash)
-                    _insert_relocate(e);
+                if (e._hash & _KEY_BIT)
+                    entry(std::move(e._key), e._hash).or_insert(std::move(e._value));
             }
         }
     }
     
     
-    template<typename Keylike>
-    bool contains(const Keylike& k) const {
+    template<typename Q>
+    bool contains(Q&& k) {
+        return contains(std::forward<Q>(k), hash(k));
+    }
+    
+    template<typename Q>
+    bool contains(Q&& k, u64 h) {
         if (!_occupants)
             return false;
-        const u64 h = _table_hash(hash(k));
+        h |= (_KEY_BIT | _VALUE_BIT);
         u64 i = h;
         for (;;) {
             if ((_hash_at(i) == h) && (_key_at(i) == k))
                 return true;
-            if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask())))
+            if (!_is_key_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
                 return false;
             ++i;
         }
+
     }
-    
-    template<typename Keylike>
-    value_type* try_get(const Keylike& k) const {
+
+    template<typename Q>
+    value_type* try_get(Q&& k, u64 h) {
         if (!_occupants)
             return nullptr;
-        const u64 h = _table_hash(hash(k));
+        h |= (_KEY_BIT | _VALUE_BIT);
         u64 i = h;
         for (;;) {
             if ((_hash_at(i) == h) && (_key_at(i) == k))
                 return &_value_at(i);
-            else if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask())))
+            if (!_is_key_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
                 return nullptr;
             ++i;
         }
     }
     
-    // precondition: contains(k)
-    template<typename Keylike>
-    value_type& get(const Keylike& k) const {
+    template<typename Q>
+    value_type* try_get(Q&& k) {
+        return try_get(std::forward<Q>(k), hash(k));
+    }
+
+    // preconditions: contains(k), h == hash(k)
+    template<typename Q>
+    value_type& get(Q&& k, u64 h) {
         assert(_occupants);
-        const u64 h = _table_hash(hash(k));
+        h |= (_KEY_BIT | _VALUE_BIT);
         u64 i = h;
         while ((_hash_at(i) != h) || (_key_at(i) != k)) {
-            //assert(!((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))));
             ++i;
         }
         return _value_at(i);
     }
     
-    // precondition: contains(k)
-    template<typename Keylike>
-    value_type& operator[](const Keylike& k) {
-        return get(k);
+    // preconditions: contains(k)
+    template<typename Q>
+    value_type& get(Q&& k) {
+        return get(std::forward<Q>(k), hash(k));
     }
     
     // precondition: contains(k)
-    template<typename Keylike>
-    const value_type& operator[](const Keylike& k) const {
-        return get(k);
+    template<typename Q>
+    value_type& operator[](Q&& k) {
+        return get(std::forward<Q>(k));
     }
     
-    template<typename Keylike, typename Valuelike>
-    entry& insert(Keylike&& k, Valuelike&& v) {
-        reserve(_occupants + 1);
-        maybe<_raw_entry> e;
-        e.emplace(std::forward<Keylike>(k), std::forward<Valuelike>(v));
-        return _insert_relocate(*e)._entry;
+    // precondition: contains(k)
+    template<typename Q>
+    value_type const& operator[](Q&& k) const {
+        return get(std::forward<Q>(k));
     }
-        
-    template<typename Keylike>
-    void erase(Keylike&& k) {
-        const u64 h = _table_hash(hash(k));
+    
+    
+    template<typename Q>
+    void erase(Q&& k, u64 h) {
+        if (!_occupants)
+            return;
+        h |= (_KEY_BIT | _VALUE_BIT);
         u64 i = h;
         for (;;) {
-            if ((_hash_at(i) == h) && (_key_at(i) == k)) {
-                _raw_entry_at(i).~_raw_entry();
-                while (_hash_at(i + 1) && _displacement_at(i + 1)) {
-                    relocate(&_raw_entry_at(i), &_raw_entry_at(i + 1));
+            if (((_hash_at(i) | _VALUE_BIT) == h) && (_key_at(i) == k)) {
+                _key_at(i).~K();
+                if (_hash_at(i) & _VALUE_BIT)
+                    _value_at(i).~value_type();
+                while (_is_key_at(i + 1) && _displacement_at(i + 1)) {
+                    std::memcpy(&_entry_at(i), &_entry_at(i + 1), sizeof(_entry_type));
                     ++i;
                 }
-                _raw_entry_at(i)._hash = 0;
+                _hash_at(i) = 0;
                 --_occupants;
                 return;
-            } else if ((_hash_at(i) == 0) || (_displacement_at(i) < ((i - h) & _mask()))) {
+            }
+            if (!_is_key_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
                 return;
-            }
             ++i;
         }
     }
     
-    template<typename Keylike, typename Valuelike>
-    value_type& get_or_insert(Keylike&& k, Valuelike&& v) {
+    template<typename Q>
+    void erase(Q&& k) {
+        erase(std::forward<Q>(k), hash(k));
+    }
+
+    // postcondition: hash_map invariant may be violated, must be followed up with call to .or_
+    template<typename Q>
+    entry_type& entry(Q&& k, u64 h) {
         reserve(_occupants + 1);
-        const u64 h = _table_hash(hash(k));
+        h |= _KEY_BIT;
+        h &= ~_VALUE_BIT;
         u64 i = h;
         for (;;) {
-            if (_hash_at(i) == 0) {
-                new (&_raw_entry_at(i)) _raw_entry(h, std::forward<Keylike>(k), std::forward<Valuelike>(v));
-                ++_occupants;
-                return _value_at(i);
-            } else if (_hash_at(i) && _key_at(i) == k) {
-                return _value_at(i);
-            } else if (_displacement_at(i) < ((i - h) & _mask())) {
-                // We are a better fit for this slot, kick everybody until the
-                // next free slot back one place
+            if (((_hash_at(i) & ~_VALUE_BIT) == h) && (_key_at(i) == k)) {
+                return reinterpret_cast<entry_type&>(_entry_at(i));
+            }
+            if (!_is_key_at(i)) {
+                goto emplace;
+            }
+            if (_is_key_at(i) && (_displacement_at(i) < _displacement_of(h, i))) {
+                // rob from the rich and give to the poor
+                // find next free slot
                 u64 j = i;
-                do {
-                    ++j;
-                } while (_hash_at(j));
-                // This is almost always a block memcpy except when j has
-                // wrapped across the boundary; do it piecewise to handle
-                // this case
+                do ++j; while (_is_key_at(j));
+                // move entries back one
                 while (j != i) {
-                    memcpy(_raw_entry_at(j), _raw_entry_at(j - 1), sizeof(_raw_entry));
+                    std::memcpy(&_entry_at(j), &_entry_at(j - 1), sizeof(_entry_type));
                     --j;
                 }
-                new (&_raw_entry_at(i)) _raw_entry(h, std::forward<Keylike>(k), std::forward<Valuelike>(v));
-                ++_occupants;
-                return _value_at(i);
+                
+                _hash_at(i) = 0;
+                goto emplace;
             }
             ++i;
         }
-        
+    emplace:
+        _hash_at(i) = h;
+        new (&_key_at(i)) K(std::forward<Q>(k));
+        ++_occupants;
+        return reinterpret_cast<entry_type&>(_entry_at(i));
     }
     
-    template<typename Keylike, typename F>
-    value_type& get_or_insert_with(Keylike&& k, F&& f) {
-        reserve(_occupants + 1);
-        const u64 h = _table_hash(hash(k));
-        u64 i = h;
-        for (;;) {
-            if (_hash_at(i) == 0) {
-                new (&_raw_entry_at(i)) _raw_entry(h, std::forward<Keylike>(k), std::forward<F>(f)());
-                ++_occupants;
-                return _value_at(i);
-            } else if (_hash_at(i) && _key_at(i) == k) {
-                return _value_at(i);
-            } else if (_displacement_at(i) < ((i - h) & _mask())) {
-                // We are a better fit for this slot, kick everybody until the
-                // next free slot back one place
-                u64 j = i;
-                do {
-                    ++j;
-                } while (_hash_at(j));
-                // This is almost always a block memcpy except when j has
-                // wrapped across the boundary; do it piecewise to handle
-                // this case
-                while (j != i) {
-                    memcpy(&_raw_entry_at(j), &_raw_entry_at(j - 1), sizeof(_raw_entry));
-                    --j;
-                }
-                new (&_raw_entry_at(i)) _raw_entry(h, std::forward<Keylike>(k), std::forward<F>(f)());
-                ++_occupants;
-                return _value_at(i);
-            }
-            ++i;
-        }
-        
+    template<typename Q>
+    entry_type& entry(Q&& k) {
+        return entry(std::forward<Q>(k), hash(k));
     }
     
+    template<typename Q, typename X>
+    void insert(Q&& k, X&& value) {
+        insert(std::forward<Q>(k), hash(k), std::forward<V>(value));
+    }
+    
+    template<typename Q, typename X>
+    void insert(Q&& k, u64 h, X&& value) {
+        entry(std::forward<Q>(k), h).and_insert(std::forward<X>(value));
+    }
+
+
+
+
+
     table3<u64, u64> _histogram() const {
         table3<u64, u64> x;
-        for (u64 i = 0; i != _vector._capacity; ++i) {
-            if (_hash_at(i)) {
-                u64 j = _displacement_at(i);
-                if (x.contains(j))
-                    ++x.get(j);
-                else
-                    x.insert(j, 1);
-            }
-        }
+        for (u64 i = 0; i != _vector._capacity; ++i)
+            if (_is_key_at(i))
+                ++x.entry(_displacement_at(i)).or_insert(0);
         return x;
     }
     
     iterator begin() {
-        return iterator(_raw_entry_iterator(_vector.begin(), _vector.end()));
+        return iterator(_iterator(_vector.begin(), _vector.end()));
     }
     
     iterator end() {
-        return iterator(_raw_entry_iterator(_vector.end(), _vector.end()));
+        return iterator(_iterator(_vector.end(), _vector.end()));
     }
     
     const_iterator begin() const {
-        return const_iterator(_const_raw_entry_iterator(_vector.begin(), _vector.end()));
+        return const_iterator(_const_iterator(_vector.begin(), _vector.end()));
     }
     
     const_iterator end() const {
-        return const_iterator(_const_raw_entry_iterator(_vector.end(), _vector.end()));
+        return const_iterator(_const_iterator(_vector.end(), _vector.end()));
     }
     
     const_iterator cbegin() const {
