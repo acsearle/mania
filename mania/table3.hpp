@@ -24,14 +24,6 @@
 
 namespace manic {
 
-inline u64 hash(string_view v) {
-    return hash_combine(v.as_bytes().begin(), v.as_bytes().size(), 0);
-}
-
-inline u64 hash(const char* c) {
-    return hash(string_view(c));
-}
-
 // table3 relies on manic::hash being high-quality; it is not defensive
 // against bad hashes.  We do not prevent users from mutating keys, which
 // violates the invariant.
@@ -468,29 +460,6 @@ struct table3 {
         }
         
     }
-    
-    /*
-     _raw_entry& _insert_relocate(_raw_entry& e) {
-         u64 i = e._hash;
-         for (;;) {
-             if (_hash_at(i) == 0) {
-                 _raw_entry* p = &_raw_entry_at(i);
-                 relocate(p, &e);
-                 ++_occupants;
-                 return *p;
-             } else if ((_hash_at(i) == e._hash) && (_key_at(i) == e._entry.key)) {
-                 _raw_entry_at(i).~_raw_entry();
-                 relocate(&_raw_entry_at(i), &e);
-                 return _raw_entry_at(i);
-             } else if (_displacement_at(i) < ((i - e._hash) & _mask())) {
-                 using std::swap;
-                 swap(e, _raw_entry_at(i));
-             }
-             ++i;
-         }
-     }
-     */
-    
     
     table3<u64, u64> _histogram() const {
         table3<u64, u64> x;

@@ -17,6 +17,7 @@
 #include "common.hpp" // u8, u32
 #include "unicode.hpp"
 #include "const_vector_view.hpp"
+#include "hash.hpp"
 
 namespace manic {
 
@@ -91,6 +92,14 @@ inline bool operator>=(string_view a, string_view b) { return !(a < b); }
 inline std::ostream& operator<<(std::ostream& a, string_view b) {
     a.write((char const*) b.a._ptr, b.b._ptr - b.a._ptr);
     return a;
+}
+
+inline u64 hash(string_view v) {
+    return hash_combine(v.as_bytes().begin(), v.as_bytes().size(), 0);
+}
+
+inline u64 hash(const char* c) {
+    return hash(string_view(c));
 }
 
 } // namespace manic

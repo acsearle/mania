@@ -52,6 +52,7 @@
 		CAAB2482238CF1C400F1D85C /* world.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2480238CF1C400F1D85C /* world.cpp */; };
 		CAAB248B238E5C6E00F1D85C /* delta_table-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */; };
 		CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB248C238E5D7C00F1D85C /* tattler.cpp */; };
+		CAAB2493238F47BF00F1D85C /* table4-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2492238F47BF00F1D85C /* table4-test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -206,6 +207,8 @@
 		CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "delta_table-test.cpp"; sourceTree = "<group>"; };
 		CAAB248C238E5D7C00F1D85C /* tattler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tattler.cpp; sourceTree = "<group>"; };
 		CAAB248D238E5D7C00F1D85C /* tattler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = tattler.hpp; sourceTree = "<group>"; };
+		CAAB2490238EFC7200F1D85C /* table4.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = table4.hpp; sourceTree = "<group>"; };
+		CAAB2492238F47BF00F1D85C /* table4-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "table4-test.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -288,6 +291,7 @@
 				CAAB248A238E5C6E00F1D85C /* delta_table-test.cpp */,
 				CAAB248C238E5D7C00F1D85C /* tattler.cpp */,
 				CAAB248D238E5D7C00F1D85C /* tattler.hpp */,
+				CAAB2492238F47BF00F1D85C /* table4-test.cpp */,
 			);
 			path = "mania-test";
 			sourceTree = "<group>";
@@ -418,21 +422,22 @@
 		CAAB2473238BDE9500F1D85C /* utility */ = {
 			isa = PBXGroup;
 			children = (
-				CAAB23D6238BC9EB00F1D85C /* table3.hpp */,
-				CAAB2411238BC9EF00F1D85C /* zip.hpp */,
-				CAAB23ED238BC9ED00F1D85C /* transform_iterator.hpp */,
-				CAAB23F5238BC9ED00F1D85C /* sentinel.h */,
-				CAAB2419238BC9EF00F1D85C /* relocate.hpp */,
-				CAAB2409238BC9EE00F1D85C /* rect.hpp */,
-				CAAB23DD238BC9EC00F1D85C /* hash.hpp */,
-				CAAB23C6238BC9EB00F1D85C /* filter_iterator.hpp */,
-				CAAB23D4238BC9EB00F1D85C /* enumerate.hpp */,
 				CAAB23CC238BC9EB00F1D85C /* bit_ptr.hpp */,
 				CAAB23CD238BC9EB00F1D85C /* bit.hpp */,
 				CAAB2423238BC9F000F1D85C /* capture.hpp */,
 				CAAB241E238BC9EF00F1D85C /* common.hpp */,
 				CAAB23DA238BC9EC00F1D85C /* debug.cpp */,
 				CAAB23C1238BC9EA00F1D85C /* debug.hpp */,
+				CAAB23D4238BC9EB00F1D85C /* enumerate.hpp */,
+				CAAB23C6238BC9EB00F1D85C /* filter_iterator.hpp */,
+				CAAB23DD238BC9EC00F1D85C /* hash.hpp */,
+				CAAB2409238BC9EE00F1D85C /* rect.hpp */,
+				CAAB2419238BC9EF00F1D85C /* relocate.hpp */,
+				CAAB23F5238BC9ED00F1D85C /* sentinel.h */,
+				CAAB23D6238BC9EB00F1D85C /* table3.hpp */,
+				CAAB2490238EFC7200F1D85C /* table4.hpp */,
+				CAAB23ED238BC9ED00F1D85C /* transform_iterator.hpp */,
+				CAAB2411238BC9EF00F1D85C /* zip.hpp */,
 			);
 			name = utility;
 			sourceTree = "<group>";
@@ -655,6 +660,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CAAB245B238BCA0100F1D85C /* enumerate-test.cpp in Sources */,
+				CAAB2493238F47BF00F1D85C /* table4-test.cpp in Sources */,
 				CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */,
 				CAAB2458238BCA0100F1D85C /* main-test.cpp in Sources */,
 				CAAB2457238BCA0100F1D85C /* table3-test.cpp in Sources */,
