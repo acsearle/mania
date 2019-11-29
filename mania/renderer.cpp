@@ -47,6 +47,7 @@ struct game : application {
     vector<sprite> _animation_h;
     vector<sprite> _animation_v;
     vector<sprite> _buildings;
+    sprite _ui_rect;
     
     table3<u64, string> _periodic;
 
@@ -70,6 +71,7 @@ struct game : application {
     void blit3(string_view v, vec2 xy);
     void blit4(string_view v, vec2 xy);
     void blit5(string_view v, vec2 xy);
+    void _draw_frame(rect<float>);
 
     virtual void key_down(u32) override;
     virtual void mouse_up(u64) override;
@@ -100,7 +102,7 @@ game::game()
         auto midpoint = (_solid.a.texCoord + _solid.b.texCoord) / 2.0f;
         _solid.a.texCoord = _solid.b.texCoord = midpoint;
     }
-    
+    _ui_rect = load_image("/Users/acsearle/Downloads/textures/frame", _atlas);
     //std::cout << load("enum", "hpp") << std::endl;
     
     _animation_h = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepper", {1, 0}, 32);
@@ -480,35 +482,10 @@ void game::draw() {
         
     }
     
-    {
-        // Draw UI
-        
-        int x = 500;
-        int y = 500;
-        int w = 200;
-        int h = 200;
-        sprite s = _tiles.get("water_tile");
-        
-        float c;
-        c = (s.a.position.x + s.b.position.x) / 2.0f;
-        float vx[] = { s.a.position.x, c, c + w, s.b.position.x + w };
-        c = (s.a.position.y + s.b.position.y) / 2.0f;
-        float vy[] = { s.a.position.y, c, c + h, s.b.position.y + h };
-        c = (s.a.texCoord.x + s.b.texCoord.x) / 2.0f;
-        float vu[] = { s.a.texCoord.x, c, c, s.b.texCoord.x };
-        c = (s.a.texCoord.y + s.b.texCoord.y) / 2.0f;
-        float vv[] = { s.a.texCoord.y, c, c, s.b.texCoord.y };
-        
-        for (int i = 0; i != 3; ++i)
-            for (int j = 0; j != 3; ++ j) {
-                sprite t = {
-                    {{vx[i], vy[j]}, {vu[i], vv[j]}, s.a.color},
-                    {{vx[i+1], vy[j+1]}, {vu[i+1], vv[j+1]}, s.a.color}
-                };
-                _atlas.push_sprite_translated(t, {x, y});
-            }
-        
-    }
+    // _draw_frame({{500,500},{700,700}});
+    
+    
+    
     
     
     {
@@ -528,7 +505,8 @@ void game::draw() {
         // Draw opcode selector
         for (i64 i = 0; i != _width / 64; ++i) {
             string_view v = translate(instruction::opcode((instruction::opcode_enum) (i << instruction::OPCODE_SHIFT)));
-            blit4("button", {i * 64, _height - 64});
+            // blit4("button", {i * 64, _height - 64});
+            _draw_frame({{i * 64 + 2, _height - 62},{i * 64 + 62, _height}});
             blit4(v, {i * 64, _height - 64});
         }
     }
@@ -568,6 +546,37 @@ void game::draw() {
     _atlas.commit();
 
 
+}
+
+void game::_draw_frame(rect<float> r) {
+    
+    // Draw UI
+    int x = r.a.x;
+    int y = r.a.y;
+    r.b -= r.a;
+    int w = r.b.x;
+    int h = r.b.y;
+    sprite s = _ui_rect;
+    
+    float c;
+    c = (s.a.position.x + s.b.position.x) / 2.0f;
+    float vx[] = { s.a.position.x, c, c + w, s.b.position.x + w };
+    c = (s.a.position.y + s.b.position.y) / 2.0f;
+    float vy[] = { s.a.position.y, c, c + h, s.b.position.y + h };
+    c = (s.a.texCoord.x + s.b.texCoord.x) / 2.0f;
+    float vu[] = { s.a.texCoord.x, c, c, s.b.texCoord.x };
+    c = (s.a.texCoord.y + s.b.texCoord.y) / 2.0f;
+    float vv[] = { s.a.texCoord.y, c, c, s.b.texCoord.y };
+    
+    for (int i = 0; i != 3; ++i)
+        for (int j = 0; j != 3; ++ j) {
+            sprite t = {
+                {{vx[i], vy[j]}, {vu[i], vv[j]}, s.a.color},
+                {{vx[i+1], vy[j+1]}, {vu[i+1], vv[j+1]}, s.a.color}
+            };
+            _atlas.push_sprite_translated(t, {x, y});
+        }
+    
 }
 
 void game::key_down(u32 c) {

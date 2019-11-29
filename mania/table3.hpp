@@ -500,24 +500,30 @@ struct table3 {
         return reinterpret_cast<entry_type&>(e);
     }
     
-    // postcondition: the invariant may be broken and to restore it we *must*
-    // call one of .or_insert, .or_emplace, .or_insert_with on the entry before
-    // performing any other operations
+    // postcondition: we must call one of
+    //
+    //     .and_insert
+    //     .or_insert
+    //     .or_emplace
+    //     .or_insert_with
+    //
+    // to ensure that a value is present in the slot and restore the invariant
+    // of the hash map
     template<typename Q>
     entry_type& entry(Q&& k) {
         return entry(std::forward<Q>(k), hash(k));
     }
         
     template<typename Q, typename X>
-    void insert(Q&& k, u64 h, X&& value) {
-        entry(std::forward<Q>(k), h).and_insert(std::forward<X>(value));
+    value_type& insert(Q&& k, u64 h, X&& value) {
+        return entry(std::forward<Q>(k), h).and_insert(std::forward<X>(value));
     }
 
     // add or update the entry for k.  if a key comparing equal to k is already
     // present, the old key is not updated
     template<typename Q, typename X>
-    void insert(Q&& k, X&& value) {
-        insert(std::forward<Q>(k), hash(k), std::forward<X>(value));
+    value_type& insert(Q&& k, X&& value) {
+        return insert(std::forward<Q>(k), hash(k), std::forward<X>(value));
     }
 
     table3<u64, u64> _histogram() const {

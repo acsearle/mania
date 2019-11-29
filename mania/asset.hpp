@@ -14,6 +14,7 @@
 
 namespace manic {
 
+sprite load_image(string_view image_name, atlas& atl);
 table3<string, sprite> load_asset(string_view, atlas& atl);
 
 } // namespace manic

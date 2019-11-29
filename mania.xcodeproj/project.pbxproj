@@ -51,6 +51,7 @@
 		CAAB247E238BF37E00F1D85C /* string-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB247D238BF37E00F1D85C /* string-test.cpp */; };
 		CAAB2482238CF1C400F1D85C /* world.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2480238CF1C400F1D85C /* world.cpp */; };
 		CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB248C238E5D7C00F1D85C /* tattler.cpp */; };
+		CAAB2495238FBC7000F1D85C /* delta_table-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2494238FBC7000F1D85C /* delta_table-test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -205,6 +206,8 @@
 		CAAB248C238E5D7C00F1D85C /* tattler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tattler.cpp; sourceTree = "<group>"; };
 		CAAB248D238E5D7C00F1D85C /* tattler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = tattler.hpp; sourceTree = "<group>"; };
 		CAAB2490238EFC7200F1D85C /* table4.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = table4.hpp; sourceTree = "<group>"; };
+		CAAB2494238FBC7000F1D85C /* delta_table-test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "delta_table-test.cpp"; sourceTree = "<group>"; };
+		CAAB24992391236A00F1D85C /* design.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = design.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -258,6 +261,7 @@
 		CAAB2394238BC87900F1D85C /* mania */ = {
 			isa = PBXGroup;
 			children = (
+				CAAB24992391236A00F1D85C /* design.txt */,
 				CAAB2470238BDDCC00F1D85C /* array */,
 				CAAB2486238E47E800F1D85C /* delta */,
 				CAAB2477238BDFC800F1D85C /* io */,
@@ -276,6 +280,7 @@
 		CAAB23AE238BC91D00F1D85C /* mania-test */ = {
 			isa = PBXGroup;
 			children = (
+				CAAB2494238FBC7000F1D85C /* delta_table-test.cpp */,
 				CAAB2453238BCA0100F1D85C /* catch.hpp */,
 				CAAB2454238BCA0100F1D85C /* deque-test.cpp */,
 				CAAB2455238BCA0100F1D85C /* enumerate-test.cpp */,
@@ -658,6 +663,7 @@
 				CAAB2458238BCA0100F1D85C /* main-test.cpp in Sources */,
 				CAAB2457238BCA0100F1D85C /* table3-test.cpp in Sources */,
 				CAAB2456238BCA0100F1D85C /* zip-test.cpp in Sources */,
+				CAAB2495238FBC7000F1D85C /* delta_table-test.cpp in Sources */,
 				CAAB245A238BCA0100F1D85C /* deque-test.cpp in Sources */,
 				CAAB247E238BF37E00F1D85C /* string-test.cpp in Sources */,
 				CAAB2459238BCA0100F1D85C /* f8-test.cpp in Sources */,

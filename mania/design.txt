@@ -1,0 +1,90 @@
+
+#  Design document
+
+## Fun
+  * SpaceChem is fun but constrained.  The 2D programming where instructions share the gamespace
+  with the gameplay elements is better Opus Magnum where the effectors are simply sequenced by linear instructions
+  * Factorio is unconstrained but static.
+  * TIS-100, Exapunks don't make effective use of their space.
+
+
+
+## Performance
+
+Chunks: let us look up things by coarse position.  Only a few chunks on screen at any one
+time.  The size tradeoff is that we have to look up all chunks intersecting the screen, which
+argues for big chunks, but also consider all the sparse entities (and cells maybe) within these
+chunks to see if they can be excluded from the render.  The ideal chunk will then be some
+large fraction of the view dimensions.
+
+The simulation moves forward in ticks.  This is the granularity with which things can happen
+in the simulation.  Within a tick, the order of operations is deterministic but has major
+performance implications.
+
+The memory cells and terrain are static.  They don't do anything to themselves.  This rules out
+things like erosion, creep -- expensive and nonlocal.  Only entities may act, to mutate
+themselves, cells or terrain, and they may only act "locally", which is ill-defined but definitely
+excludes chunks that are not immediate neighbours.  Entities can't act on each other; they
+communicate indirectly by writing to cells (example: collision avoidance by locking cells)
+
+Almost all entity actions are independent and can be performed in any order, but it is impossible
+to efficiently determine which ones.  To make efficent use of threads, we want to be able to
+cheaply break the work up into as many independent units as possible.
+
+If we treat chunks as the unit of work, then each chunk must be sequenced to be either before
+or after its immediate (including diagonal) neighbours.  This is a graph colouring problem; if
+we can color the graph with n colours we have n buckets of parallelizable work, with each
+bucket having to be completed in sequence.
+
+When process a chunk, we can read
+from and write to its neighbours, so the minimum independent work unit is a 3x3 block of
+chunks.  This dooms us to 9 buckets.  We can make the smalled unit of scheduleable work
+instead a 4x4 block where we process the 2x2 kernel in a fixed order.
+
+    ABBA
+    CDDC
+    CDDC
+    ABBA
+    
+We are not constrained to have our chunks in a square grid though; we can offset alternating
+rows (or columns) by a half.  Then we have
+
+     A A
+    A B A
+     A A
+
+neighbours, halving the distance we can affect.  Nearest independent neighbours are
+          B B
+     A A B B B
+    A A A B B B
+     A A C C
+        C C C
+         C C
+    
+With the same trick as 2D, suppose we have
+    
+Within a bucket, each kernel can be processed in any order for load balancing.
+
+A non-bucketed approach would involve tracking completions on a per-chunk basis across
+a graph, with lots of coordination.
+
+The fact that entities can wait on writes to cells means we don't know exactly how many entities
+will have to be touched by cell.  Worse, we will sometimes write across a chunk boundary into
+a chunk that was already processed, which we than have to process in another round until
+quiesence occurs.  It is easy to contrive instructions and patterns that never quiesce. This
+argues for some kind of throttling, such as one ticks's delay in waking, one wake per tick per cell,
+etc.; unfortunately this is a bit arbitrary and will look bad?
+
+There are useful cases where we
+want multiple writes per tick to the same cell; a mutex is one such example where the waiter
+observes the unlock to 0 and immediately writes 1.
+
+
+## Traffic
+Travelling entities lock cells.  This prevents collisions but like Factorio non-chain signals deadlocks will
+occur when N entities form a loop of N cells, with a 2x2 being the simplest (is 2x1 headon usefully this?)
+
+To break the problem can imagine traffic lights that alternate in locking entries to an intersection
+or chain signals where we atomically lock multiple cells to cross multiple lanes of cross traffic.
+(Implemented by waiting on first encountered already locked, until it is unlocked, repeated until
+all unlocked are found?  Starvation is a worry.)

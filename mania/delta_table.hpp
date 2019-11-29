@@ -86,7 +86,7 @@ struct delta_table {
         value_type* q = _table.try_get(key);
         if (!q)
             return nullptr;
-        return &*_delta.insert(key, std::make_optional(*q)).value;
+        return &*_delta.insert(key, std::make_optional(*q));
     }
     
     template<typename Keylike>
