@@ -47,6 +47,7 @@ struct game : application {
     vector<sprite> _animation_h;
     vector<sprite> _animation_v;
     vector<sprite> _buildings;
+    vector<sprite> _terrain;
     sprite _ui_rect;
     
     table3<u64, string> _periodic;
@@ -109,6 +110,7 @@ game::game()
     _animation_v = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepperv", {0, (float)(1.0/sqrt(2.0))}, 32);
     
     _buildings = load_animation(_atlas, "/Users/acsearle/Documents/pov/silo", {0,0}, 5);
+    _terrain = load_animation(_atlas, "/Users/acsearle/Documents/pov/terrain", {0, 0}, 16);
 
     
     // _lineheight = manic::build_font(_font, _advances);
@@ -372,7 +374,8 @@ void game::draw() {
         // hashtable lookups
         for (i64 x = x_lo; x != x_hi; ++x) {
             for (i64 y = y_lo; y != y_hi; ++y) {
-                const char* z = nullptr;
+                //const char* z = nullptr;
+                /*
                 switch (_thing._terrain({x, y})) {
                     case 0: z = "tile0"; break;
                     case 1: z = "tileF"; break;
@@ -381,7 +384,10 @@ void game::draw() {
                     default:
                         assert(false);
                 }
-                blit3(z, {x*64,y*64});
+                 */
+                // blit3(z, {x*64,y*64});
+                
+                _atlas.push_sprite_translated(_terrain[hash(vec<i64, 2>{x, y}) & 15], vec2{x*64-32, y*64-32} - _camera_position);
             }
         }
     }
@@ -515,7 +521,7 @@ void game::draw() {
 
     // With total redraw, clearing may or may not be necessary
     //glClearColor(0.1, 0.0, 0.1, 0.0);
-    glClearColor(1, 1, 1, 1.0);
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     
     

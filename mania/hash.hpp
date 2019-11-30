@@ -183,6 +183,7 @@ inline u64 hash_combine(const void* src, isize bytes, u64 already_hashed = 0) {
         u64 x;
         std::memcpy(&x, src, 8);
         already_hashed = hash(already_hashed ^ x);
+        src = ((const unsigned char*) src) + 8;
         bytes -= 8;
     }
     if (bytes) {
