@@ -12,14 +12,26 @@
 #include "string.hpp"
 #include "table3.hpp"
 #include "vec.hpp"
+#include "pane.hpp"
 
 namespace manic {
 
 struct application {
     
-    table3<u32, bool> _keyboard_state;
-    u64 _mouse_state;
-    vec<double, 2> _mouse_window;
+    pane* _pane;
+    
+    
+    struct application_event_proxy : event_proxy {
+        vec<double, 2> _mouse_window;
+        table3<u32, bool> _keyboard_state;
+        u64 _mouse_state;
+
+        virtual vec2 mouse() const {
+            return _mouse_window;
+        }
+        
+    } _event_proxy ;
+    
     
     application() = default;
     application(const application&) = delete;
@@ -28,9 +40,9 @@ struct application {
     application& operator=(const application&) = delete;
     application& operator=(application&&) = delete;
     
-    static application& get();
+    static application& get(); // hopefully the only singleton?
     
-    virtual void resize(usize width, usize height) = 0;
+    virtual void resize(usize width, usize height);
     virtual void draw();
     
     virtual void key_down(u32);

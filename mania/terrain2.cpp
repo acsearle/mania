@@ -21,7 +21,7 @@ matrix<u8> _terrain_generator::_terrain_maker::operator()() const {
     matrix<u8> b(N, N);
     for (i64 i = 0; i != N; ++i)
         for (i64 j = 0; j != N; ++j)
-            b(i, j) = (a(i, j) > 0);
+            b(i, j) = std::clamp<double>(a(i, j) * 256 + 128, 0, 255);
             
     return b;
     

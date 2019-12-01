@@ -79,7 +79,7 @@ void world::push_back(entity* p) {
 
 void world::did_exit(i64 i, i64 j, u64 d) {
     // make tracks
-    _terrain({i, j}) = 2 + !(d & 1);
+    _terrain({i, j}) = 255;
 }
 
 void world::wait_on_time(u64 t, entity* p) {

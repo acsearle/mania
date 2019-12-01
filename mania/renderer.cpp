@@ -30,14 +30,15 @@
 #include "elements.hpp"
 #include "terrain2.hpp"
 #include "world.hpp"
+#include "pane.hpp"
 
 namespace manic {
 
-struct game : application {
+struct game : pane {
     
     gl::program _program;
     
-    usize _width, _height;
+    //usize _width, _height;
         
     font _font;
     
@@ -64,8 +65,8 @@ struct game : application {
         
     game();
     virtual ~game() = default;
-    void resize(usize width, usize height) override;
-    void draw() override;
+    void resize(rect<f32>) override;
+    virtual void draw(draw_proxy*) override;
     
     void scribe(string_view, vec2 xy);
 
@@ -74,24 +75,47 @@ struct game : application {
     void blit5(string_view v, vec2 xy);
     void _draw_frame(rect<float>);
 
-    virtual void key_down(u32) override;
-    virtual void mouse_up(u64) override;
-    virtual void mouse_down(u64) override;
-    virtual void scrolled(double x, double y) override;
+    virtual bool key_down(u32, event_proxy*) override;
+    virtual bool mouse_up(u64, event_proxy*) override;
+    virtual bool mouse_down(u64, event_proxy*) override;
+    virtual bool scrolled(vec2, event_proxy*) override;
 
     vec2 bound(string_view v);
 
     sprite _solid;
 
+    struct draw_proxy : manic::draw_proxy {
+        
+        explicit draw_proxy(game* p) : _ptr(p) {}
+        
+        game* _ptr;
+        void draw_frame(rect<f32> x) override {
+            assert(_ptr);
+            _ptr->_draw_frame(x);
+        }
+        
+        virtual void draw_text(rect<f32> x, string_view v) override {
+            assert(_ptr);
+            _ptr->scribe(v, x.a + vec2{0, _ptr->_font.height});
+        }
+
+    };
+    
+    
 }; // struct game
 
 application& application::get() {
-    static game x;
-    return x;
+    // static game x;
+    static application* x = [](){
+        application* a = new application;
+        a->_pane = new game();
+        return a;
+    }();
+    return *x;
 }
 
 game::game()
-: _program("basic")
+: pane({{0,0},{100,100}}), _program("basic")
 , _atlas(2048) {
 
     _tiles = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
@@ -146,11 +170,8 @@ game::game()
 
 }
 
-void game::resize(usize width, usize height) {
-    
-    _width = width;
-    _height = height;
-    
+void game::resize(rect<f32> x) {
+    _ext = x;    
 }
 
 void game::blit3(string_view v, vec2 xy) {
@@ -228,7 +249,7 @@ vec2 game::bound(string_view v) {
 }
 
 
-void game::draw() {
+void game::draw(manic::draw_proxy*) {
     
     static auto old_t = mach_absolute_time();
 
@@ -238,11 +259,11 @@ void game::draw() {
     //_width = 2048;
     //_height = 2048;
     
-    glViewport(0, 0, (GLsizei) _width, (GLsizei) _height);
+    glViewport(0, 0, (GLsizei) _ext.b.x, (GLsizei) _ext.b.y);
     
     GLfloat transform[16] = {
-        (float) 2.0f/_width, 0, 0, -1,
-        0, - (float) 2.0f/_height, 0, +1,
+        (float) 2.0f/_ext.b.x, 0, 0, -1,
+        0, - (float) 2.0f/_ext.b.y, 0, +1,
         0, 0, 1, 0,
         0, 0, 0, 1
     };
@@ -256,6 +277,7 @@ void game::draw() {
     static double angle = 0.0;
     angle += 0.01;
     
+    /*
     if (_keyboard_state.contains('w')) {
         _camera_position.y -= 2;
     }
@@ -268,13 +290,16 @@ void game::draw() {
     if (_keyboard_state.contains('d')) {
         _camera_position.x += 2;
     }
+     */
 
+    /*
     vec2 world_mouse{
         _mouse_window.x * 2 + _camera_position.x,
         - _mouse_window.y * 2 + _height + _camera_position.y};
     
     vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
-        
+      */
+    
     // This section is a series of nasty hacks.  In a polished version we want
     // to go directly from integer terrain, instruction etc. codes to sprite
     // indices; vs current intermediate conversion to strings.  To do this it
@@ -367,9 +392,9 @@ void game::draw() {
         // Importantly, this scales with the number of tiles drawn, not the
         // number of chunks instantiated
         i64 x_lo = ((i64) _camera_position.x) >> 6;
-        i64 x_hi = ((i64) (_camera_position.x + (i64) _width + 63)) >> 6;
+        i64 x_hi = ((i64) (_camera_position.x + (i64) _ext.b.x + 63)) >> 6;
         i64 y_lo = ((i64) _camera_position.y) >> 6;
-        i64 y_hi = ((i64) (_camera_position.y + (i64) _height + 63)) >> 6;
+        i64 y_hi = ((i64) (_camera_position.y + (i64) _ext.b.y + 63)) >> 6;
         // Perf: we can lookup chunks and then render subsets of them to save
         // hashtable lookups
         for (i64 x = x_lo; x != x_hi; ++x) {
@@ -386,8 +411,11 @@ void game::draw() {
                 }
                  */
                 // blit3(z, {x*64,y*64});
-                
-                _atlas.push_sprite_translated(_terrain[hash(vec<i64, 2>{x, y}) & 15], vec2{x*64-32, y*64-32} - _camera_position);
+                u64 i = hash(vec<i64, 2>{x, y});
+                sprite s = _terrain[i & 15];
+                u8 c = _thing._terrain.get({x, y});
+                s.b.color = s.a.color = vec4{ c , 128, 0, 255};
+                _atlas.push_sprite_translated(s, vec2{x*64-32, y*64-32} - _camera_position);
             }
         }
     }
@@ -398,9 +426,9 @@ void game::draw() {
         //
         // Scales with number of cells, not number of instantiated chunks
         i64 x_lo = ((i64) _camera_position.x) >> 6;
-        i64 x_hi = ((i64) (_camera_position.x + _width + 63)) >> 6;
+        i64 x_hi = ((i64) (_camera_position.x + _ext.b.x + 63)) >> 6;
         i64 y_lo = ((i64) _camera_position.y) >> 6;
-        i64 y_hi = ((i64) (_camera_position.y + _width + 63)) >> 6;
+        i64 y_hi = ((i64) (_camera_position.y + _ext.b.y + 63)) >> 6;
         for (i64 x = x_lo; x != x_hi; ++x)
             for (i64 y= y_lo; y != y_hi; ++y) {
                 // Perf: look up chunks once and then draw the block
@@ -487,14 +515,13 @@ void game::draw() {
         }
         
     }
-    
-    // _draw_frame({{500,500},{700,700}});
-    
+        
     
     
     
     
     {
+        /*
         // Draw whatever mouse is holding
         if (_selected_opcode) {
             vec2 offset(-16, -16);
@@ -505,19 +532,26 @@ void game::draw() {
         } else {
             blit5("reticule", selectee * 64 - _camera_position);
         }
+         */
     }
 
     {
         // Draw opcode selector
-        for (i64 i = 0; i != _width / 64; ++i) {
+        for (i64 i = 0; i != _ext.b.x / 64; ++i) {
             string_view v = translate(instruction::opcode((instruction::opcode_enum) (i << instruction::OPCODE_SHIFT)));
             // blit4("button", {i * 64, _height - 64});
-            _draw_frame({{i * 64 + 2, _height - 62},{i * 64 + 62, _height}});
-            blit4(v, {i * 64, _height - 64});
+            _draw_frame({{i * 64 + 2, _ext.b.y - 62},{i * 64 + 62, _ext.b.x}});
+            blit4(v, {i * 64, _ext.b.y - 64});
         }
     }
     
+    
     //_atlas.push_sprite_translated(_animation[frame & 31], {100, 100});
+    {
+        pane_text p{rect<f32>{{100,100},{200,200}}, "hello"};
+        draw_proxy c(this);
+        p.draw(&c);
+    }
 
     // With total redraw, clearing may or may not be necessary
     //glClearColor(0.1, 0.0, 0.1, 0.0);
@@ -525,14 +559,14 @@ void game::draw() {
     glClear(GL_COLOR_BUFFER_BIT);
     
     
-    
+    /*
     if (_keyboard_state.contains('p')) {
         _atlas.discard();
         _atlas.push_atlas_translated(_camera_position);
         glClearColor(0.7, 0.5, 0.3, 0.5);
         glClear(GL_COLOR_BUFFER_BIT);
     }
-    
+    */
     
     
     for (int i = 0; i != 1; ++i) {
@@ -544,7 +578,7 @@ void game::draw() {
     {
         char s[128];
         auto new_t = mach_absolute_time();
-        sprintf(s, "%.2f ms | %lu quads\n%lux%lu\nf%d", (new_t - old_t) * 1e-6, n, _width, _height, frame);
+        sprintf(s, "%.2f ms | %lu quads\n%luxwa%lu\nf%d", (new_t - old_t) * 1e-6, n, _ext.b.x, _ext.b.y, frame);
         scribe(s, {_font.charmap[' '].advance, _font.height});
         old_t = new_t;
     }
@@ -585,13 +619,11 @@ void game::_draw_frame(rect<float> r) {
     
 }
 
-void game::key_down(u32 c) {
-    application::key_down(c);
+bool game::key_down(u32 c, event_proxy* e) {
+    // application::key_down(c);
     
-    vec2 world_mouse{
-        _mouse_window.x * 2 + _camera_position.x,
-        - _mouse_window.y * 2 + _height + _camera_position.y};
-    
+    vec2 world_mouse = e->mouse() + _camera_position;
+
     vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
     i64 i = selectee.x;
     i64 j = selectee.y;
@@ -620,53 +652,50 @@ void game::key_down(u32 c) {
         }
             
         default:
-            break;
+            return false;
     }
+    return true;
 }
 
 
 
-void game::mouse_down(u64 x) {
-    application::mouse_down(x);
+bool game::mouse_down(u64 x, event_proxy* e) {
     if (x != 1)
-        return;
+        return false;
     if (_selected_opcode) {
         _selected_opcode = 0;
     } else {
-        vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
-                             - _mouse_window.y * 2 + _height + _camera_position.y);
+        vec2 world_mouse = e->mouse() + _camera_position;
         vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
         _thing._board({selectee.x, selectee.y}) = 0;
     }
+    return true;
 }
 
-void game::mouse_up(u64 x) {
-    application::mouse_up(x);
+bool game::mouse_up(u64 x, event_proxy* e) {
+    // application::mouse_up(x);
     if (x != 0)
-        return;
-    vec2 _screen_mouse(_mouse_window.x * 2,
-                           - _mouse_window.y * 2 + _height);
-    if (_screen_mouse.y > _height - 64) {
-        i64 j = _screen_mouse.x;
+        return false;
+    if (e->mouse().y > _ext.b.y - 64) {
+        i64 j = e->mouse().x;
         j >>= 6;
         _selected_opcode = instruction::opcode((instruction::opcode_enum) (j << instruction::OPCODE_SHIFT));
     } else {
         if (_selected_opcode) {
-            vec2 world_mouse(_mouse_window.x * 2 + _camera_position.x,
-                                 - _mouse_window.y * 2 + _height + _camera_position.y);
+            vec2 world_mouse = e->mouse() + _camera_position;
             vec2 selectee(((i64) world_mouse.x) >> 6, ((i64) world_mouse.y) >> 6);
             _thing._board({selectee.x, selectee.y}) = _selected_opcode;
             std::cout << "writing" << std::hex << _selected_opcode << std::endl;
         }
     }
+    return true;
 }
 
 
 
-void game::scrolled(double x, double y) {
-    application::scrolled(x, y);
-    _camera_position.x -= x;
-    _camera_position.y -= y;
+bool game::scrolled(vec2 x, event_proxy*) {
+    _camera_position -= x;
+    return true;
 }
 
 } // namespace manic
