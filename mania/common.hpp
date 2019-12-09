@@ -39,6 +39,22 @@ using isize = std::intptr_t;
 static_assert(sizeof(usize) == sizeof(std::size_t));
 static_assert(sizeof(isize) == sizeof(std::ptrdiff_t));
 
+#define F(X) inline X operator"" _##X (unsigned long long x) { return ( X ) x; }
+
+F(u8)
+F(u16)
+F(u32)
+F(u64)
+F(usize)
+
+F(i8)
+F(i16)
+F(i32)
+F(i64)
+F(isize)
+
+#undef F
+
 } // namespace manic
 
 #endif /* common_h */

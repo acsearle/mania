@@ -57,6 +57,14 @@ public:
     
     friend T area(const rect<T>& x) { return product(x.b - x.a); }
     
+    T area() const {
+        return product(b - a);
+    }
+    
+    bool contains(vec<T, 2> x) const {
+        return (a.x <= x.x) && (a.y <= x.y) && (x.x < b.x) && (x.y < b.y);
+    }
+    
 };
 
 struct area_cmp {
@@ -94,6 +102,12 @@ rect<T> operator+(const rect<T>& a, const rect<T>& b) {
 template<typename T>
 rect<T> operator-(const rect<T>& a, const rect<T>& b) {
     return rect(a.a - b.a, a.b - b.b);
+}
+
+// shift
+template<typename T>
+rect<T> operator+(const rect<T>& a, const vec<T, 2>& b) {
+    return rect{a.a + b, a.b + b};
 }
 
 // Scaling

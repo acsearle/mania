@@ -15,44 +15,11 @@
 #include "rect.hpp"
 #include "common.hpp"
 #include "string.hpp"
+#include "matrix.hpp"
+#include "box.hpp"
 
 namespace manic {
 
-template<typename T>
-struct box {
-    
-    T* _ptr;
-    
-    box() : _ptr(nullptr) {}
-    
-    box(box const&) = delete;
-    box(box&& x) : _ptr(std::exchange(x._ptr, nullptr)) {}
-    
-    ~box() { delete _ptr; }
-    
-    box& operator=(box const&) = delete;
-    box& operator=(box&& x);
-    
-    template<typename... Args>
-    static box from(Args&&... args) {
-        box a;
-        a._ptr = new T{std::forward<Args>(args)...};
-        return a;
-    }
-    
-    T* operator->() const {
-        assert(_ptr);
-        return _ptr;
-    }
-    
-}; // struct box
-
-template<typename T>
-box<T>& box<T>::operator=(box<T>&& x) {
-    box y{std::move(x)};
-    using std::swap;
-    swap(_ptr, y._ptr);
-}
 
 
 
@@ -63,6 +30,8 @@ struct draw_proxy {
     
     virtual void draw_frame(rect<f32>) = 0;
     virtual void draw_text(rect<f32>, string_view v) = 0;
+    
+    virtual void draw_asset(vec2, string_view v) = 0;
     
 };
 
@@ -89,51 +58,42 @@ struct event_proxy {
 
 struct pane {
     
-    rect<f32> _ext;
-    
-    explicit pane(rect<f32> x) : _ext(x) {}
-    
     virtual ~pane() = default;
     
-    virtual bool mouse_move(event_proxy*) { return false; }
+    virtual bool mouse_move(rect<f32> extent, event_proxy*) { return false; }
 
-    virtual bool mouse_down(u64 button, event_proxy*) { return false; }
-    virtual bool mouse_up(u64 button, event_proxy*) { return false; }
+    virtual bool mouse_down(rect<f32>, u64 button, event_proxy*) { return false; }
+    virtual bool mouse_up(rect<f32>, u64 button, event_proxy*) { return false; }
 
     virtual bool key_down(u32, event_proxy*) { return false; }
     virtual bool key_up(u32, event_proxy*) { return false; }
 
     virtual bool scrolled(vec<f32, 2> delta, event_proxy*) { return false; }
     
-    virtual void resize(rect<f32>) {}
-    virtual void draw(draw_proxy*) {}
-        
-    bool within(vec<f32, 2> x) {
-        return (_ext.a.x <= x.x) && (_ext.a.y <= x.y) && (x.x < _ext.b.x) && (x.y < _ext.b.y);
-    }
-    
+    virtual void draw(rect<f32> extent, draw_proxy*) {}
+            
 }; // class pane
 
 struct pane_collection : pane {
     
     using pane::pane;
     
-    vector<box<pane>> sub;
+    vector<std::pair<rect<f32>, box<pane>>> sub;
     
-    virtual bool mouse_move(event_proxy* e) override {
-        if (!within(e->mouse()))
+    virtual bool mouse_move(rect<f32> extent, event_proxy* e) override {
+        if (!extent.contains(e->mouse()))
             return false;
-        for (auto& p : sub)
-            if (p->mouse_move(e))
+        for (auto&& [r, p] : sub)
+            if (p->mouse_move(r, e))
                 return true;
         return false;
     }
     
-    virtual void draw(draw_proxy* c) override {
-        for (auto& p : sub)
-            p->draw(c);
+    virtual void draw(rect<f32> extent, draw_proxy* c) override {
+        for (auto&& [r, p] : sub)
+            p->draw(r, c);
     }
-    
+        
 };
 
 struct pane_text : pane {
@@ -141,14 +101,49 @@ struct pane_text : pane {
     
     string _string;
     
-    pane_text(rect<f32> x, string_view s) : pane(x), _string(s) {}
+    pane_text(string_view s) : _string(s) {}
     
-    virtual void draw(draw_proxy* c) override {
+    virtual void draw(rect<f32> extent, draw_proxy* c) override {
         assert(c);
-        c->draw_frame(_ext);
-        c->draw_text(_ext, _string);
+        c->draw_frame(extent);
+        c->draw_text(extent, _string);
     }
     
+};
+
+
+struct pane_palette : pane {
+    
+    matrix<box<pane>> _stuff;
+    vec2 _stride;
+    
+    virtual void draw(rect<f32> extent, draw_proxy* c) override {
+        c->draw_frame(extent);
+        for (isize i = 0; i != _stuff.rows(); ++i)
+            for (isize j = 0; j != _stuff.columns(); ++j)
+                _stuff(i, j)->draw(rect<f32>{extent.a, extent.a + _stride} + vec2{i, j} * _stride, c);
+                
+    }
+    
+    virtual bool mouse_move(rect<f32> extent, event_proxy* e) override {
+        auto m = e->mouse();
+        if (!extent.contains(m))
+            return false;
+        auto x = (m - extent.a) / _stride;
+        return _stuff(vec<isize, 2>{x})->mouse_move(extent, e);
+    }
+    
+};
+
+struct pane_opcode : pane {
+    u64 _opcode;
+    
+    pane_opcode(u64 code) : _opcode(code) {}
+    
+    virtual void draw(rect<f32> extent, draw_proxy* c) override {
+
+    }
+
 };
 
 // types of panes

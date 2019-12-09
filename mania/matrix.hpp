@@ -64,7 +64,7 @@ namespace manic {
             *this = v;
         }
         
-        matrix(ptrdiff_t rows, ptrdiff_t columns)
+        matrix(isize rows, isize columns)
         : matrix_view<T>(nullptr, columns, columns, rows)
         , raw_vector<T>(rows * columns) {
             this->_begin = this->_allocation;
@@ -72,7 +72,7 @@ namespace manic {
             assert(_invariant());
         }
         
-        matrix(ptrdiff_t rows, ptrdiff_t columns, const T& x)
+        matrix(isize rows, isize columns, const T& x)
         : matrix_view<T>(nullptr, columns, columns, rows)
         , raw_vector<T>(rows * columns) {
             this->_begin = this->_allocation;
@@ -82,7 +82,7 @@ namespace manic {
         
         void _destroy_all() {
             if constexpr (!std::is_trivially_destructible<T>::value) {
-                for (ptrdiff_t i = 0; i != this->_rows; ++i)
+                for (isize i = 0; i != this->_rows; ++i)
                     std::destroy_n(this->_begin + i * this->_stride, this->_columns);
             }
         }
@@ -111,7 +111,7 @@ namespace manic {
             this->_columns = r._columns;
             this->_stride = r._columns;
             this->_rows = r._rows;
-            for (ptrdiff_t i = 0; i != this->_rows; ++i)
+            for (isize i = 0; i != this->_rows; ++i)
                 std::uninitialized_copy_n(r._begin + i * r._stride, r._columns, this->_begin + i * this->_stride);
             assert(_invariant());
             return *this;
@@ -152,7 +152,7 @@ namespace manic {
         
         // Mutators
         
-        void crop(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c) {
+        void crop(isize i, isize j, isize r, isize c) {
             assert(i >= 0);
             assert(j >= 0);
             assert(r >= 0);
@@ -161,14 +161,14 @@ namespace manic {
             assert(j + c <= this->_columns);
             
             if constexpr (!std::is_trivially_destructible<T>::value) {
-                for (ptrdiff_t i2 = 0; i2 != i; ++i2) {
+                for (isize i2 = 0; i2 != i; ++i2) {
                     std::destroy_n(this->_begin + this->_stride * i2, this->_columns);
                 }
-                for (ptrdiff_t i2 = i; i2 != (i + r); ++i2) {
+                for (isize i2 = i; i2 != (i + r); ++i2) {
                     std::destroy_n(this->_begin + this->_stride * i2, j);
                     std::destroy_n(this->_begin + this->_stride * i2 + j + c, this->_columns - j - c);
                 }
-                for (ptrdiff_t i2 = i + r; i2 != this->_rows; ++i2) {
+                for (isize i2 = i + r; i2 != this->_rows; ++i2) {
                     std::destroy_n(this->_begin + this->_stride * i2, this->_columns);
                 }
             }
@@ -181,7 +181,7 @@ namespace manic {
         }
         
         // Resizes without preserving values
-        void discard_and_resize(ptrdiff_t rows, ptrdiff_t columns) {
+        void discard_and_resize(isize rows, isize columns) {
             _destroy_all();
             if (this->_capacity < rows * columns) {
                 raw_vector<T> v(std::max(rows * columns, 2 * this->_capacity));
@@ -196,7 +196,7 @@ namespace manic {
 
         }
         
-        void expand(ptrdiff_t i, ptrdiff_t j, ptrdiff_t r, ptrdiff_t c, const T& x) {
+        void expand(isize i, isize j, isize r, isize c, const T& x) {
             // todo: detect when we can do this in-place
             matrix<T> a(r, c, x);
             a.sub(i, j, this->_rows, this->_columns) = *this;
@@ -204,7 +204,7 @@ namespace manic {
         }
         
         // Resizes preserving values, and padding with x
-        void resize(ptrdiff_t r, ptrdiff_t c, const T& x = T()) {
+        void resize(isize r, isize c, const T& x = T()) {
             assert(_invariant());
             matrix<T> a(r, c, x);
             r = std::min(r, this->_rows);
@@ -225,8 +225,8 @@ namespace manic {
         assert(a.rows() == b.rows());
         assert(b.columns() == b.columns());
         matrix<T> c(a.rows(), a.columns());
-        for (ptrdiff_t i = 0; i != a.rows(); ++i)
-            for (ptrdiff_t j = 0; j != a.columns(); ++j)
+        for (isize i = 0; i != a.rows(); ++i)
+            for (isize j = 0; j != a.columns(); ++j)
                 c(i, j) = a(i, j) + b(i, j);
         return c;
     }
@@ -234,16 +234,16 @@ namespace manic {
 
     template<typename T> matrix<T> operator+(matrix_view<T> a, T b) {
         matrix<T> c(a.rows(), a.columns());
-        for (ptrdiff_t i = 0; i != a.rows(); ++i)
-            for (ptrdiff_t j = 0; j != a.columns(); ++j)
+        for (isize i = 0; i != a.rows(); ++i)
+            for (isize j = 0; j != a.columns(); ++j)
                 c(i, j) = a(i, j) + b;
         return c;
     }
  
     template<typename T> matrix<T> transpose(const_matrix_view<T> a) {
         matrix<T> b(a.columns(), a.rows());
-        for (ptrdiff_t i = 0; i != a.rows(); ++i)
-            for (ptrdiff_t j = 0; j != a.columns(); ++j)
+        for (isize i = 0; i != a.rows(); ++i)
+            for (isize j = 0; j != a.columns(); ++j)
                 b(j, i) = a(i, j);
         return b;
     }
@@ -251,8 +251,8 @@ namespace manic {
     template<typename T> matrix<T> outer_product(const_vector_view<T> a,
                                                  const_vector_view<T> b) {
         matrix<T> c(a.size(), b.size());
-        for (ptrdiff_t i = 0; i != c.rows(); ++i)
-            for (ptrdiff_t j = 0; j != c.columns(); ++j)
+        for (isize i = 0; i != c.rows(); ++i)
+            for (isize j = 0; j != c.columns(); ++j)
                 c(i, j) = a[i] * b[j];
         return c;
     }
@@ -260,8 +260,8 @@ namespace manic {
     template<typename T>
     matrix<T> operator-(const_matrix_view<T> a, const_matrix_view<T> b) {
         matrix<T> c(a.rows(), a.columns());
-        for (ptrdiff_t i = 0; i != a.rows(); ++i)
-            for (ptrdiff_t j = 0; j != a.columns(); ++j)
+        for (isize i = 0; i != a.rows(); ++i)
+            for (isize j = 0; j != a.columns(); ++j)
                 c(i, j) = a(i, j) - b(i, j);
         return c;
     }
@@ -271,9 +271,9 @@ namespace manic {
     void filter_rows(matrix_view<C> c, const_matrix_view<A> a, const_vector_view<B> b) {
         assert(c.rows() == a.rows());
         assert(c.columns() + b.columns() == a.columns());
-        for (ptrdiff_t i = 0; i != c.rows(); ++i)
-            for (ptrdiff_t j = 0; j != c.columns(); ++j) {
-                for (ptrdiff_t k = 0; k != b.size(); ++k)
+        for (isize i = 0; i != c.rows(); ++i)
+            for (isize j = 0; j != c.columns(); ++j) {
+                for (isize k = 0; k != b.size(); ++k)
                     c(i, j) += a(i, j + k) * b(k);
             }
     }
@@ -282,9 +282,9 @@ namespace manic {
     void filter_columns(matrix_view<C> c, const_matrix_view<A> a, const_vector_view<B> b) {
         assert(c.columns() == a.columns());
         assert(c.rows() + b.size() == a.rows());
-        for (ptrdiff_t i = 0; i != c.rows(); ++i)
-            for (ptrdiff_t j = 0; j != c.columns(); ++j) {
-                for (ptrdiff_t k = 0; k != b.size(); ++k)
+        for (isize i = 0; i != c.rows(); ++i)
+            for (isize j = 0; j != c.columns(); ++j) {
+                for (isize k = 0; k != b.size(); ++k)
                     c(i, j) += a(i + k, j) * b(k);
             }
     }
@@ -293,8 +293,8 @@ namespace manic {
     void explode(matrix_view<B> b, const_matrix_view<A> a) {
         assert(b.rows() == 2 * a.rows());
         assert(b.columns() == 2 * a.columns());
-        for (ptrdiff_t i = 0; i != a.rows(); ++i)
-            for (ptrdiff_t j = 0; j != a.columns(); ++j)
+        for (isize i = 0; i != a.rows(); ++i)
+            for (isize j = 0; j != a.columns(); ++j)
                 b(2 * i, 2 * j) = a(i, j);
     }
     
