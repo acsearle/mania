@@ -211,68 +211,6 @@ namespace manic {
     
     
     
-    // differs from std::optional by behaving basically like box - moves leave it empty, can't be copied
-    
-    template<typename T> // require bytewise move
-    class option {
-        std::aligned_storage_t<sizeof(T), alignof(T)> _value;
-        bool _has;
-    public:
-        option() : _has(false) {}
-        option(const option&) = delete;
-        option(option&& r)
-        : _has(exchange(r._has, false)) {
-            if (_has)
-                new (&_value) T(move(r._value));
-        }
-        ~option() {
-            if (_has)
-                reinterpret_cast<T&>(_value).~T();
-        }
-        option& operator=(const option&) = delete;
-        option& operator=(option&& r) {
-            swap(*this, r);
-            return *this;
-        }
-        option(T&& value)
-        : _has(true) {
-            new (&_value) T(move(value));
-        }
-        option(std::nullptr_t)
-        : _has(false) {
-        }
-        option& operator=(T&& value) {
-            if (_has)
-                swap(reinterpret_cast<T&>(_value), value);
-            else
-                new (&_value) T(value);
-            return *this;
-        }
-        option& operator=(std::nullptr_t) {
-            if (_has) {
-                reinterpret_cast<T&>(_value).~T();
-                _has = false;
-            }
-            return *this;
-        }
-        friend void swap(option& a, option& b) {
-            using std::swap;
-            swap(a._value, b._value); // <- relies on bytewise swap
-            swap(a._has, b._has);
-        }
-        explicit operator bool() const { return _has; }
-        T& operator*() & { return reinterpret_cast<T&>(_value); }
-        T&& operator*() && { return reinterpret_cast<T&>(_value); }
-        const T& operator*() const& { return reinterpret_cast<const T&>(_value); }
-        const T&& operator*() const&& { return reinterpret_cast<const T&>(_value); }
-        const T* operator->() const { return reinterpret_cast<const T*>(&_value); }
-        T* operator->() { return reinterpret_cast<T*>(&_value); }
-        
-        friend option clone(const option& a) {
-            return a ? option(*a) : option();
-        }
-        
-    };
     
     template<typename T>
     class array {

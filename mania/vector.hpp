@@ -254,6 +254,15 @@ namespace manic {
         a.swap(b);
     }
     
+template<typename T, typename Deserializer>
+inline auto deserialize(placeholder<vector<T>>, Deserializer& d) {
+    auto n = deserialize<isize>(d);
+    vector<T> x;
+    x.reserve(n);
+    while (n--)
+        x.push_back(deserialize<T>(d));
+    return x;
+}
     
 } // namespace manic
 

@@ -19,30 +19,41 @@ namespace manic {
 // relocation that are on the stack or embedded in other types.
 //
 // maybe<T> is a TrivialType
+//
+// Some operations require T is Relocatable
 
 template<typename T>
-class maybe {
+class Maybe {
     
     alignas(alignof(T)) unsigned char _[sizeof(T)];
     
 public:
+    
+    // Defaulted, unsafe, constructors and assignment
     
     template<typename... Args>
     void emplace(Args&&... args) {
         new (this) T(std::forward<Args>(args)...);
     }
 
-    T* get() { return reinterpret_cast<T*>(_); }
-    T const* get() const { return reinterpret_cast<T const*>(_); }
+    void destroy() const {
+        (**this).~T();
+    }
+
+    T* get() { return reinterpret_cast<T&>(_); }
+    T const* get() const { return reinterpret_cast<T const&>(_); }
     
     T* operator->() { return get(); }
     T const* operator->() const { return get(); }
     
     T& operator*() { return *get(); }
     T const& operator*() const { return *get(); }
-
-    void destroy() const {
-        get()->~T();
+    
+    template<typename... Args>
+    static Maybe from(Args&&... args) {
+        Maybe x;
+        x.emplace(std::forward<Args>(args)...);
+        return x;
     }
 
 }; // class maybe<T>

@@ -1,0 +1,9 @@
+# Serialization
+
+# UI
+
+Complex.  Stateful.  Fuck.  Does a mouse click occur at its own location, or at
+the mouseMoved location?  Is the location resolved to the hoveredOver item, or does it scan stack?
+
+# Network
+

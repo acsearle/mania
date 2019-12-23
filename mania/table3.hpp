@@ -22,6 +22,7 @@
 #include "string.hpp"
 #include "transform_iterator.hpp"
 #include "debug.hpp"
+#include "serialize.hpp"
 
 namespace manic {
 
@@ -635,7 +636,40 @@ struct table3 {
         return _value_range<T>(std::forward<T>(r));
     }
     
+    template<typename K, typename V>
+    bool operator==(table3<K, V> const& a, table3<K, V> const& b) {
+        if (a.size() != b.size())
+            return false;
+        for (auto&& [k, v] : a) {
+            auto p = const_cast<table3<K, V>&>(b).try_get(k);
+            if (!p || (*p != v))
+                return false;
+        }
+        return true;
+    }
     
+    
+    template<typename K, typename V, typename Serializer>
+    void serialize(table3<K, V> const& x, Serializer& s) {
+        serialize(x.size(), s);
+        for (auto&& [k, v] : x) {
+            serialize(k, s);
+            serialize(v, s);
+        }
+    }
+        
+    template<typename K, typename V, typename Deserializer>
+    auto deserialize(placeholder<table3<K, V>>, Deserializer& d) {
+        auto n = deserialize<usize>(d);
+        table3<K, V> x;
+        x.reserve(n);
+        while (n--) {
+            auto k = deserialize<K>(d);
+            auto v = deserialize<V>(d);
+            x.insert(k, v);
+        }
+        return x;
+    }
     
     
     

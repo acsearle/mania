@@ -1,5 +1,5 @@
 
-#  Design document
+#  Design
 
 ## Fun
   * SpaceChem is fun but constrained.  The 2D programming where instructions share the gamespace

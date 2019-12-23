@@ -18,6 +18,7 @@
 #include "unicode.hpp"
 #include "const_vector_view.hpp"
 #include "hash.hpp"
+#include "serialize.hpp"
 
 namespace manic {
 
@@ -100,6 +101,11 @@ inline u64 hash(string_view v) {
 
 inline u64 hash(const char* c) {
     return hash(string_view(c));
+}
+
+template<typename Serializer>
+void serialize(string_view const& v, Serializer& s) {
+    serialize(v.as_bytes(), s);
 }
 
 } // namespace manic

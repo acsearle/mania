@@ -53,6 +53,7 @@
 		CAAB2495238FBC7000F1D85C /* delta_table-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2494238FBC7000F1D85C /* delta_table-test.cpp */; };
 		CAAB249D2394E91300F1D85C /* async.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB249B2394E91300F1D85C /* async.cpp */; };
 		CAAB24A32394FBB700F1D85C /* awrc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB24A12394FBB700F1D85C /* awrc.cpp */; };
+		CABEB8D423B0B0B400A12ACC /* serialization-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -204,7 +205,6 @@
 		CAAB2488238E482C00F1D85C /* delta_table.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = delta_table.hpp; sourceTree = "<group>"; };
 		CAAB248C238E5D7C00F1D85C /* tattler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tattler.cpp; sourceTree = "<group>"; };
 		CAAB248D238E5D7C00F1D85C /* tattler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = tattler.hpp; sourceTree = "<group>"; };
-		CAAB2490238EFC7200F1D85C /* table4.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = table4.hpp; sourceTree = "<group>"; };
 		CAAB2494238FBC7000F1D85C /* delta_table-test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "delta_table-test.cpp"; sourceTree = "<group>"; };
 		CAAB24992391236A00F1D85C /* design.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = design.txt; sourceTree = "<group>"; };
 		CAAB249B2394E91300F1D85C /* async.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = async.cpp; sourceTree = "<group>"; };
@@ -212,6 +212,9 @@
 		CAAB24A12394FBB700F1D85C /* awrc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = awrc.cpp; sourceTree = "<group>"; };
 		CAAB24A22394FBB700F1D85C /* awrc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = awrc.hpp; sourceTree = "<group>"; };
 		CAAB24A52397D29400F1D85C /* box.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = box.hpp; sourceTree = "<group>"; };
+		CABEB8CF23AC962A00A12ACC /* notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
+		CABEB8D123AF0FCA00A12ACC /* serialize.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = serialize.hpp; sourceTree = "<group>"; };
+		CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "serialization-test.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -266,6 +269,7 @@
 			isa = PBXGroup;
 			children = (
 				CAAB24992391236A00F1D85C /* design.txt */,
+				CABEB8CF23AC962A00A12ACC /* notes.txt */,
 				CAAB2470238BDDCC00F1D85C /* array */,
 				CAAB249A2394E8E500F1D85C /* async */,
 				CAAB2486238E47E800F1D85C /* delta */,
@@ -295,6 +299,7 @@
 				CAAB247D238BF37E00F1D85C /* string-test.cpp */,
 				CAAB248C238E5D7C00F1D85C /* tattler.cpp */,
 				CAAB248D238E5D7C00F1D85C /* tattler.hpp */,
+				CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */,
 			);
 			path = "mania-test";
 			sourceTree = "<group>";
@@ -353,7 +358,6 @@
 				CAAB241C238BC9EF00F1D85C /* graveyard.cpp */,
 				CAAB2421238BC9F000F1D85C /* indirect.hpp */,
 				CAAB240D238BC9EE00F1D85C /* int.cpp */,
-				CAAB2425238BC9F000F1D85C /* maybe.hpp */,
 				CAAB23DF238BC9EC00F1D85C /* nr.cpp */,
 				CAAB2415238BC9EF00F1D85C /* object.hpp */,
 				CAAB23C8238BC9EB00F1D85C /* option.hpp */,
@@ -425,6 +429,7 @@
 		CAAB2473238BDE9500F1D85C /* utility */ = {
 			isa = PBXGroup;
 			children = (
+				CAAB2425238BC9F000F1D85C /* maybe.hpp */,
 				CAAB23CC238BC9EB00F1D85C /* bit_ptr.hpp */,
 				CAAB23CD238BC9EB00F1D85C /* bit.hpp */,
 				CAAB24A52397D29400F1D85C /* box.hpp */,
@@ -439,9 +444,9 @@
 				CAAB2419238BC9EF00F1D85C /* relocate.hpp */,
 				CAAB23F5238BC9ED00F1D85C /* sentinel.h */,
 				CAAB23D6238BC9EB00F1D85C /* table3.hpp */,
-				CAAB2490238EFC7200F1D85C /* table4.hpp */,
 				CAAB23ED238BC9ED00F1D85C /* transform_iterator.hpp */,
 				CAAB2411238BC9EF00F1D85C /* zip.hpp */,
+				CABEB8D123AF0FCA00A12ACC /* serialize.hpp */,
 			);
 			name = utility;
 			sourceTree = "<group>";
@@ -586,7 +591,7 @@
 		CAAB238A238BC87900F1D85C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1120;
+				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = "Antony Searle";
 				TargetAttributes = {
 					CAAB2391238BC87900F1D85C = {
@@ -676,6 +681,7 @@
 			files = (
 				CAAB245B238BCA0100F1D85C /* enumerate-test.cpp in Sources */,
 				CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */,
+				CABEB8D423B0B0B400A12ACC /* serialization-test.cpp in Sources */,
 				CAAB2458238BCA0100F1D85C /* main-test.cpp in Sources */,
 				CAAB2457238BCA0100F1D85C /* table3-test.cpp in Sources */,
 				CAAB2456238BCA0100F1D85C /* zip-test.cpp in Sources */,
@@ -832,6 +838,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = mania/mania.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = mania/Info.plist;
@@ -854,6 +861,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = mania/mania.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = mania/Info.plist;
@@ -874,6 +882,7 @@
 		CAAB23B2238BC91D00F1D85C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -882,6 +891,7 @@
 		CAAB23B3238BC91D00F1D85C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -890,6 +900,7 @@
 		CAAB23BD238BC92C00F1D85C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -898,6 +909,7 @@
 		CAAB23BE238BC92C00F1D85C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

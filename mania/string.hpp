@@ -69,6 +69,11 @@ struct string {
         _bytes.pop_back();
     }
     
+    explicit string(vector<u8>&& bytes) : _bytes(bytes) {
+        _bytes.push_back(0);
+        _bytes.pop_back();
+    }
+    
     operator const_vector_view<u8>() const { return _bytes; }
     operator string_view() const { return string_view(begin(), end()); }
     
@@ -166,6 +171,11 @@ inline std::ostream& operator<<(std::ostream& a, string const& b) {
     a.write((char const*) b._bytes._begin, b._bytes._size);
     return a;
 }
+    
+    template<typename Deserializer>
+    inline auto deserialize(placeholder<string>, Deserializer& d) {
+        return string{deserialize<vector<u8>>(d)};
+    }
 
 
 struct immutable_string {
