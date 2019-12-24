@@ -467,7 +467,7 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
         // occultation) then by x (for shadows).
         
         int zz = 0;
-        for (entity* q : _thing._entities) {
+        for (entity2* q : _thing._entities) {
             
             // clip this list to screen
             // and draw in proper order (top to bottom, left to right?)
@@ -475,7 +475,8 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
             auto u = q->x * 64;
             auto v = q->y * 64;
             
-            if (truck* p = dynamic_cast<truck*>(q)) {
+            if (q->discriminant == entity2::TRUCK) {
+                auto p = q;
                 
                 u64 k = 0;
                 if (!p->s) {
@@ -672,7 +673,12 @@ bool game::key_down(u32 c, event_proxy* e) {
             break;
         case 'q': {
             using namespace instruction;
-            entity* p = new truck(selectee.x, selectee.y, 0);
+            //entity* p = new truck(selectee.x, selectee.y, 0);
+            entity2* p = new entity2;
+            p->discriminant = entity2::TRUCK;
+            p->x = selectee.x;
+            p->y = selectee.y;
+            p->s = instruction::newborn;
             if (is_vacant(_thing._board({p->x, p->y}))) {
                 _thing.push_back(p);
             }

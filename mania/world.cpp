@@ -15,15 +15,17 @@ world::world()
 : counter(0)
 , _terrain(_terrain_generator(0)) {
 
+    /*
     push_back(new mine(4, 8, element::carbon));
     push_back(new mine(8, 8, element::hematite));
     push_back(new smelter(12, 8));
     push_back(new silo(16, 8));
+     */
 }
 
 void world::tick() {
-    if (vector<entity*>* a = _waiting_on_time.try_get(counter)) {
-        vector<entity*> b;
+    if (vector<entity2*>* a = _waiting_on_time.try_get(counter)) {
+        vector<entity2*> b;
         while (a->size()) {
             assert(b.empty());
             swap(*a, b);
@@ -54,10 +56,10 @@ void world::write(vec<i64, 2> xy, u64 v) {
 }
 
 void world::_did_write(vec<i64, 2> xy) {
-    vector<entity*>* a = this->_waiting_on_write.try_get(xy);
+    vector<entity2*>* a = this->_waiting_on_write.try_get(xy);
     if (a) {
         // if somebody is writing, we must be within world::tick
-        // ... unless the write originates from a UI action such as spawning a new entity?
+        // ... unless the write originates from a UI action such as spawning a new entity2?
         assert(this->_waiting_on_time.contains(this->counter));
         this->_waiting_on_time[this->counter].append(a->begin(), a->end());
         this->_waiting_on_write.erase(xy);
@@ -65,7 +67,7 @@ void world::_did_write(vec<i64, 2> xy) {
 }
 
 
-void world::push_back(entity* p) {
+void world::push_back(entity2* p) {
     // register for drawing
     _entities.push_back(p);
     // register for immediate execution
@@ -82,18 +84,18 @@ void world::did_exit(i64 i, i64 j, u64 d) {
     _terrain({i, j}) = 255;
 }
 
-void world::wait_on_time(u64 t, entity* p) {
+void world::wait_on_time(u64 t, entity2* p) {
     assert(t >= counter);
     assert(p);
     this->_waiting_on_time.entry(t).or_insert_with([]() {
-        return vector<entity*>{};
+        return vector<entity2*>{};
     }).push_back(p);
     p->t = t;
 }
 
-void world::wait_on_write(vec<i64, 2> x, entity* p) {
+void world::wait_on_write(vec<i64, 2> x, entity2* p) {
     this->_waiting_on_write.entry(x).or_insert_with([](){
-        return vector<entity*>{};
+        return vector<entity2*>{};
     }).push_back(p);
 }
 

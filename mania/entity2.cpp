@@ -15,6 +15,23 @@
 
 namespace manic {
 
+void entity2::tick(world& _world) {
+    switch (discriminant) {
+        case TRUCK:
+            tick_truck(_world);
+            break;
+        case MINE:
+            tick_mine(_world);
+            break;
+        case SILO:
+            tick_silo(_world);
+            break;
+        case SMELTER:
+            tick_smelter(_world);
+            break;
+    }
+}
+
 void entity2::tick_truck(world& _world) {
     
     auto& x = *this;

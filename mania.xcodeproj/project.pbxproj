@@ -23,7 +23,6 @@
 		CAAB2434238BC9F000F1D85C /* atlas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23E0238BC9EC00F1D85C /* atlas.cpp */; };
 		CAAB2435238BC9F000F1D85C /* asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23E2238BC9EC00F1D85C /* asset.cpp */; };
 		CAAB2437238BC9F000F1D85C /* parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23E5238BC9EC00F1D85C /* parse.cpp */; };
-		CAAB243B238BC9F000F1D85C /* entity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23EE238BC9ED00F1D85C /* entity.cpp */; };
 		CAAB243C238BC9F000F1D85C /* terrain2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23F2238BC9ED00F1D85C /* terrain2.cpp */; };
 		CAAB243D238BC9F000F1D85C /* vbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23F3238BC9ED00F1D85C /* vbo.cpp */; };
 		CAAB243E238BC9F000F1D85C /* vao.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23F8238BC9ED00F1D85C /* vao.cpp */; };
@@ -649,7 +648,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CAAB243B238BC9F000F1D85C /* entity.cpp in Sources */,
 				CAAB2434238BC9F000F1D85C /* atlas.cpp in Sources */,
 				CAAB243D238BC9F000F1D85C /* vbo.cpp in Sources */,
 				CAAB244D238BC9F000F1D85C /* json.cpp in Sources */,

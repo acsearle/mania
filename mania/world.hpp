@@ -9,7 +9,7 @@
 #ifndef world_hpp
 #define world_hpp
 
-#include "entity.hpp"
+#include "entity2.hpp"
 #include "space2.hpp"
 #include "terrain2.hpp"
 #include "vector.hpp"
@@ -29,8 +29,8 @@ struct world_interface {
     virtual u64 read(vec<i64, 2>) const = 0;
     virtual void write(vec<i64, 2>, u64) = 0;
     
-    virtual void wait_on_write(vec<i64, 2>, entity*);
-    virtual void wait_on_time(u64, entity*);
+    virtual void wait_on_write(vec<i64, 2>, entity2*);
+    virtual void wait_on_time(u64, entity2*);
     
 };
 
@@ -44,7 +44,7 @@ struct world {
     terrain2 _terrain;
     
     // Bag of entities.
-    vector<entity*> _entities;
+    vector<entity2*> _entities;
     //usize _next_insert;
     
     // Idea 2: entities spend most of their time waiting (travelling is
@@ -55,13 +55,13 @@ struct world {
     
     u64 counter = 0;
     
-    table3<u64, vector<entity*>> _waiting_on_time;
-    table3<vec<i64, 2>, vector<entity*>> _waiting_on_write;
+    table3<u64, vector<entity2*>> _waiting_on_time;
+    table3<vec<i64, 2>, vector<entity2*>> _waiting_on_write;
     
-    void wait_on_write(vec<i64, 2>, entity*);
-    void wait_on_time(u64, entity*);
+    void wait_on_write(vec<i64, 2>, entity2*);
+    void wait_on_time(u64, entity2*);
 
-    // table3<vec<i64, 2>, vector<entity*>> _entities_in_chunk;
+    // table3<vec<i64, 2>, vector<entity2*>> _entities_in_chunk;
     
     // When waiting on a value, only a few local entities can be waiting?  If
     // many entities are waiting on a value, does it make sense to break down
@@ -70,7 +70,7 @@ struct world {
     
     // Make a unified chunk that contains terrain, cells, waiters on cells
     // and entities-within?  Depends on access patterns.  Terrain accesed by
-    // rendering but not by entity code.
+    // rendering but not by entity2 code.
     
     // Can we execute entities by chunk without losing deterministic ordering?
     
@@ -82,9 +82,9 @@ struct world {
         
     void tick();
     
-    void exec(entity&);
+    void exec(entity2&);
     
-    void push_back(entity*);
+    void push_back(entity2*);
     
     void did_exit(i64 i, i64 j, u64 d);
     
