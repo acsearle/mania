@@ -1,10 +1,12 @@
 //
-//  thing.cpp
+//  entity2.cpp
 //  mania
 //
-//  Created by Antony Searle on 22/10/19.
+//  Created by Antony Searle on 25/12/19.
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
+
+#include "entity2.hpp"
 
 #include "instruction.hpp"
 #include "elements.hpp"
@@ -13,7 +15,7 @@
 
 namespace manic {
 
-void truck::tick(world& _world) {
+void entity2::tick_truck(world& _world) {
     
     auto& x = *this;
     auto& _board = _world._board;
@@ -435,7 +437,7 @@ void truck::tick(world& _world) {
 }
 
 
-void mine::tick(world& _world) {
+void entity2::tick_mine(world& _world) {
     auto& _board = _world._board;
 
     using namespace instruction;
@@ -447,7 +449,7 @@ void mine::tick(world& _world) {
     
 }
 
-void smelter::tick(world& _world) {
+void entity2::tick_smelter(world& _world) {
     
     auto& _board = _world._board;
 
@@ -466,7 +468,7 @@ void smelter::tick(world& _world) {
 
 }
 
-void silo::tick(world& _world) {
+void entity2::tick_silo(world& _world) {
     using namespace instruction;
     
     auto& _board = _world._board;

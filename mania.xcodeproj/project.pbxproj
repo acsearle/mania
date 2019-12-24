@@ -54,6 +54,7 @@
 		CAAB249D2394E91300F1D85C /* async.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB249B2394E91300F1D85C /* async.cpp */; };
 		CAAB24A32394FBB700F1D85C /* awrc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB24A12394FBB700F1D85C /* awrc.cpp */; };
 		CABEB8D423B0B0B400A12ACC /* serialization-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */; };
+		CABEB8D723B2BEA800A12ACC /* entity2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D523B2BEA800A12ACC /* entity2.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -215,6 +216,8 @@
 		CABEB8CF23AC962A00A12ACC /* notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
 		CABEB8D123AF0FCA00A12ACC /* serialize.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = serialize.hpp; sourceTree = "<group>"; };
 		CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "serialization-test.cpp"; sourceTree = "<group>"; };
+		CABEB8D523B2BEA800A12ACC /* entity2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = entity2.cpp; sourceTree = "<group>"; };
+		CABEB8D623B2BEA800A12ACC /* entity2.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = entity2.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -462,6 +465,8 @@
 				CAAB23D0238BC9EB00F1D85C /* elements.hpp */,
 				CAAB23EE238BC9ED00F1D85C /* entity.cpp */,
 				CAAB23EF238BC9ED00F1D85C /* entity.hpp */,
+				CABEB8D523B2BEA800A12ACC /* entity2.cpp */,
+				CABEB8D623B2BEA800A12ACC /* entity2.hpp */,
 				CAAB2480238CF1C400F1D85C /* world.cpp */,
 				CAAB2481238CF1C400F1D85C /* world.hpp */,
 			);
@@ -661,6 +666,7 @@
 				CAAB244C238BC9F000F1D85C /* preprocessor.cpp in Sources */,
 				CAAB249D2394E91300F1D85C /* async.cpp in Sources */,
 				CAAB242B238BC9F000F1D85C /* MyOpenGLView.mm in Sources */,
+				CABEB8D723B2BEA800A12ACC /* entity2.cpp in Sources */,
 				CAAB244E238BC9F000F1D85C /* terrain.cpp in Sources */,
 				CAAB243C238BC9F000F1D85C /* terrain2.cpp in Sources */,
 				CAAB243E238BC9F000F1D85C /* vao.cpp in Sources */,

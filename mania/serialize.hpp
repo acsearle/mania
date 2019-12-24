@@ -116,6 +116,7 @@ X(float)
 X(double)
 X(long double)
 
+#undef X
 
 
 // std::pair

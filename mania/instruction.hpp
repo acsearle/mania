@@ -36,7 +36,7 @@ namespace manic::instruction {
 //     representation chosen for physical things determines other restrictions;
 //     for example, total-number-of-set-bits-at-a-position must be conserved
 //     for the atomic representation.
-//   * physical objects obstruct MCUs from entering them.  This works well with
+//   * physical objects obstruct trucks from entering them.  This works well with
 //     diagonal access.  It also means we don't have to deal with opcodes under
 //     physical objects, the object just overwrites it.
 //

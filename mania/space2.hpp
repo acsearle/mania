@@ -12,6 +12,7 @@
 #include "table3.hpp"
 #include "vec.hpp"
 #include "matrix.hpp"
+#include "serialize.hpp"
 
 namespace manic {
 
@@ -29,7 +30,6 @@ struct _space2_default {
         };
     }
 };
-
 
 template<typename T>
 struct _dumb_matrix {
@@ -68,6 +68,21 @@ struct _dumb_matrix {
     T& operator()(vec<i64, 2> xy) { return *(_ptr + xy.x * 16 + xy.y); }
     
 };
+    
+    template<typename T, typename Serializer>
+    void serialize(_dumb_matrix<T> const& x, Serializer& s) {
+        for (isize i = 0; i != CHUNK_SIZE * CHUNK_SIZE; ++i)
+            serialize(x._ptr[i], s);
+    }
+
+    template<typename T, typename Deserializer>
+    void deserialize(placeholder<_dumb_matrix<T>>, Deserializer& d) {
+        _dumb_matrix<T> x;
+        for (isize i = 0; i != CHUNK_SIZE * CHUNK_SIZE; ++i)
+            x._ptr[i] = deserialize<T>(d);
+        return x;
+    }
+
 
 template<typename T>
 struct _space2_inline {
@@ -76,16 +91,26 @@ struct _space2_inline {
     }
 };
     
+    template<typename T, typename Serializer>
+    void serialize(_space2_inline<T> const&, Serializer&) {
+        // monostate
+    }
+
+    template<typename T, typename Deserializer>
+    void deserialize(placeholder<_space2_default<T>>, Deserializer&) {
+        return _space2_inline<T>{};
+    }
+
+    
 template<typename F>
 struct space2 {
     
     using M = std::decay_t<decltype(std::declval<F>()(std::declval<vec<i64, 2>>())())>;
     using T = std::decay_t<decltype(std::declval<M>()(std::declval<vec<i64, 2>>()))>;
     
-    table3<vec<i64, 2>, M> _table;
-    
     F _generator;
-    
+    table3<vec<i64, 2>, M> _table;
+        
     static constexpr i64 N = 16;
     static constexpr i64 MASK = N - 1;
     
@@ -129,6 +154,18 @@ struct space2 {
     }
     
 }; // struct space2
+    
+    template<typename F, typename Serializer>
+    void serialize(space2<F>& x, Serializer& s) {
+        serialize(x._generator, s);
+        serialize(x._table, s);
+    }
+    
+    template<typename F, typename Deserializer>
+    void deserialize(placeholder<space2<F>>, Deserializer& d) {
+        space2<F> x{deserialize<F>(d)};
+        x._table = deserialize<decltype(x._table)>(d);
+    }
 
 } // namespace manic
 

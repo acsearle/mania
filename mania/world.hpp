@@ -48,7 +48,7 @@ struct world {
     //usize _next_insert;
     
     // Idea 2: entities spend most of their time waiting (travelling is
-    // implemented as waiting and then jumping), wiating either until a point
+    // implemented as waiting and then jumping), waiting either until a point
     // in the future (as when travelling or processing) or waiting on a cell
     // to take on a new value (as in a mutex, barrier, or a blocking read/write
     // to an empty/occupied cell).
@@ -89,6 +89,25 @@ struct world {
     void did_exit(i64 i, i64 j, u64 d);
     
 }; // struct world
+
+template<typename Serializer>
+void serialize(world const& x, Serializer& s) {
+    serialize(x._board, s);
+    serialize(x._terrain, s);
+    // entities are hard
+    serialize(x.counter, s);
+}
+
+template<typename Deserializer>
+auto deserialize(placeholder<world>, Deserializer& d) {
+    world x;
+    x._board = deserialize<decltype(x._board)>(d);
+    x._terrain = deserialize<decltype(x._terrain)>(d);
+    // entities are hard
+    x.counter = deserialize<u64>(d);
+    return x;
+}
+
 
 }
 

@@ -16,6 +16,7 @@
 
 #include "common.hpp"
 #include "hash.hpp"
+#include "serialize.hpp"
 
 namespace manic {
     
@@ -436,7 +437,22 @@ return a;\
     u64 hash(const vec<T, N>& x) {
         return hash_combine(&x, sizeof(x));
     }
+           
+           template<typename T, usize N, typename Serializer>
+           void serialize(vec<T, N> const& x, Serializer& s) {
+           for (usize i = 0; i != N; ++i)
+           serialize(x[i], s);
+        }
 
+           template<typename T, usize N, typename Deserializer>
+           void deserialize(placeholder<vec<T, N>>, Deserializer& s) {
+           vec<T, N> x;
+           for (usize i = 0; i != N; ++i)
+           x[i] = deserialize<T>(s);
+           return x;
+        }
+
+        
 }
 
 #endif /* vec_hpp */

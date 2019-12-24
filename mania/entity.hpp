@@ -19,6 +19,20 @@ namespace manic {
 
 struct world;
 
+// Serialization of entities prefers they are a discriminated union rather
+// than an inheritance tree
+
+// We need to be able to efficiently find entities by:
+//     chunk
+//     wake time
+//     multiple wait-on-write locations
+//     ? precise location
+
+// Currently, we have for each chunk a map of entities by wake time and a map
+// by wake locations.  This is fine if each entity is always waiting on
+// exactly one time or location.  We probably want to wait on multiple locations
+// though (and maybe timeout too).
+
 struct entity {
             
     i64 x;
@@ -41,9 +55,9 @@ struct entity {
 
 };
 
-struct mcu : entity {
+struct truck : entity {
     
-    // MCU has a 'microstate' that allows it to perform operations over multiple
+    // truck has a 'microstate' that allows it to perform operations over multiple
     // cycles.  The most common is being obstructed, where it must wait for
     // the cell ahead to clear before it can move on.  It can also be used to
     // wait for conditions to be met (input cell nonzero, output cell zero)
@@ -52,7 +66,7 @@ struct mcu : entity {
     // what the registers are for, and nonzero values have different meanings
     // in different cells / instructions anyway.  The microstate is always
     // zero when entering and leaving a new cell.  Without the microstate, the
-    // MCU would always attempt to execute the whole instructon each cycle while
+    // truck would always attempt to execute the whole instructon each cycle while
     // blocked.  This is not always desired.
     
     u64 s;
@@ -63,12 +77,12 @@ struct mcu : entity {
     // then writes one to it, then proceeds.  A BARRIER instruction decrements
     // a cell, then waits until the cell is zero, then proceeds.
     
-    // If MCUs are physical, the operations must also reserve and release cells
+    // If trucks are physical, the operations must also reserve and release cells
     // as they travel through them.  On execution, if state is zero, release
     // the "from" cell indicated by D, perform instruction, then if not
     // waiting, acquire the "to" cell indicated by D.
     
-    // MCU has multiple registers.  These let it carry state as it moves around
+    // truck has multiple registers.  These let it carry state as it moves around
     //     A:  The accumulator register.  Instructions involving two locations
     //         usually include accumulator as one of them.  For example,
     //         addition is perfromed by adding a value from a memory cell or
@@ -76,7 +90,7 @@ struct mcu : entity {
     //     B:  General-purpose register
     //     C:  General-purpose register
     //     D:  The direction register.  The last two bits control the direction
-    //         the MCU is travelling (0123 -> NESW).  Conditional instructions
+    //         the truck is travelling (0123 -> NESW).  Conditional instructions
     //         like "<" write their output to the direction register, as in
     //         right-turn-if-less-than D += (A < *addr)
     
@@ -85,14 +99,14 @@ struct mcu : entity {
     u64 c;
     u64 d; // direction
     
-    // Each tick, the MCU reads its instruction from the cell it is "at".  The
+    // Each tick, the truck reads its instruction from the cell it is "at".  The
     // instruction may address only the diagonally adjacent cells for read write
     // etc.
     //
     // Code and data are mingled together, but diagonal access means it is easy
     // to keep them locally separate on two complementary grids.
     
-    mcu(i64 x, i64 y, u64 d_) : entity(x, y), d(d_) {
+    truck(i64 x, i64 y, u64 d_) : entity(x, y), d(d_) {
         s = instruction::newborn;
         a = 0;
         b = 0;

@@ -36,6 +36,16 @@ struct _terrain_generator {
     
 };
 
+template<typename Serializer>
+void serialize(_terrain_generator const& x, Serializer& s) {
+    serialize(x._seed, s);
+}
+
+template<typename Deserializer>
+_terrain_generator deserialize(placeholder<_terrain_generator>, Deserializer& d) {
+    return _terrain_generator{deserialize<u64>(d)};
+}
+
 using terrain2 = space2<_terrain_generator>;
 
 } // namespace manic

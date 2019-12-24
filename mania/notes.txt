@@ -1,5 +1,7 @@
 # Serialization
 
+Combine with existing JSON parser
+
 # UI
 
 Complex.  Stateful.  Fuck.  Does a mouse click occur at its own location, or at

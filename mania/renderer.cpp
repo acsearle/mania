@@ -475,7 +475,7 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
             auto u = q->x * 64;
             auto v = q->y * 64;
             
-            if (mcu* p = dynamic_cast<mcu*>(q)) {
+            if (truck* p = dynamic_cast<truck*>(q)) {
                 
                 u64 k = 0;
                 if (!p->s) {
@@ -672,7 +672,7 @@ bool game::key_down(u32 c, event_proxy* e) {
             break;
         case 'q': {
             using namespace instruction;
-            entity* p = new mcu(selectee.x, selectee.y, 0);
+            entity* p = new truck(selectee.x, selectee.y, 0);
             if (is_vacant(_thing._board({p->x, p->y}))) {
                 _thing.push_back(p);
             }
