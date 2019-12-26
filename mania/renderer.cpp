@@ -35,33 +35,7 @@
 namespace manic {
 
 struct game : pane {
-    
-    struct draw_proxy : manic::draw_proxy {
         
-        vec2 bound(string_view v);
-
-        gl::program _program;
-        font _font;
-        atlas _atlas;
-        table3<string, sprite> _assets;
-        vector<sprite> _animation_h;
-        vector<sprite> _animation_v;
-        vector<sprite> _buildings;
-        vector<sprite> _terrain;
-        sprite _ui_rect;
-        sprite _solid;
-        
-        draw_proxy();
-
-        virtual ~draw_proxy() = default;
-        
-        virtual void draw_frame(rect<f32>) override;
-        virtual void draw_text(rect<f32>, string_view v) override;
-
-        virtual void draw_asset(vec2, string_view) override;
-        
-    } _draw_proxy;
-    
     table3<u64, string> _periodic;
 
     world _thing;
@@ -76,93 +50,18 @@ struct game : pane {
     //void resize(rect<f32>) override;
     virtual void draw(rect<f32>, manic::draw_proxy*) override;
     
-    void scribe(string_view, vec2 xy);
+    void scribe(string_view, vec2 xy, draw_proxy& _draw_proxy);
 
-    void blit3(string_view v, vec2 xy);
-    void blit4(string_view v, vec2 xy);
-    void blit5(string_view v, vec2 xy);
+    void blit3(string_view v, vec2 xy, draw_proxy& _draw_proxy);
+    void blit4(string_view v, vec2 xy, draw_proxy& _draw_proxy);
+    void blit5(string_view v, vec2 xy, draw_proxy& _draw_proxy);
 
     virtual bool key_down(u32, event_proxy*) override;
     virtual bool mouse_up(rect<f32>, u64, event_proxy*) override;
     virtual bool mouse_down(rect<f32>, u64, event_proxy*) override;
     virtual bool scrolled(vec2, event_proxy*) override;
 
-    /*
-    struct draw_proxy : manic::draw_proxy {
-        
-        explicit draw_proxy(game* p) : _ptr(p) {}
-        
-        game* _ptr;
-        void draw_frame(rect<f32> x) override {
-            assert(_ptr);
-            _ptr->_draw_frame(x);
-        }
-        
-        virtual void draw_text(rect<f32> x, string_view v) override {
-            assert(_ptr);
-            _ptr->scribe(v, x.a + vec2{0, _ptr->_font.height});
-        }
-
-    };
-     */
-    
-    
 }; // struct game
-
-application& application::get() {
-    // static game x;
-    static application* x = [](){
-        application* a = new application;
-        a->_pane = new game();
-        return a;
-    }();
-    return *x;
-}
-
-game::draw_proxy::draw_proxy()
-: _program("basic")
-, _atlas(2048) {
-    _assets = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
-    _font = build_font(_atlas);
-    {
-        // Put a white pixel on the texture so we can render solid blocks of color
-        pixel p{255, 255, 255, 255};
-        _solid = _atlas.place(const_matrix_view<pixel>(&p, 1, 1, 1));
-        auto midpoint = (_solid.a.texCoord + _solid.b.texCoord) / 2.0f;
-        _solid.a.texCoord = _solid.b.texCoord = midpoint;
-    }
-    _ui_rect = load_image("/Users/acsearle/Downloads/textures/frame", _atlas);
-    //std::cout << load("enum", "hpp") << std::endl;
-    
-    _animation_h = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepper", {1, 0}, 32);
-    _animation_v = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepperv", {0, (float)(1.0/sqrt(2.0))}, 32);
-    
-    _buildings = load_animation(_atlas, "/Users/acsearle/Documents/pov/silo", {0,0}, 5);
-    _terrain = load_animation(_atlas, "/Users/acsearle/Documents/pov/terrain", {0, 0}, 16);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    
-    glEnable(GL_FRAMEBUFFER_SRGB);
-    
-    glBindAttribLocation(_program, (GLuint) gl::attribute::position, "position");
-    glBindAttribLocation(_program, (GLuint) gl::attribute::texCoord, "texCoord");
-    glBindAttribLocation(_program, (GLuint) gl::attribute::color, "color");
-    _program.link();
-    
-    _program.validate();
-    _program.use();
-    
-    _program.assign("sampler", 0);
-
-    
-}
 
 game::game() {
         
@@ -178,91 +77,28 @@ game::game() {
 
 }
 
-//void game::resize(rect<f32> x) {
-//    _ext = x;
-//}
-
-void game::blit3(string_view v, vec2 x) {
-    x -= _camera_position;
-    if (auto p = _draw_proxy._assets.try_get(v)) {
-        _draw_proxy._atlas.push_sprite_translated(*p, x);
-    }
+void game::blit3(string_view v, vec2 x, draw_proxy& _draw_proxy) {
+    _draw_proxy.draw_asset(x - _camera_position, v);
 }
 
-void game::blit4(string_view v, vec2 xy) {
-    if (auto p = _draw_proxy._assets.try_get(v))
-        _draw_proxy._atlas.push_sprite_translated(*p, xy);
+void game::blit4(string_view v, vec2 xy, draw_proxy& _draw_proxy) {
+    _draw_proxy.draw_asset(xy, v);
 }
 
-void game::blit5(string_view v, vec2 xy) {
+void game::blit5(string_view v, vec2 xy, draw_proxy& _draw_proxy) {
+    assert(false);
+    /*
     if (auto p = _draw_proxy._assets.try_get(v)) {
         auto s = *p;
         s.a.color *= 0.5f;
         s.b.color *= 0.5f;
         _draw_proxy._atlas.push_sprite_translated(s, xy);
     }
-}
-
-void game::draw_proxy::draw_asset(vec2 xy, string_view v) {
-    if (auto p = _assets.try_get(v)) {
-        _atlas.push_sprite_translated(*p, xy);
-    }
-}
-
-
-void game::draw_proxy::draw_text(rect<f32> x, string_view v) { // ::scribe(string_view v, vec2 xy) {
-    /*
-    {
-        _solid.a.position = xy;
-        _solid.b.position = xy + bound(v);;
-        _solid.a.position.y -= _font.ascender;
-        _solid.b.position.y -= _font.ascender;
-        _solid.a.color = pixel{0, 0, 0, 64};
-        _solid.b.color = pixel{0, 0, 0, 192};
-        _atlas.push_sprite(_solid);
-    }
      */
-    auto xy = x.a;
-    pixel col = { 255, 255, 255, 255 };
-    // char const* p = v.data();
-    while (v) {
-        u32 c = *v; ++v;
-        if (c == '\n') {
-            xy.x = x.a.x;
-            xy.y += _font.height;
-        } else {
-            if (auto* q = _font.charmap.try_get(c)) {
-                sprite s = q->sprite_;
-                s.a.color = col;
-                s.b.color = col;
-                _atlas.push_sprite_translated(s, xy);
-                xy.x += q->advance;
-            }
-        }
-    }
-}
-
-vec2 game::draw_proxy::bound(string_view v) {
-    vec2 xy{0, _font.ascender - _font.descender};
-    float x = 0.0f;
-    while (v) {
-        u32 c = *v; ++v;
-        if (c != '\n') {
-            if (auto* p = _font.charmap.try_get(c)) {
-                x += p->advance;
-            }
-        } else {
-            xy.x = std::max<float>(xy.x, x);
-            x = 0.0f;
-            xy.y += _font.height;
-        }
-    }
-    xy.x = std::max<float>(xy.x, x);
-    return xy;
 }
 
 
-void game::draw(rect<f32> _ext, manic::draw_proxy*) {
+void game::draw(rect<f32> _ext, manic::draw_proxy* _draw_proxy) {
     
     static auto old_t = mach_absolute_time();
 
@@ -272,20 +108,6 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
     //_width = 2048;
     //_height = 2048;
     
-    glViewport(0, 0, (GLsizei) _ext.b.x, (GLsizei) _ext.b.y);
-    
-    GLfloat transform[16] = {
-        (float) 2.0f/_ext.b.x, 0, 0, -1,
-        0, - (float) 2.0f/_ext.b.y, 0, +1,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    };
-    
-    //_camera_position.x += sin(frame * 0.1);
-    //_camera_position.y += cos(frame * 0.1);
-
-    
-    glUniformMatrix4fv(glGetUniformLocation(_draw_proxy._program, "transform"), 1, GL_TRUE, transform);
     
     static double angle = 0.0;
     angle += 0.01;
@@ -425,10 +247,11 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
                  */
                 // blit3(z, {x*64,y*64});
                 u64 i = hash(vec<i64, 2>{x, y});
-                sprite s = _draw_proxy._terrain[i & 15];
-                u8 c = _thing._terrain.get({x, y});
-                s.b.color = s.a.color = vec4{ c , 128, 0, 255};
-                _draw_proxy._atlas.push_sprite_translated(s, vec2{x*64-32, y*64-32} - _camera_position);
+                // sprite s = _draw_proxy._terrain[i & 15];
+                // u8 c = _thing._terrain.get({x, y});
+                // s.b.color = s.a.color = vec4{ c , 128, 0, 255};
+                // _draw_proxy._atlas.push_sprite_translated(s, vec2{x*64-32, y*64-32} - _camera_position);
+                _draw_proxy->draw_terrain(vec2{x*64-32, y*64-32} - _camera_position, i & 15);
             }
         }
     }
@@ -446,10 +269,10 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
             for (i64 y= y_lo; y != y_hi; ++y) {
                 // Perf: look up chunks once and then draw the block
                 u64 k = _thing._board({x, y});
-                blit3(translate(k), {x * 64, y * 64});
+                blit3(translate(k), {x * 64, y * 64}, *_draw_proxy);
                 if (instruction::is_instruction(k)) {
                     string_view u(_translate_address[(k & 0x7)]);
-                    blit3(u, {x * 64, y * 64});
+                    blit3(u, {x * 64, y * 64}, *_draw_proxy);
                 }
             }
     }
@@ -502,9 +325,11 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
                 }
                 
                 if (p->d & 1) {
-                    _draw_proxy._atlas.push_sprite_translated(_draw_proxy._animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                    //_draw_proxy._atlas.push_sprite_translated(_draw_proxy._animation_h[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                    _draw_proxy->draw_animation_h({u - 96 - _camera_position.x, v - 96 - _camera_position.y}, k & 31);
                 } else {
-                    _draw_proxy._atlas.push_sprite_translated(_draw_proxy._animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                    //_draw_proxy._atlas.push_sprite_translated(_draw_proxy._animation_v[k & 31], {u - 96 - _camera_position.x, v - 96 - _camera_position.y});
+                    _draw_proxy->draw_animation_v({u - 96 - _camera_position.x, v - 96 - _camera_position.y}, k & 31);
                 }
                 
                 //char z[32];
@@ -518,12 +343,14 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
                 //blit3(z, {u+32, v+32});
                 //sprintf(z, "%llX", p->d);
                 //blit3(z, {u-32, v+32});
-                blit3(translate(p->a), {u, v-24});
+                blit3(translate(p->a), {u, v-24}, *_draw_proxy);
                 
             } else {
                 // some other kind of entity
                 //blit3("house", {u, v});
+                /*
                 _draw_proxy._atlas.push_sprite_translated(_draw_proxy._buildings[zz % _draw_proxy._buildings.size()], {u - _camera_position.x - 256 + 32, v - _camera_position.y - 256 + 32});
+                 */
                 ++zz;
             }
         }
@@ -601,50 +428,18 @@ void game::draw(rect<f32> _ext, manic::draw_proxy*) {
         _thing.tick();
     }
 
-    auto n = _draw_proxy._atlas._vertices.size() / 6;
-
+    // auto n = _draw_proxy._atlas._vertices.size() / 6;
+    
     {
+        auto n = 0;
         char s[128];
         auto new_t = mach_absolute_time();
-        sprintf(s, "%.2f ms | %lu quads\n%gxw%g\nf%d", (new_t - old_t) * 1e-6, n, _ext.b.x, _ext.b.y, frame);
-        _draw_proxy.draw_text({{_draw_proxy._font.charmap[' '].advance, _draw_proxy._font.height},{_ext.b}}, s);
+        sprintf(s, "%.2f ms | %d quads\n%gxw%g\nf%d", (new_t - old_t) * 1e-6, n, _ext.b.x, _ext.b.y, frame);
+        //_draw_proxy->draw_text({{_draw_proxy._font.charmap[' '].advance, _draw_proxy._font.height},{_ext.b}}, s);
+        _draw_proxy->draw_text({{0.0f, 0.0f},{_ext.b}}, s);
         old_t = new_t;
     }
 
-    _draw_proxy._atlas.commit();
-
-
-}
-
-void game::draw_proxy::draw_frame(rect<float> r) {
-    
-    // Draw UI
-    int x = r.a.x;
-    int y = r.a.y;
-    r.b -= r.a;
-    int w = r.b.x;
-    int h = r.b.y;
-    sprite s = _ui_rect;
-    
-    float c;
-    c = (s.a.position.x + s.b.position.x) / 2.0f;
-    float vx[] = { s.a.position.x, c, c + w, s.b.position.x + w };
-    c = (s.a.position.y + s.b.position.y) / 2.0f;
-    float vy[] = { s.a.position.y, c, c + h, s.b.position.y + h };
-    c = (s.a.texCoord.x + s.b.texCoord.x) / 2.0f;
-    float vu[] = { s.a.texCoord.x, c, c, s.b.texCoord.x };
-    c = (s.a.texCoord.y + s.b.texCoord.y) / 2.0f;
-    float vv[] = { s.a.texCoord.y, c, c, s.b.texCoord.y };
-    
-    for (int i = 0; i != 3; ++i)
-        for (int j = 0; j != 3; ++ j) {
-            sprite t = {
-                {{vx[i], vy[j]}, {vu[i], vv[j]}, s.a.color},
-                {{vx[i+1], vy[j+1]}, {vu[i+1], vv[j+1]}, s.a.color}
-            };
-            _atlas.push_sprite_translated(t, {x, y});
-        }
-    
 }
 
 bool game::key_down(u32 c, event_proxy* e) {

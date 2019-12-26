@@ -14,7 +14,10 @@
 namespace manic {
 
 void application::draw() {
-    _pane->draw(rect<f32>{{0,0},{1920,1080}}, nullptr);
+    draw_proxy::get().presize({_width, _height});
+    _pane->draw(rect<f32>{{0,0},{_width,_height}}, &draw_proxy::get());
+    draw_proxy::get().commit();
+
     
 }
 
@@ -48,7 +51,9 @@ void application::scrolled(double x, double y) {
 }
 
 void application::resize(usize width, usize height) {
-    //_pane->resize(rect<f32>{{0,0},{width,height}});
+    _width = width;
+    _height = height;
+    draw_proxy::get().presize(vec2(_width, _height));
 }
 
 

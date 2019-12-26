@@ -54,6 +54,8 @@
 		CAAB24A32394FBB700F1D85C /* awrc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB24A12394FBB700F1D85C /* awrc.cpp */; };
 		CABEB8D423B0B0B400A12ACC /* serialization-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */; };
 		CABEB8D723B2BEA800A12ACC /* entity2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D523B2BEA800A12ACC /* entity2.cpp */; };
+		CABEB8DA23B4BB9D00A12ACC /* draw_proxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D823B4BB9D00A12ACC /* draw_proxy.cpp */; };
+		CABEB8DC23B4C89400A12ACC /* pane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8DB23B4C89400A12ACC /* pane.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -215,6 +217,9 @@
 		CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "serialization-test.cpp"; sourceTree = "<group>"; };
 		CABEB8D523B2BEA800A12ACC /* entity2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = entity2.cpp; sourceTree = "<group>"; };
 		CABEB8D623B2BEA800A12ACC /* entity2.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = entity2.hpp; sourceTree = "<group>"; };
+		CABEB8D823B4BB9D00A12ACC /* draw_proxy.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = draw_proxy.cpp; sourceTree = "<group>"; };
+		CABEB8D923B4BB9D00A12ACC /* draw_proxy.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = draw_proxy.hpp; sourceTree = "<group>"; };
+		CABEB8DB23B4C89400A12ACC /* pane.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pane.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -476,6 +481,9 @@
 				CAAB2400238BC9EE00F1D85C /* application.cpp */,
 				CAAB23FD238BC9EE00F1D85C /* application.hpp */,
 				CAAB23FB238BC9ED00F1D85C /* pane.hpp */,
+				CABEB8DB23B4C89400A12ACC /* pane.cpp */,
+				CABEB8D823B4BB9D00A12ACC /* draw_proxy.cpp */,
+				CABEB8D923B4BB9D00A12ACC /* draw_proxy.hpp */,
 			);
 			name = ui;
 			sourceTree = "<group>";
@@ -646,6 +654,7 @@
 			files = (
 				CAAB2434238BC9F000F1D85C /* atlas.cpp in Sources */,
 				CAAB243D238BC9F000F1D85C /* vbo.cpp in Sources */,
+				CABEB8DA23B4BB9D00A12ACC /* draw_proxy.cpp in Sources */,
 				CAAB244D238BC9F000F1D85C /* json.cpp in Sources */,
 				CAAB242D238BC9F000F1D85C /* image.cpp in Sources */,
 				CAAB2443238BC9F000F1D85C /* vertex.cpp in Sources */,
@@ -666,6 +675,7 @@
 				CAAB243E238BC9F000F1D85C /* vao.cpp in Sources */,
 				CAAB242A238BC9F000F1D85C /* text.cpp in Sources */,
 				CAAB2441238BC9F000F1D85C /* application.cpp in Sources */,
+				CABEB8DC23B4C89400A12ACC /* pane.cpp in Sources */,
 				CAAB2435238BC9F000F1D85C /* asset.cpp in Sources */,
 				CAAB24A32394FBB700F1D85C /* awrc.cpp in Sources */,
 				CAAB2397238BC87900F1D85C /* AppDelegate.m in Sources */,

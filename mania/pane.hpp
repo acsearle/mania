@@ -17,23 +17,10 @@
 #include "string.hpp"
 #include "matrix.hpp"
 #include "box.hpp"
+#include "draw_proxy.hpp"
 
 namespace manic {
 
-
-
-
-
-struct draw_proxy {
-
-    virtual ~draw_proxy() = default;
-    
-    virtual void draw_frame(rect<f32>) = 0;
-    virtual void draw_text(rect<f32>, string_view v) = 0;
-    
-    virtual void draw_asset(vec2, string_view v) = 0;
-    
-};
 
 struct event_proxy {
     
@@ -153,8 +140,10 @@ struct pane_opcode : pane {
 // grid of squares
 //     instruction picker (row of squares?)
 //          subinstruction picker (popup column of squares?)
-// list of panes
+// list of panes (h, v)
 // table of panes
+// slider, checkbox
+// button
 
 } // namespace manic
 

@@ -38,6 +38,8 @@ void atlas::discard() {
     _vertices.clear();
 }
 
+// Place a sprite within the free space of the atlas
+
 sprite atlas::place(const_matrix_view<pixel> v, vec2 origin) {
     auto tl = _packer.place({(GLsizei) v.columns(), (GLsizei) v.rows()});
     glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) v.stride());
@@ -58,6 +60,13 @@ sprite atlas::place(const_matrix_view<pixel> v, vec2 origin) {
     s.b.color = s.a.color;
     return s;
 }
+
+// todo:
+// The atlas only knows what space is free, not how the used space is used or
+// what it represents.  This is kinda cool but for debugging purposes we
+// should maybe keep track of what asset is where, in some cold storage
+// somewhere
+
 
 void atlas::release(sprite s) {
     vec<GLint, 2> a = s.a.texCoord * _size;
