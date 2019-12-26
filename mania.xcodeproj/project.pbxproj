@@ -131,8 +131,6 @@
 		CAAB23EA238BC9EC00F1D85C /* const_vector_view.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = const_vector_view.hpp; sourceTree = "<group>"; };
 		CAAB23EB238BC9ED00F1D85C /* const_column_vector_view.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = const_column_vector_view.hpp; sourceTree = "<group>"; };
 		CAAB23ED238BC9ED00F1D85C /* transform_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = transform_iterator.hpp; sourceTree = "<group>"; };
-		CAAB23EE238BC9ED00F1D85C /* entity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = entity.cpp; sourceTree = "<group>"; };
-		CAAB23EF238BC9ED00F1D85C /* entity.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = entity.hpp; sourceTree = "<group>"; };
 		CAAB23F0238BC9ED00F1D85C /* asset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = asset.hpp; sourceTree = "<group>"; };
 		CAAB23F1238BC9ED00F1D85C /* const_matrix_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = const_matrix_iterator.hpp; sourceTree = "<group>"; };
 		CAAB23F2238BC9ED00F1D85C /* terrain2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = terrain2.cpp; sourceTree = "<group>"; };
@@ -462,8 +460,6 @@
 				CAAB23D7238BC9EB00F1D85C /* terrain2.hpp */,
 				CAAB2402238BC9EE00F1D85C /* instruction.hpp */,
 				CAAB23D0238BC9EB00F1D85C /* elements.hpp */,
-				CAAB23EE238BC9ED00F1D85C /* entity.cpp */,
-				CAAB23EF238BC9ED00F1D85C /* entity.hpp */,
 				CABEB8D523B2BEA800A12ACC /* entity2.cpp */,
 				CABEB8D623B2BEA800A12ACC /* entity2.hpp */,
 				CAAB2480238CF1C400F1D85C /* world.cpp */,

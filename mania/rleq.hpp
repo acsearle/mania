@@ -12,27 +12,35 @@
 #include "common.hpp"
 
 #include "vector.hpp"
+#include "serialize.hpp"
 
 namespace manic {
 
-template<typename T, typename N = u64>
+template<typename T, typename I = u64>
 struct rleq {
     
     // Run-length-encoded queue and stack
     
     struct entry {
         T value;
-        N count;
+        I count;
     };
     
     vector<entry> _array;
     usize _size = 0;
     
+    bool _invariant() {
+        I m = 0;
+        for (auto&& [_, n] : _array)
+            m += n;
+        return _size == m;
+    }
+    
     void push_back(T x) {
         push_back(x, 1);
     }
     
-    void push_back(T x, N n) {
+    void push_back(T x, I n) {
         if (!_array.size() || (_array.back().value != x)) {
             _array.push_back(entry{x, n});
         } else {
@@ -82,8 +90,32 @@ struct rleq {
         return _array.back().value;
     }
     
-    
-};
+}; // rleq<T, I>
+
+template<typename T, typename I, typename Serializer>
+void serialize(rleq<T, I> const& x, Serializer& s) {
+    assert(x._invariant());
+    serialize(x._array.size(), s);
+    for (auto&& [y, n] : x._array) {
+        serialize(y, s);
+        serialize(n, s);
+    }
+}
+
+template<typename T, typename I, typename Deserializer>
+auto deserialize(placeholder<rleq<T, I>>, Deserializer& d) {
+    auto n = deserialize<isize>(d);
+    vector<typename rleq<T, I>::entry> y;
+    y.reserve(n);
+    I m = 0;
+    while (n--) {
+        auto a = deserialize<T>(d);
+        auto b = deserialize<I>(d);
+        m += b;
+        y.push_back(typename rleq<T, I>::entry{std::move(a), std::move(b)});
+    }
+    return rleq<T, I>{std::move(y), m};
+}
 
 } // namespace manic
 

@@ -6,11 +6,9 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
-#include "entity2.hpp"
-
 #include "instruction.hpp"
 #include "elements.hpp"
-#include "entity.hpp"
+#include "entity2.hpp"
 #include "world.hpp"
 
 namespace manic {

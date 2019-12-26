@@ -103,7 +103,9 @@ auto deserialize(placeholder<world>, Deserializer& d) {
     world x;
     x._board = deserialize<decltype(x._board)>(d);
     x._terrain = deserialize<decltype(x._terrain)>(d);
-    // entities are hard
+
+    
+    
     x.counter = deserialize<u64>(d);
     return x;
 }

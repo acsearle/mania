@@ -25,7 +25,7 @@
 #include "mat.hpp"
 #include "program.hpp"
 #include "text.hpp"
-#include "entity.hpp"
+#include "entity2.hpp"
 #include "instruction.hpp"
 #include "elements.hpp"
 #include "terrain2.hpp"
