@@ -43,6 +43,8 @@ struct draw_proxy_concrete : draw_proxy {
     virtual void draw_animation_h(vec2, int i) override;
     virtual void draw_animation_v(vec2, int i) override;
 
+    virtual void draw_sprite(vec2, sprite s) override;
+
     virtual void presize(vec2) override;
     virtual void commit() override;
     
@@ -56,7 +58,7 @@ draw_proxy& draw_proxy::get() {
 
 draw_proxy_concrete::draw_proxy_concrete()
 : _program("basic")
-, _atlas(2048) {
+, _atlas(4192) {
     _assets = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
     _font = build_font(_atlas);
     {
@@ -75,6 +77,8 @@ draw_proxy_concrete::draw_proxy_concrete()
     _buildings = load_animation(_atlas, "/Users/acsearle/Documents/pov/silo", {0,0}, 5);
     _terrain = load_animation(_atlas, "/Users/acsearle/Documents/pov/terrain", {0, 0}, 16);
 
+    _background = load_image("/Users/acsearle/Downloads/textures/curioso-photography", _atlas);
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -178,6 +182,11 @@ void draw_proxy_concrete::draw_asset(vec2 xy, string_view v) {
 void draw_proxy_concrete::draw_terrain(vec2 xy, int i) {
     _atlas.push_sprite_translated(_terrain[i], xy);
 }
+
+void draw_proxy_concrete::draw_sprite(vec2 v, sprite s) {
+    _atlas.push_sprite_translated(s, v);
+}
+
 
 void draw_proxy_concrete::draw_animation_h(vec2 xy, int i) {
     _atlas.push_sprite_translated(_animation_h[i], xy);

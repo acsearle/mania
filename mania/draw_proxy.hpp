@@ -11,6 +11,7 @@
 
 #include "rect.hpp"
 #include "string_view.hpp"
+#include "atlas.hpp"
 
 namespace manic {
 
@@ -49,12 +50,13 @@ struct draw_proxy {
     // todo: select what layer we are drawing in, then resolve multiple draw
     // calls.
     
+    virtual void draw_sprite(vec2, sprite s) = 0;
 
     
         
 }; // struct draw_proxy
 
-
+inline sprite _background;
 
 } // namespace manic
 #endif /* draw_proxy_hpp */

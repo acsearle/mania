@@ -1,13 +1,83 @@
 
 #  Design
 
-## Fun
-  * SpaceChem is fun but constrained.  The 2D programming where instructions share the gamespace
-  with the gameplay elements is better Opus Magnum where the effectors are simply sequenced by linear instructions
-  * Factorio is unconstrained but static.
-  * TIS-100, Exapunks don't make effective use of their space.
+## Motivating critiques of comparable games
 
+  * SpaceChem is fun but constrained.  The 2D programming where instructions
+    share the gamespace with the gameplay elements is better than Opus Magnum
+    where the effectors are simply sequenced by linear instructions
+  * TIS-100, Exapunks don't make effective use of their geometry.
+  * Factorio is spatially opened but composed of static material flows.  There
+    is mostly routing, but little programming.  Modern splitters are too
+    powerful and make prioritization trivial.
+  * Inserters are charismatic but WTF?  They consume much CPU.  They do
+    floating point inverse kinematics! They are really just entry exit nodes.
+  * Sub-tile placement on belts, and inserter tracking, pick-and-place, add
+    nothing substantive to the gameplay.  They greatly explode the number
+    of items in flight for not much purpose.
+  * Putting things into and pulling them out of assemblers at random places is
+    odd.  Compare minecraft workbench where position of materials determines
+    product.
+  * Too many combinations of entities.  Inserters take and place from ground,
+    belts, and many chest-like objects (chests, production machines, trains,
+    cars).
+  * Moving extended objects through a grid is a nightmare.  Spacechem works
+    OK but rotation and collision is odd.  Infinifactory is full of unintuitive
+    ambiguities - like if an extended object is on top of two belts, which
+    wins?  Can a stack of belts move at double speed?  What does rotation mean
+    when things have to be on a grid, and how do they collide?
+  * Factorio looks like a cellular automation but in practice the world grid
+    serves mostly as an interface to define the graph of interactions for the
+    "real" flow simulation.  This means unintuitive constraints on what is
+    possible for the engine.  A belt is not a fundamental entity; you place it,
+    it changes the connection graph for a flow segment.  When it is drawn or
+    previewed or queried, it is back-synthesised from the flowing thing.
+    Likewise train tracks, which are multi-tile objects that define connection
+    graph.  Tiles under them can become pathologically complicated with many
+    kinds of curve all present.
 
+## Dogma
+
+  * No algorithms.  We don't do pathfinding, voroni, graph cuts, etc.
+  * No O(N) operations.  We don't do creep, flow, PDEs, anything that touches
+    "all" parts of a system per frame.  No cellular automations.
+  * No numerics.  No approximate or convergent operations.
+  * No floats.  Specifically, we don't perform any rounding float operations,
+    since we have to feed OpenGL a lot of floats.  We use floats like fixed
+    point integers and never get close to rounding them.  This means dividing
+    only by powers of two, for example.  These floats are usually coordinates
+    into a power-of-two texture map.
+  * Exceptions: Deterministic O(1) cleverness like hashing, hash tables.
+    O(N log N) sorting for rendering.  O(N) rendering of N objects.
+    Amortized O(1) resizes of vector-like objects--dangerous.
+    
+  * No polling or busy waiting.  Wait queues for game objects.
+  
+  * Pixel perfection.  No interpolation.  We put images on the screen at native
+    resolution and pixel alignment.
+  * sRGB and premultiplied alpha everywhere.
+    
+  * Determinism.  Unavoidable in the GUI but once we enter the gamestate, it
+    is not permitted to rely on order of thread scheduling.  It is also not
+    permitted to rely on observable parts of classes that do not impact
+    logical equivalence.  For example, hash table ordering cannot be relied on;
+    for operations that are not independent we must iterate a sorted copy.
+    Even if the hashers on different machines are identical, the history of the
+    hash table can give it different capacities and thus different orders.
+    Also, vector capacity.  Also, object addresses.
+    
+  * Objects are Relocatable.
+  * Moved-from objects are left in their Default state.
+  * Default states are composed of zeroed bits.
+  * Default states have no-op destructors.
+  
+  * Don't optimize non-worst cases.  (Such as turning off subsystems when they
+    have no particpants; this is already the fast case.)  Exception: does this
+    interact with "statistically" good things like amortized O(1) resizing?
+  * Is amortized good enough?  Do we need to migrate tables and vectors
+    piecewise rather than resize in one swoop?
+  * Is allocation and deallocation per-frame admissible?
+  
 
 ## Performance
 

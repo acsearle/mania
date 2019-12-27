@@ -80,6 +80,7 @@ struct pane_collection : pane {
     }
     
     virtual void draw(rect<f32> extent, draw_proxy* c) override {
+        c->draw_sprite(extent.mid(), _background);
         for (auto&& [r, p] : sub)
             p->draw(r, c);
     }

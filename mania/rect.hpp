@@ -65,6 +65,10 @@ public:
         return (a.x <= x.x) && (a.y <= x.y) && (x.x < b.x) && (x.y < b.y);
     }
     
+    vec2 mid() {
+        return (a + b) / 2.0f;
+    }
+    
 };
 
 struct area_cmp {
