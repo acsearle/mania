@@ -19,8 +19,6 @@ namespace manic {
 
 struct draw_proxy_concrete : draw_proxy {
     
-    vec2 bound(string_view v);
-
     gl::program _program;
     font _font;
     atlas _atlas;
@@ -38,6 +36,7 @@ struct draw_proxy_concrete : draw_proxy {
     
     virtual void draw_frame(rect<f32>) override;
     virtual void draw_text(rect<f32>, string_view v) override;
+    virtual rect<f32> bound_text(string_view v) override;
 
     virtual void draw_asset(vec2, string_view) override;
     virtual void draw_terrain(vec2, int i) override;
@@ -115,18 +114,18 @@ void draw_proxy_concrete::draw_text(rect<f32> x, string_view v) { // ::scribe(st
         _atlas.push_sprite(_solid);
     }
      */
-    x.a.x += _font.charmap[' '].advance;
-    x.a.y += _font.height;
+    //x.a.x = 0; //+= _font.charmap[' '].advance;
+    //x.a.y = 0; //+= _font.height;
     auto xy = x.a;
 
     pixel col = { 255, 255, 255, 255 };
     // char const* p = v.data();
     while (v) {
         u32 c = *v; ++v;
-        if (c == '\n') {
-            xy.x = x.a.x;
-            xy.y += _font.height;
-        } else {
+        //if (c == '\n') {
+        //    xy.x = x.a.x;
+        //    xy.y += _font.height;
+        //} else {
             if (auto* q = _font.charmap.try_get(c)) {
                 sprite s = q->sprite_;
                 s.a.color = col;
@@ -134,11 +133,12 @@ void draw_proxy_concrete::draw_text(rect<f32> x, string_view v) { // ::scribe(st
                 _atlas.push_sprite_translated(s, xy);
                 xy.x += q->advance;
             }
-        }
+        //}
     }
 }
 
-vec2 draw_proxy_concrete::bound(string_view v) {
+rect<f32> draw_proxy_concrete::bound_text(string_view v) {
+    /*
     vec2 xy{0, _font.ascender - _font.descender};
     float x = 0.0f;
     while (v) {
@@ -154,6 +154,18 @@ vec2 draw_proxy_concrete::bound(string_view v) {
         }
     }
     xy.x = std::max<float>(xy.x, x);
+    return xy;
+     */
+    
+    // This is a loose bound that prefers vertical stability to tightness;
+    
+    rect<f32> xy{{0, -_font.ascender},{0, -_font.descender}};
+    while (v) {
+        u32 c = *v; ++v;
+        if (auto* p = _font.charmap.try_get(c)) {
+            xy.b.x += p->advance;
+        }
+    }
     return xy;
 }
 
@@ -200,6 +212,9 @@ void draw_proxy_concrete::commit() {
 
 void draw_proxy_concrete::draw_frame(rect<float> r) {
     
+    r.a += 2.0f;
+    r.b -= 2.0f;
+    
     // Draw UI
     int x = r.a.x;
     int y = r.a.y;
@@ -228,7 +243,5 @@ void draw_proxy_concrete::draw_frame(rect<float> r) {
         }
     
 }
-
-
 
 } // namespace manic

@@ -109,27 +109,11 @@ font build_font(atlas& atl) {
         // Unfortunately we can't tell OpenGL to load one channel into all
         // channels so we have to expand in memory
         // TODO: investigate texture swizzling
-        /*
-        u.discard_and_resize(v.rows(), v.columns());
-        for (ptrdiff_t i = 0; i != v.rows(); ++i)
-            for (ptrdiff_t j = 0; j != v.columns(); ++j) {
-                u8 a = v(i, j);
-                u8 b = std::round(to_sRGB(a / 255.0) * 255.0);
-                u(i, j) = pixel(b, b, b, a); // white, premultiplied alpha
-            }
-         */
-        
-        //dilate(u);
-        
-        //matrix<GLubyte> h(v);
-        //h = 0;
-        //if (h.rows() && h.columns())
-        //    h(0,0) = 255;
-        
+
         image u = apply_shadow(v);
         
         sprite s = atl.place(u,
-                             vec2(-face->glyph->bitmap_left - 1,
+                             vec2(-face->glyph->bitmap_left + 1,
                                       +face->glyph->bitmap_top));
         
         float advance = face->glyph->advance.x * 0.015625f;

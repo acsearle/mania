@@ -110,6 +110,26 @@ rect<T> operator+(const rect<T>& a, const vec<T, 2>& b) {
     return rect{a.a + b, a.b + b};
 }
 
+template<typename T>
+rect<T>& operator+=(rect<T>& a, const vec<T, 2>& b) {
+    a.a += b;
+    a.b += b;
+    return a;
+}
+
+template<typename T>
+rect<T> operator-(const rect<T>& a, const vec<T, 2>& b) {
+    return rect{a.a - b, a.b - b};
+}
+
+template<typename T>
+rect<T>& operator-=(rect<T>& a, const vec<T, 2>& b) {
+    a.a -= b;
+    a.b -= b;
+    return a;
+}
+
+
 // Scaling
 
 template<typename T>
@@ -135,6 +155,14 @@ rect<T> hull(const rect<T>& a, const rect<T>& b) {
                    std::min(a.a.y, b.a.y),
                    std::max(a.b.x, b.b.x),
                    std::max(a.b.y, b.b.y));
+}
+
+template<typename T>
+rect<T> hull(const rect<T>& a, const vec<T, 2>& b) {
+    return rect<T>(std::min(a.a.x, b.x),
+                   std::min(a.a.y, b.y),
+                   std::max(a.b.x, b.x),
+                   std::max(a.b.y, b.y));
 }
 
 template<typename T>

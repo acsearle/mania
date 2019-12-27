@@ -9,6 +9,7 @@
 #ifndef pane_hpp
 #define pane_hpp
 
+#include <functional>
 
 #include "pane.hpp"
 #include "vector.hpp"
@@ -58,6 +59,8 @@ struct pane {
     virtual bool scrolled(vec<f32, 2> delta, event_proxy*) { return false; }
     
     virtual void draw(rect<f32> extent, draw_proxy*) {}
+    
+    virtual vec2 bound() { return vec2(0, 0); }
             
 }; // class pane
 
@@ -80,6 +83,18 @@ struct pane_collection : pane {
         for (auto&& [r, p] : sub)
             p->draw(r, c);
     }
+    
+    virtual vec2 bound() override {
+
+        vec2 x(0, 0);
+        for (auto&& [r, p] : sub) {
+            vec2 y = r.size();
+            x.x = std::max(x.x, y.x);
+            x.y = std::max(x.y, y.y);
+        }
+        return x;
+        
+    }
         
 };
 
@@ -90,11 +105,9 @@ struct pane_text : pane {
     
     pane_text(string_view s) : _string(s) {}
     
-    virtual void draw(rect<f32> extent, draw_proxy* c) override {
-        assert(c);
-        c->draw_frame(extent);
-        c->draw_text(extent, _string);
-    }
+    virtual void draw(rect<f32> extent, draw_proxy* c) override;
+    
+    virtual vec2 bound() override;
     
 };
 
@@ -129,6 +142,58 @@ struct pane_opcode : pane {
     
     virtual void draw(rect<f32> extent, draw_proxy* c) override {
 
+    }
+
+};
+
+struct pane_button : pane {
+    
+    box<pane> _appearance;
+    std::function<void()> _action;
+    
+    template<typename FF>
+    pane_button(pane* p, FF&& ff)
+    : _appearance(p)
+    , _action(std::forward<FF>(ff)) {
+    }
+    
+    virtual void draw(rect<f32> extent, draw_proxy* c) override {
+        c->draw_frame(extent);
+        extent.a += 4;
+        extent.b -= 4;
+        _appearance->draw(extent, c);
+    }
+    
+    virtual vec2 bound() override {
+        return _appearance->bound() + 8;
+    }
+    
+}; // struct pane_button
+
+
+struct pane_stack : pane {
+    
+    std::vector<box<pane>> _panes;
+    
+    virtual void draw(rect<f32> extent, draw_proxy* c) override {
+        assert(_panes.size());
+        _panes.back()->draw(extent, c);
+    }
+
+    virtual vec2 bound() override {
+        assert(_panes.size());
+        return _panes.back()->bound();
+    }
+    
+    void push(box<pane>&& p) {
+        _panes.push_back(std::move(p));
+    }
+    
+    box<pane> pop() {
+        assert(_panes.size());
+        box<pane> p{std::move(_panes.back())};
+        _panes.pop_back();
+        return p;
     }
 
 };

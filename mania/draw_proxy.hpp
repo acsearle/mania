@@ -32,6 +32,7 @@ struct draw_proxy {
     
     // good for all panes
     virtual void draw_text(rect<f32>, string_view v) = 0;
+    virtual rect<f32> bound_text(string_view v) = 0;
     
     // too general
     virtual void draw_asset(vec2, string_view v) = 0;
