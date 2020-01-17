@@ -16,13 +16,15 @@
 
 namespace manic {
 
+struct event_proxy {};
+
 struct application {
     
     // Entry point and firewall for platform-independent code.
     
     // maybe this is NSWindow-like, pane is NSView-like?
     
-    pane* _pane;
+    pane::base* _pane;
     usize _width, _height;
     
     

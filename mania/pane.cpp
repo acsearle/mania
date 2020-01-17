@@ -11,19 +11,23 @@
 
 namespace manic {
 
+pane::base* make_game();
+
 application& application::get() {
     // static game x;
     static application* x = [](){
         application* a = new application;
         // a->_pane = new game();
         // auto q = new pane_text("Not a button");
-        auto q = new pane_collection;
+        auto q = new pane::collection;
         rect<f32> r{{100,100},{200,200}};
-        q->sub.emplace_back(r, new pane_button(new pane_text("New"), nullptr));
-        q->sub.emplace_back(r, new pane_button(new pane_text("Continue"), nullptr));
-        q->sub.emplace_back(r, new pane_button(new pane_text("Load"), nullptr));
-        q->sub.emplace_back(r, new pane_button(new pane_text("Settings"), nullptr));
-        q->sub.emplace_back(r, new pane_button(new pane_text("Exit"), nullptr));
+        q->sub.emplace_back(r, box<pane::button>::from(box<pane::text>::from("New"), [=](){
+            a->_pane = make_game();
+        }));
+        q->sub.emplace_back(r, box<pane::button>::from(box<pane::text>::from("Continue"), nullptr));
+        q->sub.emplace_back(r, box<pane::button>::from(box<pane::text>::from("Load"), nullptr));
+        q->sub.emplace_back(r, box<pane::button>::from(box<pane::text>::from("Settings"), nullptr));
+        q->sub.emplace_back(r, box<pane::button>::from(box<pane::text>::from("Exit"), nullptr));
         
         // auto-layout
         vec2 b{0,0};
@@ -46,17 +50,61 @@ application& application::get() {
     return *x;
 }
 
-vec2 pane_text::bound() {
+vec2 pane::text::bound() {
     return draw_proxy::get().bound_text(this->_string).size();
 }
 
-void pane_text::draw(rect<f32> extent, draw_proxy* c) {
+void pane::text::draw(rect<f32> extent, draw_proxy* c) {
     assert(c);
     //c->draw_frame(extent);
     auto b = c->bound_text(_string);
     // c->draw_text(extent, _string);
     c->draw_text(extent - b.a, _string);
 }
+
+void pane::collection::draw(rect<f32> extent, draw_proxy* c) {
+    
+    // todo:
+    // * load images into their own textures
+    // * enable filtering
+    // * pan and zoom slowly ( < 60 pixels / s)
+    // * fade between images
+    // * like apple image screensaver
+    c->draw_sprite(extent.mid(), _background);
+    
+    for (auto&& [r, p] : sub)
+        p->draw(r, c);
+}
+
+vec2 event::base::mouse() const {
+    return vec2{}; // FIXME
+}
+
+bool event::mouse_up::visit(pane::base* p) {
+    return p->handle_event(rect<f32>{{},{}}, this); // FIXME
+}
+
+bool event::mouse_down::visit(pane::base* p) {
+    return p->handle_event(rect<f32>{{},{}}, this); // FIXME
+}
+
+bool event::key_up::visit(pane::base* p) {
+    return p->handle_event(rect<f32>{{},{}}, this); // FIXME
+}
+
+bool event::key_down::visit(pane::base* p) {
+    return p->handle_event(rect<f32>{{},{}}, this); // FIXME
+}
+
+bool event::scrolled::visit(pane::base* p) {
+    return p->handle_event(rect<f32>{{},{}}, this); // FIXME
+}
+
+bool event::mouse_moved::visit(pane::base* p) {
+    return p->handle_event(rect<f32>{{},{}}, this); // FIXME
+}
+
+
 
 
 }

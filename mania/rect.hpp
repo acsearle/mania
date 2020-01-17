@@ -29,6 +29,8 @@ public:
         return (a.x <= b.x) && (a.y <= b.y);
     }
     
+    rect() = default;
+    
     rect(const rect&) = default;
     
     rect(const vec<T, 2>& x,

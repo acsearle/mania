@@ -30,6 +30,9 @@ struct box {
     box& operator=(box const&) = delete;
     box& operator=(box&& x);
     
+    template<typename U>
+    box(box<U>&& x) : _ptr(std::exchange(x._ptr, nullptr)) {}
+    
     explicit box(T* p) : _ptr(p) {}
     
     template<typename... Args>

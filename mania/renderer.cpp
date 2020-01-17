@@ -34,7 +34,7 @@
 
 namespace manic {
 
-struct game : pane {
+struct game : pane::base {
         
     table3<u64, string> _periodic;
 
@@ -56,10 +56,10 @@ struct game : pane {
     void blit4(string_view v, vec2 xy, draw_proxy& _draw_proxy);
     void blit5(string_view v, vec2 xy, draw_proxy& _draw_proxy);
 
-    virtual bool key_down(u32, event_proxy*) override;
-    virtual bool mouse_up(rect<f32>, u64, event_proxy*) override;
-    virtual bool mouse_down(rect<f32>, u64, event_proxy*) override;
-    virtual bool scrolled(vec2, event_proxy*) override;
+    virtual bool handle_event(rect<f32>, event::key_down*) override;
+    virtual bool handle_event(rect<f32>, event::mouse_up*) override;
+    virtual bool handle_event(rect<f32>, event::mouse_down*) override;
+    virtual bool handle_event(rect<f32>, event::scrolled*) override;
 
 }; // struct game
 
@@ -75,6 +75,10 @@ game::game() {
     _periodic.insert(hematite, "iron_ore");
     _periodic.insert(iron, "iron");
 
+}
+
+pane::base* make_game() {
+    return new game;
 }
 
 void game::blit3(string_view v, vec2 x, draw_proxy& _draw_proxy) {
@@ -436,14 +440,13 @@ void game::draw(rect<f32> _ext, manic::draw_proxy* _draw_proxy) {
         auto new_t = mach_absolute_time();
         sprintf(s, "%.2f ms | %d quads\n%gxw%g\nf%d", (new_t - old_t) * 1e-6, n, _ext.b.x, _ext.b.y, frame);
         //_draw_proxy->draw_text({{_draw_proxy._font.charmap[' '].advance, _draw_proxy._font.height},{_ext.b}}, s);
-        _draw_proxy->draw_text({{0.0f, 0.0f},{_ext.b}}, s);
+        _draw_proxy->draw_text({{0.0f, _ext.b.y},{_ext.b}}, s);
         old_t = new_t;
     }
 
 }
 
-bool game::key_down(u32 c, event_proxy* e) {
-    // application::key_down(c);
+bool game::handle_event(rect<f32>, event::key_down* e) {
     
     vec2 world_mouse = e->mouse() + _camera_position;
 
@@ -451,7 +454,7 @@ bool game::key_down(u32 c, event_proxy* e) {
     i64 i = selectee.x;
     i64 j = selectee.y;
     
-    switch (c) {
+    switch (e->c) {
         case 'r':
             if (_selected_opcode) {
                 ++_selected_opcode;
@@ -487,8 +490,8 @@ bool game::key_down(u32 c, event_proxy* e) {
 
 
 
-bool game::mouse_down(rect<f32> _ext, u64 x, event_proxy* e) {
-    if (x != 1)
+bool game::handle_event(rect<f32> _ext, event::mouse_down* e) {
+    if (e->button != 1)
         return false;
     if (_selected_opcode) {
         _selected_opcode = 0;
@@ -500,9 +503,8 @@ bool game::mouse_down(rect<f32> _ext, u64 x, event_proxy* e) {
     return true;
 }
 
-bool game::mouse_up(rect<f32> _ext, u64 x, event_proxy* e) {
-    // application::mouse_up(x);
-    if (x != 0)
+bool game::handle_event(rect<f32> _ext, event::mouse_up* e) {
+    if (e->button != 0)
         return false;
     if (e->mouse().y > _ext.b.y - 64) {
         i64 j = e->mouse().x;
@@ -521,8 +523,8 @@ bool game::mouse_up(rect<f32> _ext, u64 x, event_proxy* e) {
 
 
 
-bool game::scrolled(vec2 x, event_proxy*) {
-    _camera_position -= x;
+bool game::handle_event(rect<f32> _ext,  event::scrolled* e) {
+    _camera_position -= e->delta;
     return true;
 }
 
