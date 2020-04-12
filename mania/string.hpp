@@ -55,7 +55,7 @@ struct string {
         _bytes.pop_back();
     }
     
-    explicit string(string_view v) {
+     string(string_view v) {
         _bytes.reserve(v.as_bytes().size() + 1);
         _bytes = v.as_bytes();
         _bytes.push_back(0);
@@ -151,6 +151,7 @@ struct string {
         _bytes.pop_back();
     }
     
+    /*
     friend bool operator==(string const& a, string const& b) {
         return std::equal(a.begin(), a.end(), b.begin(), b.end());
     }
@@ -158,7 +159,7 @@ struct string {
     friend bool operator!=(string const& a, string const& b) {
         return !(a == b);
     }
-    
+    */
 };
 
 inline string operator+(string_view a, char const* b) {

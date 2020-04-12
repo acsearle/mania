@@ -86,9 +86,9 @@ struct entity2 {
             
         };
         
-        struct { // SMELTER
+        // struct { // SMELTER
             // stateless
-        };
+        //};
         
     };
         

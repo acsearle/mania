@@ -71,107 +71,56 @@ namespace manic {
 template<typename K, typename V>
 struct table3 {
     
+    static const u64 HASH_BIT = 1ull << 32;
+    
     using key_type = std::add_const_t<K>;
     using value_type = V;
     
-    static constexpr u64 _KEY_BIT = u64(1) << 63;
-    static constexpr u64 _VALUE_BIT = u64(1) << 62;
-    static constexpr u64 _HASH_MASK = (u64(1) << 62) - 1;
-    
     struct _entry_type {
         
-        K _key;
-        value_type _value;
         u64 _hash;
-        
-        void _clear() {
-            if (_hash & _KEY_BIT) {
-                _key.~K();
-                if (_hash & _VALUE_BIT)
-                    _value.~value_type();
-                _hash = 0;
+        struct et {
+            K _key;
+            value_type _value;
+            
+            template<typename Q, typename U>
+            et(Q&& k, U&& v)
+            : _key(std::forward<Q>(k))
+            , _value(std::forward<U>(v)) {
             }
+            
+            template<typename Q>
+            explicit et(Q&& k)
+            : _key(std::forward<Q>(k))
+            , _value() {
+            }
+
+        } _p;
+        
+        template<typename Q, typename U>
+        _entry_type(u64 h, Q&& k, U&& v)
+        : _hash{h}
+        , _p(std::forward<Q>(k),
+             std::forward<U>(v)) {
         }
+        
+        template<typename Q>
+        _entry_type(u64 h, Q&& k)
+        : _hash{h}
+        , _p(std::forward<Q>(k)) {
+        }
+
         
     };
-    
+
     struct entry_type {
-        
         key_type key;
         value_type value;
-        
-        u64& _hash() { return reinterpret_cast<_entry_type&>(*this)._hash; }
-        
-        template<typename F>
-        entry_type& and_modify(F&& f) {
-            assert(_hash() & _KEY_BIT);
-            if (_hash() & _VALUE_BIT)
-                std::forward<F>(f)(value);
-            return *this;
-        }
-        
-        template<typename X>
-        value_type& and_insert(X&& v) {
-            assert(_hash() & _KEY_BIT);
-            if (_hash() & _VALUE_BIT)
-                value = std::forward<X>(v);
-            else {
-                new (&value) value_type(std::forward<X>(v));
-                _hash() |= _VALUE_BIT;
-            }
-            return value;
-        }
-        
-        value_type& or_default() {
-            assert(_hash() & _KEY_BIT);
-            if (!(_hash() & _VALUE_BIT)) {
-                new (&value) value_type;
-            }
-        }
-        
-        value_type& or_insert(value_type const& v) {
-            assert(_hash() & _KEY_BIT);
-            if (!(_hash() & _VALUE_BIT)) {
-                new (&value) value_type(v);
-                _hash() |= _VALUE_BIT;
-            }
-            return value;
-        }
-        
-        value_type& or_insert(value_type&& v) {
-            assert(_hash() & _KEY_BIT);
-            if (!(_hash() & _VALUE_BIT)) {
-                new (&value) value_type(std::move(v));
-                _hash() |= _VALUE_BIT;
-            }
-            return value;
-        }
-        
-        template<typename... Args>
-        value_type& or_emplace(Args&&... args) {
-            assert(_hash() & _KEY_BIT);
-            if (!(_hash() & _VALUE_BIT)) {
-                new (&value) value_type(std::forward<Args>(args)...);
-                _hash() |= _VALUE_BIT;
-            }
-            return value;
-        }
-        
-        template<typename F>
-        value_type& or_insert_with(F&& f) {
-            assert(_hash() & _KEY_BIT);
-            if (!(_hash() & _VALUE_BIT)) {
-                new (&value) value_type(std::forward<F>(f)());
-                _hash() |= _VALUE_BIT;
-            }
-            return value;
-        }
-        
-    }; // struct entry_type
+    };
     
     struct _is_occupied {
         bool operator()(_entry_type const& e) const {
-            return e._hash & _KEY_BIT;
+            return e._hash;
         }
     };
     
@@ -180,10 +129,10 @@ struct table3 {
     
     struct _entry_cast {
         entry_type& operator()(_entry_type& e) const {
-            return reinterpret_cast<entry_type&>(e);
+            return reinterpret_cast<entry_type&>(e._p._key);
         }
         entry_type const& operator()(_entry_type const& e) const {
-            return reinterpret_cast<entry_type const&>(e);
+            return reinterpret_cast<entry_type const&>(e._p._key);
         }
     };
     
@@ -193,7 +142,9 @@ struct table3 {
     raw_vector<_entry_type> _vector;
     usize _occupants;
     
-    u64 _mask() const { return _vector._capacity - 1; }
+    u64 _mask() const {
+        return _vector._capacity - 1;
+    }
     
     _entry_type& _entry_at(u64 i) const {
         return _vector[i & _mask()];
@@ -203,16 +154,16 @@ struct table3 {
         return _entry_at(i)._hash;
     }
     
-    bool _is_key_at(u64 i) const {
-        return _hash_at(i) & _KEY_BIT;
+    bool _occupied_at(u64 i) const {
+        return _hash_at(i);
     }
     
     K& _key_at(u64 i) const {
-        return _entry_at(i)._key;
+        return _entry_at(i)._p._key;
     }
     
     value_type& _value_at(u64 i) const {
-        return _entry_at(i)._value;
+        return _entry_at(i)._p._value;
     }
     
     u64 _displacement_at(u64 i) const {
@@ -228,15 +179,19 @@ struct table3 {
         return n ? std::ceil2(n + (n >> 1) + 1) : 0;
     }
     
+    template<typename Q>
+    static u64 _table_hash(Q&& k) {
+        return hash(std::forward<Q>(k)) | HASH_BIT;
+    }
+    
     void _assert_invariant() const {
         assert(std::ispow2(_vector._capacity));
         assert(!_vector._capacity || (_occupants < _vector._capacity));
         usize n = 0;
         for (usize i = 0; i != _vector._capacity; ++i) {
-            if (_hash_at(i) & _KEY_BIT) {
-                assert(_hash_at(i) & _VALUE_BIT);
+            if (_hash_at(i)) {
                 ++n;
-                assert((_hash_at(i) & _HASH_MASK) == (hash(_key_at(i)) & _HASH_MASK));
+                assert((_hash_at(i)) == _table_hash(_key_at(i)));
                 if (_hash_at(i - 1)) {
                     assert(_displacement_at(i) <= (_displacement_at(i - 1) + 1));
                 } else {
@@ -247,9 +202,16 @@ struct table3 {
         assert(_occupants == n);
     }
     
+    void _destroy_one(_entry_type& e) {
+        if (e._hash) {
+            e._p.~et();
+            e._hash = 0;
+        }
+    }
+    
     void _destroy_all() {
         for (_entry_type& e : _vector)
-            e._clear();
+            _destroy_one(e);
     }
     
     table3()
@@ -309,18 +271,46 @@ struct table3 {
             _vector = raw_vector<_entry_type>(n);
         }
     }
+
+    // Rob from the rich: move all entries back one slot until a free slot is
+    // found
+    void _rob(u64 i) {
+        u64 j = i;
+        while (_hash_at(++j))
+            ;
+        do {
+            std::memcpy(&_entry_at(j),
+                        &_entry_at(j - 1),
+                        sizeof(_entry_type));
+        } while (--j != i);
+        // _entry_at(i) is now uninitialized garbage
+    }
+    
+    _entry_type& _prepare_insert(u64 h) {
+        // return the location to insert an element that is not present
+        assert(h & HASH_BIT);
+        for (u64 i = h;; ++i) {
+            if (!_hash_at(i)) {
+                return _entry_at(i);
+            } else if (_displacement_at(i) < _displacement_of(h, i)) {
+                _rob(i);
+                return _entry_at(i);
+            }
+            
+        }
+        
+    }
     
     void reserve(usize n) {
         n = _capacity_for_occupants(n);
         if (n > _vector._capacity) {
             raw_vector<_entry_type> v(n);
             v.swap(_vector);
-            _occupants = 0;
             for (_entry_type& src : v)
-                if (src._hash & _KEY_BIT) {
-                    _entry_type& dest = _entry_unsafe(src._key, src._hash);
-                    assert(!(dest._hash & _KEY_BIT));
-                    std::memcpy(&dest, &src, sizeof(_entry_type));
+                if (src._hash) {
+                    std::memcpy(&_prepare_insert(src._hash),
+                                &src,
+                                sizeof(_entry_type));
                 }
         }
     }
@@ -330,12 +320,11 @@ struct table3 {
         if (n < _vector._capacity) {
             raw_vector<_entry_type> v(n);
             v.swap(_vector);
-            _occupants = 0;
             for (_entry_type& src : v)
-                if (src._hash & _KEY_BIT) {
-                    _entry_type& dest = _entry_unsafe(src._key, src._hash);
-                    assert(!(dest._hash & _KEY_BIT));
-                    std::memcpy(&dest, &src, sizeof(_entry_type));
+                if (src._hash) {
+                    std::memcpy(&_prepare_insert(src._hash),
+                                &src,
+                                sizeof(_entry_type));
                 }
         }
     }
@@ -350,14 +339,12 @@ struct table3 {
     bool contains(Q&& k, u64 h) {
         if (!_occupants)
             return false;
-        h |= (_KEY_BIT | _VALUE_BIT);
-        u64 i = h;
-        for (;;) {
+        h |= HASH_BIT;
+        for (u64 i = h;; ++i) {
             if ((_hash_at(i) == h) && (_key_at(i) == k))
                 return true;
-            if (!_is_key_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
+            if (!_hash_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
                 return false;
-            ++i;
         }
 
     }
@@ -366,14 +353,12 @@ struct table3 {
     value_type* try_get(Q&& k, u64 h) {
         if (!_occupants)
             return nullptr;
-        h |= (_KEY_BIT | _VALUE_BIT);
-        u64 i = h;
-        for (;;) {
+        h |= HASH_BIT;
+        for (u64 i = h;; ++i) {
             if ((_hash_at(i) == h) && (_key_at(i) == k))
                 return &_value_at(i);
-            if (!_is_key_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
+            if (!_hash_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
                 return nullptr;
-            ++i;
         }
     }
     
@@ -386,9 +371,10 @@ struct table3 {
     template<typename Q>
     value_type& _get_unsafe(Q&& k, u64 h) const {
         assert(_occupants);
-        h |= (_KEY_BIT | _VALUE_BIT);
+        h |= HASH_BIT;
         u64 i = h;
         while ((_hash_at(i) != h) || (_key_at(i) != k)) {
+            assert(_hash_at(i) && (_displacement_at(i) >= _displacement_of(h, i)));
             ++i;
         }
         return _value_at(i);
@@ -428,14 +414,13 @@ struct table3 {
     void erase(Q&& k, u64 h) {
         if (!_occupants)
             return;
-        h |= (_KEY_BIT | _VALUE_BIT);
+        h |= HASH_BIT;
         u64 i = h;
         for (;;) {
-            if (((_hash_at(i) | _VALUE_BIT) == h) && (_key_at(i) == k)) {
+            if ((_hash_at(i) == h) && (_key_at(i) == k)) {
                 _key_at(i).~K();
-                if (_hash_at(i) & _VALUE_BIT)
-                    _value_at(i).~value_type();
-                while (_is_key_at(i + 1) && _displacement_at(i + 1)) {
+                _value_at(i).~value_type();
+                while (_hash_at(i + 1) && _displacement_at(i + 1)) {
                     std::memcpy(&_entry_at(i), &_entry_at(i + 1), sizeof(_entry_type));
                     ++i;
                 }
@@ -443,7 +428,7 @@ struct table3 {
                 --_occupants;
                 return;
             }
-            if (!_is_key_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
+            if (!_hash_at(i) || (_displacement_at(i) < _displacement_of(h, i)))
                 return;
             ++i;
         }
@@ -454,83 +439,218 @@ struct table3 {
         erase(std::forward<Q>(k), hash(k));
     }
 
-    // postcondition: the hash map invariant has potentially been violated and
-    // if the entry is unoccupied a valid entry *must* be constructed in it
-    template<typename Q>
-    _entry_type& _entry_unsafe(Q&& k, u64 h) {
+    template<typename Q, typename U>
+    value_type& insert(Q&& k, u64 h, U&& u) {
         reserve(_occupants + 1);
-        h |= (_KEY_BIT | _VALUE_BIT);
-        u64 i = h;
-        for (;;) {
+        assert(h & HASH_BIT);
+        for (u64 i = h;; ++i) {
+            if ((_hash_at(i) == h) && (_key_at(i) == k)) {
+                _value_at(i) = std::forward<U>(u);
+                return _value_at(i);
+            }
+            if (!_hash_at(i)) {
+            thing:
+                new (&_entry_at(i)) _entry_type{
+                    h,
+                    std::forward<Q>(k),
+                    std::forward<U>(u)
+                };
+                ++_occupants;
+                return _value_at(i);
+            }
+            if (_displacement_at(i) < _displacement_of(h, i)) {
+                _rob(i);
+                goto thing;
+            }
+        }
+    }
+    
+    template<typename Q, typename U>
+    value_type& insert(Q&& k, U&& v) {
+        return insert(std::forward<Q>(k),
+                      _table_hash(k),
+                      std::forward<U>(v));
+    }
+
+    
+    // Entry API
+    
+    enum _entry_tag : u64 {
+        VACANT,
+        PRESENT,
+        OCCUPIED
+    };
+
+    // expose the find-element logic and the three possible results
+    //   * element is found in slot
+    //   * element not found in slot
+    //   * element not found and slot is occupied by a richer entry
+    template<typename Q>
+    std::pair<u64, _entry_tag> _find_entry(Q const& k, u64 h) {
+        assert(h & HASH_BIT);
+        reserve(_occupants + 1);
+        for (u64 i = h; ; ++i) {
+            if (!_hash_at(i))
+                return std::make_pair(i, VACANT); // <-- vacant
             if ((_hash_at(i) == h) && (_key_at(i) == k))
-                return _entry_at(i);
-            if (!_is_key_at(i)) {
-                ++_occupants;
-                return _entry_at(i);
-            }
-            if (_is_key_at(i) && (_displacement_at(i) < _displacement_of(h, i))) {
-                // rob from the rich and give to the poor
-                // find next free slot
-                u64 j = i;
-                do ++j; while (_is_key_at(j));
-                // move entries back one
-                while (j != i) {
-                    std::memcpy(&_entry_at(j), &_entry_at(j - 1), sizeof(_entry_type));
-                    --j;
-                }
-                // blank the slot
-                _hash_at(i) = 0;
-                // we have inserted a blank slot where k will go, but we have
-                // not put it there yet; the invariant of the hash table is
-                // broken and must be repaired by setting _hash and constructing
-                // key and value
-                ++_occupants;
-                return _entry_at(i);
-            }
-            ++i;
+                return std::make_pair(i, PRESENT); // <-- present
+            if (_hash_at(i) && (_displacement_at(i) < _displacement_of(h, i)))
+                return std::make_pair(i, OCCUPIED); // <-- occupied
         }
-    }
-    
-    template<typename Q>
-    entry_type& entry(Q&& k, u64 h) {
-        _entry_type& e = _entry_unsafe(k, h);
-        if (!(e._hash & _KEY_BIT)) {
-            e._hash = (h | _KEY_BIT) & ~_VALUE_BIT;
-            new (&e._key) K(std::forward<Q>(k));
-        }
-        return reinterpret_cast<entry_type&>(e);
-    }
-    
-    // postcondition: we must call one of
-    //
-    //     .and_insert
-    //     .or_insert
-    //     .or_emplace
-    //     .or_insert_with
-    //
-    // to ensure that a value is present in the slot and restore the invariant
-    // of the hash map
-    template<typename Q>
-    entry_type& entry(Q&& k) {
-        return entry(std::forward<Q>(k), hash(k));
     }
         
-    template<typename Q, typename X>
-    value_type& insert(Q&& k, u64 h, X&& value) {
-        return entry(std::forward<Q>(k), h).and_insert(std::forward<X>(value));
-    }
+    struct _deferred_entry {
+        K _key;
+        table3<K, V>* _target;
+        u64 _hash;
+        u64 _index;
+        _entry_tag _tag;
+        
+        template<typename F>
+        _deferred_entry& and_modify(F&& f) {
+            if (_tag == PRESENT)
+                std::forward<F>(f)(_target->_value_at(_index));
+        }
+        
+        template<typename U>
+        value_type& insert(U&& u) {
+            switch (_tag) {
+                case OCCUPIED:
+                    _target->_rob(_index);
+                    // fallthrough
+                case VACANT:
+                    new (&_target->_entry_at(_index)) _entry_type{
+                        _hash,
+                        {
+                            std::move(_key),
+                            std::forward<U>(u),
+                        },
+                    };
+                    ++_target->_occupants;
+                    return _target->_value_at(_index);
+                case PRESENT:
+                    return _target->_value_at(_index) = std::forward<U>(u);
+            }
+        }
+        
+        key_type& key() const {
+            return _key;
+        }
+        
+        template<typename U>
+        value_type& or_insert(U&& u) {
+            switch (_tag) {
+                case OCCUPIED:
+                    _target->_rob(_index);
+                    // fallthrough
+                case VACANT:
+                    new (&_target->_entry_at(_index))
+                    _entry_type(_hash,
+                                std::move(_key),
+                                std::forward<U>(u));
+                    ++_target->_occupants;
+                    // fallthrough
+                case PRESENT:
+                    return _target->_value_at(_index);
+            }
+        }
 
-    // add or update the entry for k.  if a key comparing equal to k is already
-    // present, the old key is not updated
-    template<typename Q, typename X>
-    value_type& insert(Q&& k, X&& value) {
-        return insert(std::forward<Q>(k), hash(k), std::forward<X>(value));
-    }
+        template<typename F>
+        value_type& or_insert_with(F&& f) {
+            switch (_tag) {
+                case OCCUPIED:
+                    _target->_rob(_index);
+                    // fallthrough
+                case VACANT:
+                    new (&_target->_entry_at(_index))
+                    _entry_type(_hash,
+                                std::move(_key),
+                                std::forward<F>(f)());
+                    ++_target->_occupants;
+                    // fallthrough
+                case PRESENT:
+                    return _target->_value_at(_index);
+            }
+        }
+        
+        value_type& or_default() {
+            switch (_tag) {
+                case OCCUPIED:
+                    _target->_rob(_index);
+                    // fallthrough
+                case VACANT:
+                    new (&_target->_entry_at(_index)) _entry_type{
+                        _hash,
+                        {
+                            std::move(_key),
+                            // value is default constructed
+                        },
+                    };
+                    ++_target->_occupants;
+                    // fallthrough
+                case PRESENT:
+                    return _target->_value_at(_index);
+            }
+        }
 
+    }; // entry type
+    
+    template<typename Q>
+    _deferred_entry entry(Q&& q) {
+        u64 h = hash(q) | HASH_BIT;
+        auto [i, t] = _find_entry(q, h);
+        return _deferred_entry{
+            std::forward<Q>(q),
+            this,
+            h,
+            i,
+            t,
+        };
+    }
+    
+    // entry(k).
+    //          or_insert(V) -> V&
+    //          or_insert_with(F) -> V&
+    //          key() -> key_type&
+    //          and_modify(F) -> entry
+    //          insert(V) -> occupied_entry
+    //          or_default() -> V&
+    //
+    // occupied_entry::
+    //                 key() -> key_type&
+    //                 remove_entry() -> (K, V)
+    //                 get() -> V&
+    //                 insert(V) -> V
+    //                 remove() -> V
+    //                 replace_entry(V) -> (K, V)
+    //                 replace_key() -> K
+    //
+    // vacant_entry::
+    //               key() -> key_type&
+    //               insert(V) -> V&
+    
+    /*
+    struct union_entry_type {
+        table3<K, V>* _table;
+        union {
+            _entry_type* _entry;
+            K _key;
+        };
+    };
+
+    struct occupied_entry_type {
+        union_entry_type _inner;
+    };
+    
+    struct vacant_entry_type {
+        union_entry_type _inner;
+    };
+     */
+    
     table3<u64, u64> _histogram() const {
         table3<u64, u64> x;
         for (u64 i = 0; i != _vector._capacity; ++i)
-            if (_is_key_at(i))
+            if (_hash_at(i))
                 ++x.entry(_displacement_at(i)).or_insert(0);
         return x;
     }
@@ -647,6 +767,11 @@ struct table3 {
         }
         return true;
     }
+
+template<typename K, typename V>
+bool operator!=(table3<K, V> const& a, table3<K, V> const& b) {
+    return !(a == b);
+}
     
     
     template<typename K, typename V, typename Serializer>

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA8CB34823FBCF5A00FE7E52 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23D1238BC9EB00F1D85C /* image.cpp */; };
+		CA8CB34923FBCF7700FE7E52 /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23DA238BC9EC00F1D85C /* debug.cpp */; };
+		CA8CB34A23FBCFDB00FE7E52 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAAB2464238BCAE800F1D85C /* libpng16.a */; };
+		CA8CB34D240F97A200FE7E52 /* bytes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA8CB34B240F97A200FE7E52 /* bytes.cpp */; };
 		CAAB2397238BC87900F1D85C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2396238BC87900F1D85C /* AppDelegate.m */; };
 		CAAB239A238BC87900F1D85C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2399238BC87900F1D85C /* ViewController.m */; };
 		CAAB239C238BC87B00F1D85C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAAB239B238BC87B00F1D85C /* Assets.xcassets */; };
@@ -80,6 +84,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CA8CB34623FA6E4C00FE7E52 /* y_combinator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = y_combinator.hpp; sourceTree = "<group>"; };
+		CA8CB34B240F97A200FE7E52 /* bytes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bytes.cpp; sourceTree = "<group>"; };
+		CA8CB34C240F97A200FE7E52 /* bytes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bytes.hpp; sourceTree = "<group>"; };
 		CAAB2392238BC87900F1D85C /* mania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mania.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAAB2395238BC87900F1D85C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CAAB2396238BC87900F1D85C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -243,6 +250,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA8CB34A23FBCFDB00FE7E52 /* libpng16.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,6 +460,7 @@
 				CAAB23ED238BC9ED00F1D85C /* transform_iterator.hpp */,
 				CAAB2411238BC9EF00F1D85C /* zip.hpp */,
 				CABEB8D123AF0FCA00A12ACC /* serialize.hpp */,
+				CA8CB34623FA6E4C00FE7E52 /* y_combinator.hpp */,
 			);
 			name = utility;
 			sourceTree = "<group>";
@@ -493,6 +502,8 @@
 			children = (
 				CAAB2428238BC9F000F1D85C /* json.cpp */,
 				CAAB2413238BC9EF00F1D85C /* json.hpp */,
+				CA8CB34B240F97A200FE7E52 /* bytes.cpp */,
+				CA8CB34C240F97A200FE7E52 /* bytes.hpp */,
 			);
 			name = io;
 			sourceTree = "<group>";
@@ -654,6 +665,7 @@
 			files = (
 				CAAB2434238BC9F000F1D85C /* atlas.cpp in Sources */,
 				CAAB243D238BC9F000F1D85C /* vbo.cpp in Sources */,
+				CA8CB34D240F97A200FE7E52 /* bytes.cpp in Sources */,
 				CABEB8DA23B4BB9D00A12ACC /* draw_proxy.cpp in Sources */,
 				CAAB244D238BC9F000F1D85C /* json.cpp in Sources */,
 				CAAB242D238BC9F000F1D85C /* image.cpp in Sources */,
@@ -706,6 +718,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA8CB34923FBCF7700FE7E52 /* debug.cpp in Sources */,
+				CA8CB34823FBCF5A00FE7E52 /* image.cpp in Sources */,
 				CAAB2460238BCA1300F1D85C /* projections.cpp in Sources */,
 				CAAB2461238BCA1300F1D85C /* povtools.cpp in Sources */,
 				CAAB23BB238BC92C00F1D85C /* main.cpp in Sources */,
@@ -912,6 +926,10 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libpng/1.6.36/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -921,6 +939,10 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/libpng/1.6.36/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

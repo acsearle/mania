@@ -5,10 +5,87 @@
 //  Copyright © 2018 Antony Searle. All rights reserved.
 //
 
-#include "projections.hpp"
+// #include "projections.hpp"
+
+#include <vector>
+#include <array>
+
+#include "image.hpp"
+#include "debug.hpp"
+#include "hash.hpp"
 
 int main(int argc, char** argv) {
-    main_projections(argc, argv);
+
+    using namespace manic;
+    
+    image a = from_png_and_multiply_alpha("/Users/acsearle/Downloads/snooze3.png");
+    
+    std::array<std::vector<u8>, 3> hist;
+    
+    pixel oit(0,0,0,255);
+    for (auto&& b : a)
+        for (auto&& c : b) {
+            for (int i = 0; i != 3; ++i) {
+                hist[0].push_back(c[i]);
+            }
+        }
+    
+    pixel median;
+    for (int i = 0; i != 1; ++i) {
+        std::sort(hist[i].begin(), hist[i].end());
+        median[i] = hist[i][hist[i].size() / 2];
+    }
+    
+    DUMP(vec4(median));
+    
+    DUMP(vec4(oit));
+    
+    pixel z[] = {
+        { 152, 122, 123, 255 },
+        { 248, 153,  43, 255 },
+        {  30,  97,  53, 255 },
+        {  74,  56,  56, 255 },
+        { 180,  14,  28, 255 },
+        {  16,  36,  99, 255 },
+        {  14,  14,  12, 255 },
+    };
+    
+    uniform<> r;
+    
+    auto distance = [&](pixel a, pixel b) {
+        auto weight = from_sRGB_(pixel(248, 153, 123, 255));
+        auto weight2 = from_sRGB_(oit);
+        auto weight3 = vec4(1, 0.5, 1, 0);
+        return length((from_sRGB_(a) / weight - from_sRGB_(b) / weight2) * weight3);
+    };
+    
+    for (auto&& b : a)
+        for (auto&& c : b) {
+            /*
+            auto d = 1000;
+            auto j = 10000;
+            for (int i = 0; i != 7; ++i) {
+                auto e = distance(z[i], c);
+                //DUMP(e);
+                if (e < d) {
+                    j = i;
+                    d = e;
+                }
+            }
+            c = z[j];
+            */
+            for (int i = 0; i != 3; ++i) {
+                //DUMP(c[i]);
+                //c[i] = c[i] >= median[i] ? 255 : 0;
+                // 140 is good
+                // 130 is good
+                c[i] = c[i] >= 140 ? 255 : 0;
+            }
+        }
+    
+    to_png(a, "/Users/acsearle/Downloads/snooze3-out.png");
+    
+
 }
 
 

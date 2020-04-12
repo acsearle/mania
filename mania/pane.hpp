@@ -134,6 +134,12 @@ struct base {
     //     f();
     // }
         
+    // contra:
+    //
+    // too much bouncing around vs. classic thing
+    // too many types
+    //
+    // we want to handle key events differently to mouse events
     
 
     virtual bool handle_event(rect<f32> extent, event::base* e) {

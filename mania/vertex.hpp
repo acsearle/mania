@@ -46,10 +46,10 @@ template<typename T> constexpr GLenum format<vec<T, 4>> = GL_RGBA;
 
 template<typename T> GLenum type;
 
-template<> constexpr GLenum type<GLubyte> = GL_UNSIGNED_BYTE;
+template<> inline constexpr GLenum type<GLubyte> = GL_UNSIGNED_BYTE;
 template<std::size_t N> constexpr GLenum type<vec<GLubyte, N>> = GL_UNSIGNED_BYTE;
 
-template<> constexpr GLenum type<GLfloat> = GL_FLOAT;
+template<> inline constexpr GLenum type<GLfloat> = GL_FLOAT;
 template<std::size_t N> constexpr GLenum type<vec<GLfloat, N>> = GL_FLOAT;
 
 

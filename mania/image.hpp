@@ -55,10 +55,24 @@ inline f32 from_sRBG(u8 u) {
     return _from_sRGB_table[u];
 }
 
+inline vec4 from_sRGB_(pixel p) {
+    return vec4(_from_sRGB_table[p.r],
+                _from_sRGB_table[p.g],
+                _from_sRGB_table[p.b],
+                p.a / 255.0f);
+}
+
 inline f32 to_sRGB(f32 u) {
     return ((u <= 0.0031308f)
             ? (u * 12.92f)
             : (1.055f * powf(u, 1.0f / 2.4f) - 0.055f));
+}
+
+inline vec4 to_sRGB(vec4 v) {
+    return vec4(to_sRGB(v.r),
+                to_sRGB(v.g),
+                to_sRGB(v.b),
+                v.a * 255.0f);
 }
 
 extern u8 (*_multiply_alpha_table)[256];

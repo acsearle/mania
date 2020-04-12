@@ -36,6 +36,8 @@ static_assert(sizeof(f32) == 4);
 using usize = std::uintptr_t;
 using isize = std::intptr_t;
 
+using byte = std::byte;
+
 static_assert(sizeof(usize) == sizeof(std::size_t));
 static_assert(sizeof(isize) == sizeof(std::ptrdiff_t));
 
