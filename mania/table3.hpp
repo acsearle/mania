@@ -71,7 +71,7 @@ namespace manic {
 template<typename K, typename V>
 struct table3 {
     
-    static const u64 HASH_BIT = 1ull << 32;
+    static const u64 HASH_BIT = 0x8000'0000'0000'0000;
     
     using key_type = std::add_const_t<K>;
     using value_type = V;

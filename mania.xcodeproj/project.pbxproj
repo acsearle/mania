@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA4ABA4E244ACAAB008295A7 /* awrc-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA4ABA4D244ACAAB008295A7 /* awrc-test.cpp */; };
 		CA8CB34823FBCF5A00FE7E52 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23D1238BC9EB00F1D85C /* image.cpp */; };
 		CA8CB34923FBCF7700FE7E52 /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23DA238BC9EC00F1D85C /* debug.cpp */; };
 		CA8CB34A23FBCFDB00FE7E52 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAAB2464238BCAE800F1D85C /* libpng16.a */; };
@@ -55,7 +56,6 @@
 		CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB248C238E5D7C00F1D85C /* tattler.cpp */; };
 		CAAB2495238FBC7000F1D85C /* delta_table-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2494238FBC7000F1D85C /* delta_table-test.cpp */; };
 		CAAB249D2394E91300F1D85C /* async.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB249B2394E91300F1D85C /* async.cpp */; };
-		CAAB24A32394FBB700F1D85C /* awrc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB24A12394FBB700F1D85C /* awrc.cpp */; };
 		CABEB8D423B0B0B400A12ACC /* serialization-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */; };
 		CABEB8D723B2BEA800A12ACC /* entity2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D523B2BEA800A12ACC /* entity2.cpp */; };
 		CABEB8DA23B4BB9D00A12ACC /* draw_proxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CABEB8D823B4BB9D00A12ACC /* draw_proxy.cpp */; };
@@ -84,6 +84,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CA4ABA4D244ACAAB008295A7 /* awrc-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "awrc-test.cpp"; sourceTree = "<group>"; };
 		CA8CB34623FA6E4C00FE7E52 /* y_combinator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = y_combinator.hpp; sourceTree = "<group>"; };
 		CA8CB34B240F97A200FE7E52 /* bytes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bytes.cpp; sourceTree = "<group>"; };
 		CA8CB34C240F97A200FE7E52 /* bytes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bytes.hpp; sourceTree = "<group>"; };
@@ -216,7 +217,6 @@
 		CAAB24992391236A00F1D85C /* design.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = design.txt; sourceTree = "<group>"; };
 		CAAB249B2394E91300F1D85C /* async.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = async.cpp; sourceTree = "<group>"; };
 		CAAB249C2394E91300F1D85C /* async.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = async.hpp; sourceTree = "<group>"; };
-		CAAB24A12394FBB700F1D85C /* awrc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = awrc.cpp; sourceTree = "<group>"; };
 		CAAB24A22394FBB700F1D85C /* awrc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = awrc.hpp; sourceTree = "<group>"; };
 		CAAB24A52397D29400F1D85C /* box.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = box.hpp; sourceTree = "<group>"; };
 		CABEB8CF23AC962A00A12ACC /* notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
@@ -313,6 +313,7 @@
 				CAAB248C238E5D7C00F1D85C /* tattler.cpp */,
 				CAAB248D238E5D7C00F1D85C /* tattler.hpp */,
 				CABEB8D323B0B0B400A12ACC /* serialization-test.cpp */,
+				CA4ABA4D244ACAAB008295A7 /* awrc-test.cpp */,
 			);
 			path = "mania-test";
 			sourceTree = "<group>";
@@ -544,7 +545,6 @@
 			children = (
 				CAAB249B2394E91300F1D85C /* async.cpp */,
 				CAAB249C2394E91300F1D85C /* async.hpp */,
-				CAAB24A12394FBB700F1D85C /* awrc.cpp */,
 				CAAB24A22394FBB700F1D85C /* awrc.hpp */,
 			);
 			name = async;
@@ -689,7 +689,6 @@
 				CAAB2441238BC9F000F1D85C /* application.cpp in Sources */,
 				CABEB8DC23B4C89400A12ACC /* pane.cpp in Sources */,
 				CAAB2435238BC9F000F1D85C /* asset.cpp in Sources */,
-				CAAB24A32394FBB700F1D85C /* awrc.cpp in Sources */,
 				CAAB2397238BC87900F1D85C /* AppDelegate.m in Sources */,
 				CAAB2430238BC9F000F1D85C /* debug.cpp in Sources */,
 				CAAB2482238CF1C400F1D85C /* world.cpp in Sources */,
@@ -701,6 +700,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA4ABA4E244ACAAB008295A7 /* awrc-test.cpp in Sources */,
 				CAAB245B238BCA0100F1D85C /* enumerate-test.cpp in Sources */,
 				CAAB248E238E5D7C00F1D85C /* tattler.cpp in Sources */,
 				CABEB8D423B0B0B400A12ACC /* serialization-test.cpp in Sources */,

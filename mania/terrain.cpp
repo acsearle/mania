@@ -40,6 +40,8 @@ void _terrain_perturb(uint64_t seed, ptrdiff_t i, ptrdiff_t j, matrix_view<doubl
 
 // TODO: Compute the variance of the output (or normalize it).
 
+// TODO: Integer arithmetic?
+
 void _terrain_recurse(ptrdiff_t i,
                       ptrdiff_t j,
                       ptrdiff_t rows,

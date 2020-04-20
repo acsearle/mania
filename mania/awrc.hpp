@@ -9,9 +9,224 @@
 #ifndef awrc_hpp
 #define awrc_hpp
 
-#include <stdio.h>
+#include <atomic>
+#include <thread>
+#include <utility>
+
+#include "common.hpp"
+#include "hash.hpp"
 
 namespace manic {
+
+template<typename T>
+struct manager {
+    
+    std::atomic<u64> _count;
+    T _payload;
+    
+    template<typename... Args>
+    explicit manager(u64 n, Args&&... args)
+    : _count{n}
+    , _payload{std::forward<Args>(args)...} {
+    }
+    
+};
+
+template<typename T>
+struct unique_ptr {
+    
+    manager<T>* _ptr;
+    
+    unique_ptr() : _ptr{nullptr} {}
+    
+    unique_ptr(unique_ptr const&) = delete;
+    
+    unique_ptr(unique_ptr&& other)
+    : _ptr{std::exchange(other._ptr, nullptr)} {
+    }
+    
+    template<typename... Args>
+    explicit unique_ptr(std::in_place_t, Args&&... args)
+    : _ptr{new manager<T>{0, std::forward<Args>(args)...}} {
+    }
+    
+    ~unique_ptr() { delete _ptr; }
+    
+    void swap(unique_ptr& other) {
+        using std::swap;
+        swap(_ptr, other._ptr);
+    }
+    
+    unique_ptr& operator=(unique_ptr const&) = delete;
+    
+    unique_ptr& operator=(unique_ptr&& other) {
+        unique_ptr{std::move(other)}.swap(*this);
+        return *this;
+    }
+    
+    T* operator->() {
+        return _ptr ? &_ptr->_payload : nullptr;
+    }
+    
+};
+
+
+
+template<typename K, typename V>
+struct ctrie {
+        
+    struct branch {
+        
+        virtual ~branch() = default;
+        virtual V* lookup(u64 h) = 0;
+        
+    };
+    
+    struct main_node {
+        
+        virtual ~main_node() = default;
+        virtual V* lookup(u64 h) = 0;
+    };
+    
+    struct inode : branch {
+        
+        main_node* _child;
+        
+        inode() : _child{nullptr} {}
+        
+        virtual V* lookup(u64 h) {
+            return _child ? _child->lookup(h) : nullptr;
+        }
+        
+        virtual main_node* insert(u64 h, K k, V v) {
+            if (_child) {
+                _child = _child->insert(h, k, v);
+            } else {
+                _child = cnode::make(nullptr, h, new snode{k, v});
+            }
+            return nullptr;
+        }
+    };
+    
+    
+    struct snode : branch {
+        K _key;
+        V _value;
+
+        virtual V* lookup(u64 h) {
+            return &_value;
+        }
+        
+        virtual branch* insert(u64 h, K k, V v) {
+            
+        }
+        
+    };
+
+        
+    struct cnode : main_node {
+        
+        u64 _bitmap;
+        branch* _children[];
+
+        int size() const {
+            return __builtin_popcountll(_bitmap);
+        }
+        
+        virtual ~cnode() {
+            auto i = size();
+            while (i--)
+                std::destroy_at(_children + i);
+        }
+
+        branch* operator[](u64 h) {
+            auto i = 1ull << (h & 63);
+            if (_bitmap & i) {
+                return _children[__builtin_popcountll(_bitmap & (i - 1))];
+            } else {
+                return nullptr;
+            }
+        }
+
+        V* lookup(u64 h) {
+            auto p = operator[](h);
+            return p ? p->lookup(h >> 6) : nullptr;
+        }
+        
+        cnode* make(cnode* old, u64 h, branch* p) {
+            h &= 63;
+            auto i = 1ull << h;
+            if (old) {
+                auto b = old->_bitmap | i;
+                auto n = __builtin_popcountll(b);
+                auto a = (cnode*) malloc(sizeof(cnode) + sizeof(branch*) * n);
+                new (a) cnode{b};
+                auto k = __buildin_popccountll(b & (i - 1));
+                for (int j = 0; j != k; ++j)
+                    new (_children + j) branch*{old->_children[j]};
+                new (_children + k) branch*{p};
+                for (int j = k + 1; j != n; ++j) {
+                    assert(false);
+                }
+                
+            } else {
+                auto a = (cnode*) malloc(sizeof(cnode) + sizeof(branch*) * 1);
+                new (a) cnode{i};
+                new (_children + 0) branch*{p};
+            }
+        }
+        
+        // ctor
+        cnode(u64 h, branch* p) {
+            _bitmap = 1ull << (h & 63);
+            _children[0] = p;
+        }
+        
+                        
+        cnode* insert(u64 h, K k, V v) {
+            if (auto b = operator[](h)) {
+                b->insert(h >> 6, k, v);
+                return this;
+            } else {
+                u64 i = h & 0x3F;
+                u64 j = 1ull << i;
+                u64 k = __builtin_popcountll(_bitmap & (j - 1));
+                u64 n = size();
+                auto p = (cnode*) malloc((n + 2) * 8);
+                p->_bitmap = _bitmap | j;
+                for (u64 a = 0; a != k; ++a)
+                    p->_children[a] = _children[a];
+                for (u64 a = k; a != n; ++a)
+                    p->_children[a + 1] = _children[a];
+                auto q = new snode{k, v};
+                p->_children[k] = q;
+                return p;
+            }
+        }
+        
+    };
+    
+    inode* _root = nullptr;
+    
+    V* lookup(K const& k) {
+        return _root ? _root->lookup(hash(k)) : nullptr;
+    }
+    
+    void insert(K const& k, V const& v) {
+        if (!_root) {
+            _root = new inode;
+        }
+        _root->insert(hash(k), k, v);
+    }
+    
+};
+
+
+
+
+
+
+
 
 template<typename T>
 struct weighted_ptr {
@@ -93,7 +308,7 @@ struct weighted_ptr {
     T const& operator*() const {
         return reinterpret_cast<manager*>(_value & MASK)->_payload;
     }
-
+    
 };
 
 template<typename T>
@@ -151,12 +366,12 @@ struct atomic_weighted_ptr {
     }
     
     weighted_ptr<T> load() {
-
+        
         using weighted_ptr<T>::MASK;
-
+        
         usize x = _value.load(std::memory_order_relaxed);
         usize y = 0;
-
+        
         for(;;) {
             if (x & ~MASK) {
                 y = x - 0x0001'0000'0000'0000;
@@ -196,5 +411,7 @@ struct atomic_weighted_ptr {
     }
     
 };
+
+}
 
 #endif /* awrc_hpp */

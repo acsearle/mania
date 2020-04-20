@@ -56,6 +56,8 @@ TEST_CASE("table3") {
     
     SECTION("stress") {
         
+        printf("%ld", sizeof(std::mutex));
+        
         const u64 N = 1'000'000;
         
         table3<u64, u64> t;

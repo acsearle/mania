@@ -20,8 +20,8 @@ namespace manic {
 // raw_vector manages a slab of callocated raw memory.  It will free the memory
 // on destruction, but will not attempt to construct or destruct any objects in
 // the memory.  It must be combined with some external management to determine
-// which slots are occupied; a std::vector maintains a size partioning occupied
-// and unoccupied slots, for example.
+// which slots are occupied; a std::vector maintains a _size, partioning
+// occupied and unoccupied slots, for example.
 
 template<typename T>
 struct raw_vector {
@@ -52,7 +52,7 @@ struct raw_vector {
     
     isize capacity() const { return _capacity; }
     
-    // Dicey methods
+    // Unsafe methods
     
     isize size() const { return _capacity; }
     T* begin() const { return _allocation; }
