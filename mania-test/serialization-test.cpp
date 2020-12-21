@@ -6,12 +6,12 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
-#include "serialize.hpp"
-#include "string_view.hpp"
-#include "string.hpp"
-#include "table3.hpp"
+#include <catch2/catch.hpp>
 
-#include "catch.hpp"
+#include "table3.hpp"
+#include "serialize.hpp"
+#include "string.hpp"
+#include "string_view.hpp"
 
 namespace manic {
 

@@ -98,6 +98,7 @@ struct ctrie {
             return _child ? _child->lookup(h) : nullptr;
         }
         
+        /*
         virtual main_node* insert(u64 h, K k, V v) {
             if (_child) {
                 _child = _child->insert(h, k, v);
@@ -106,6 +107,7 @@ struct ctrie {
             }
             return nullptr;
         }
+         */
     };
     
     

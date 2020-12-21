@@ -9,7 +9,6 @@
 #ifndef table3_hpp
 #define table3_hpp
 
-#include "bit.hpp" // <bit>
 #include <iostream>
 #include <utility>
 
@@ -185,7 +184,7 @@ struct table3 {
     }
     
     void _assert_invariant() const {
-        assert(std::ispow2(_vector._capacity));
+        assert(std::ispow2((std::size_t) _vector._capacity) || !_vector._capacity);
         assert(!_vector._capacity || (_occupants < _vector._capacity));
         usize n = 0;
         for (usize i = 0; i != _vector._capacity; ++i) {

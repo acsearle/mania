@@ -36,10 +36,22 @@ static_assert(sizeof(f32) == 4);
 using usize = std::uintptr_t;
 using isize = std::intptr_t;
 
-using byte = std::byte;
-
 static_assert(sizeof(usize) == sizeof(std::size_t));
 static_assert(sizeof(isize) == sizeof(std::ptrdiff_t));
+
+using byte = std::byte;
+
+template<std::size_t N> struct _uint_t;
+template<> struct _uint_t<8> { using type = std::uint8_t; };
+template<> struct _uint_t<16> { using type = std::uint16_t; };
+template<> struct _uint_t<32> { using type = std::uint32_t; };
+template<> struct _uint_t<64> { using type = std::uint64_t; };
+
+template<std::size_t N> struct _int_t;
+template<> struct _int_t<8> { using type = std::int8_t; };
+template<> struct _int_t<16> { using type = std::int16_t; };
+template<> struct _int_t<32> { using type = std::int32_t; };
+template<> struct _int_t<64> { using type = std::int64_t; };
 
 #define F(X) inline X operator"" _##X (unsigned long long x) { return ( X ) x; }
 

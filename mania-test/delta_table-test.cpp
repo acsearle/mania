@@ -9,7 +9,7 @@
 #include "delta_table.hpp"
 #include "debug.hpp"
 
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include "tattler.hpp"
 
 namespace manic {

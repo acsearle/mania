@@ -30,7 +30,9 @@ namespace manic {
         const_column_vector_view() = delete;
         
         const_column_vector_view(T* p, ptrdiff_t stride, ptrdiff_t rows)
-        : _begin(p), _stride(stride), _rows(rows) {
+        : _begin(p)
+        , _stride(stride)
+        , _rows(rows) {
         }
         
         const_column_vector_view(std::nullptr_t, ptrdiff_t s, ptrdiff_t n)

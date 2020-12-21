@@ -8,7 +8,7 @@
 
 #include "awrc.hpp"
 
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 
 namespace manic {
 

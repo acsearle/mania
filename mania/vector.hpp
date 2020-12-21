@@ -14,8 +14,9 @@
 
 namespace manic {
 
-// General-purpose dynamic array.  Unlike std::vector and std::vec::Vec, it
-// does not begin at the beginning of its allocation
+// General-purpose dynamic array.  Contiguous elements.  Supports amortized O(1)
+// push_back, pop_back, and pop_front, but O(N) pop_front, making it a
+// performant stack and queue but not a performant deque.
     
     template<typename T>
     struct vector : vector_view<T>, raw_vector<T> {

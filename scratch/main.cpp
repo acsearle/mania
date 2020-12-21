@@ -5,15 +5,88 @@
 //  Copyright © 2018 Antony Searle. All rights reserved.
 //
 
+int main(int, char**) {
+    return 0;
+}
+
+
+/*
+#include <iostream>
+#include <functional>
+
+template<typename Callable>
+struct _y_combinator {
+    Callable _f;
+    template<typename... Args>
+    auto operator()(Args&&... args) const {
+        return _f(*this, std::forward<Args>(args)...);
+    }
+};
+
+template<typename Callable>
+auto Y(Callable&& f) {
+    return _y_combinator<std::decay_t<Callable>>{std::forward<Callable>(f)};
+}
+
+
+int main () {
+    
+    auto y = [](auto f) // -> int(int)
+{
+        
+        return [](auto x) // int(int)
+ {
+            
+            return x (x);
+            
+        }([f] (auto y) -> std::function <int (int)> {
+            
+            return f([y](int a) -> int {
+                
+                return y(y)(a) ;
+                
+            });
+            
+        });
+        
+    };
+    
+    auto almost_fac = [] (auto f) { return
+        [f] (int n) -> int {
+            return n <= 1 ? n : n * f(n - 1);
+        };
+    };
+    
+    auto fac = y (almost_fac);
+    std:: cout << fac (10) << '\n';
+
+    auto fac2 = Y([](auto&& self, auto n) -> decltype(n) {
+        return n <= 1 ? n : n * self(n - 1);
+    });
+    
+    std::cout << fac2(10) << '\n';
+    
+}
+
+
+*/
+
+
+
+
+
+
 // #include "projections.hpp"
 
+/*
 #include <vector>
 #include <array>
 
 #include "image.hpp"
 #include "debug.hpp"
 #include "hash.hpp"
-
+*/
+/*
 int main(int argc, char** argv) {
 
     using namespace manic;
@@ -61,6 +134,7 @@ int main(int argc, char** argv) {
     
     for (auto&& b : a)
         for (auto&& c : b) {
+ */
             /*
             auto d = 1000;
             auto j = 10000;
@@ -73,7 +147,7 @@ int main(int argc, char** argv) {
                 }
             }
             c = z[j];
-            */
+            *//*
             for (int i = 0; i != 3; ++i) {
                 //DUMP(c[i]);
                 //c[i] = c[i] >= median[i] ? 255 : 0;
@@ -87,7 +161,7 @@ int main(int argc, char** argv) {
     
 
 }
-
+*/
 
 /*
 #include <iostream>

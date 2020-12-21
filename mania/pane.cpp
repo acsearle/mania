@@ -8,6 +8,7 @@
 
 #include "application.hpp"
 #include "pane.hpp"
+#include "renderer.hpp"
 
 namespace manic {
 
@@ -17,8 +18,9 @@ application& application::get() {
     // static game x;
     static application* x = [](){
         application* a = new application;
-        // a->_pane = new game();
+        a->_pane = make_game();
         // auto q = new pane_text("Not a button");
+        /*
         auto q = new pane::collection;
         rect<f32> r{{100,100},{200,200}};
         q->sub.emplace_back(r, box<pane::button>::from(box<pane::text>::from("New"), [=](){
@@ -44,7 +46,7 @@ application& application::get() {
         }
         a->_pane = q;
         
-        
+        */
         return a;
     }();
     return *x;

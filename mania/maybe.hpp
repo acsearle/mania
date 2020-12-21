@@ -59,6 +59,26 @@ public:
 }; // class maybe<T>
 
 
+template<typename T>
+union maybe {
+    
+    T value;
+    
+    maybe() {}
+    maybe(maybe const&) = default;
+    ~maybe() {}
+    
+    template<typename... Args>
+    void emplace(Args&&... args) {
+        new (&value) T(std::forward<Args>(args)...);
+    }
+    
+    void erase() const noexcept {
+        (&value)->~T();
+    }
+    
+};
+
 
     
 } // namespace maybe

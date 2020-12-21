@@ -91,7 +91,7 @@ double merit(mat3 m) {
     i /= r;
     
     return r;
-    
+    /*
     double merit = 1;
     using std::min;
     // Penalize if on a coordinate plane
@@ -104,6 +104,7 @@ double merit(mat3 m) {
     merit = min(merit, fabs(h-i));
     
     return merit;
+     */
 }
 
 

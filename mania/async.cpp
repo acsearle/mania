@@ -54,7 +54,7 @@ struct notification_queue
     
     T pop() {
         auto lock = std::unique_lock(_mutex);
-        _condition_variable.wait(lock, []{
+        _condition_variable.wait(lock, [this]{
             return _vector.size() || _cancelled;
         });
         if (_cancelled)

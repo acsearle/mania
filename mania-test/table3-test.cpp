@@ -6,11 +6,11 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
-#include "table3.hpp"
-#include "debug.hpp"
+#include <catch2/catch.hpp>
 
+#include "debug.hpp"
+#include "table3.hpp"
 #include "tattler.hpp"
-#include "catch.hpp"
 
 namespace manic {
 
