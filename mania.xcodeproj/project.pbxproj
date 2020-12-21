@@ -11,6 +11,9 @@
 		CA2745DA251AD09500198510 /* atomic_wait.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA2745D9251AD09500198510 /* atomic_wait.cpp */; };
 		CA2745DB251AD09500198510 /* atomic_wait.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA2745D9251AD09500198510 /* atomic_wait.cpp */; };
 		CA4ABA4E244ACAAB008295A7 /* awrc-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA4ABA4D244ACAAB008295A7 /* awrc-test.cpp */; };
+		CA705DCB259146A200559EE7 /* MyMetalView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA705DCA259146A200559EE7 /* MyMetalView.m */; };
+		CA705DD725914B5700559EE7 /* MyRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = CA705DD625914B5700559EE7 /* MyRenderer.m */; };
+		CA705DE025914EBA00559EE7 /* MyShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = CA705DDF25914EBA00559EE7 /* MyShaders.metal */; };
 		CA8CB34823FBCF5A00FE7E52 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23D1238BC9EB00F1D85C /* image.cpp */; };
 		CA8CB34923FBCF7700FE7E52 /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23DA238BC9EC00F1D85C /* debug.cpp */; };
 		CA8CB34A23FBCFDB00FE7E52 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAAB2464238BCAE800F1D85C /* libpng16.a */; };
@@ -109,6 +112,12 @@
 		CA2745D9251AD09500198510 /* atomic_wait.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = atomic_wait.cpp; sourceTree = "<group>"; };
 		CA4ABA4D244ACAAB008295A7 /* awrc-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "awrc-test.cpp"; sourceTree = "<group>"; };
 		CA705D4C258B32D800559EE7 /* bytes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bytes.h; sourceTree = "<group>"; };
+		CA705DC9259146A200559EE7 /* MyMetalView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyMetalView.h; sourceTree = "<group>"; };
+		CA705DCA259146A200559EE7 /* MyMetalView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyMetalView.m; sourceTree = "<group>"; };
+		CA705DD525914B5700559EE7 /* MyRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyRenderer.h; sourceTree = "<group>"; };
+		CA705DD625914B5700559EE7 /* MyRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyRenderer.m; sourceTree = "<group>"; };
+		CA705DDB25914D9A00559EE7 /* MyShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyShaderTypes.h; sourceTree = "<group>"; };
+		CA705DDF25914EBA00559EE7 /* MyShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MyShaders.metal; sourceTree = "<group>"; };
 		CA8CB34623FA6E4C00FE7E52 /* y_combinator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = y_combinator.hpp; sourceTree = "<group>"; };
 		CA8CB34B240F97A200FE7E52 /* bytes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bytes.cpp; sourceTree = "<group>"; };
 		CA8CB34C240F97A200FE7E52 /* bytes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bytes.hpp; sourceTree = "<group>"; };
@@ -505,17 +514,23 @@
 		CAAB2472238BDE6F00F1D85C /* platform */ = {
 			isa = PBXGroup;
 			children = (
-				CAAB2398238BC87900F1D85C /* ViewController.h */,
-				CAAB2399238BC87900F1D85C /* ViewController.m */,
+				CAAB2395238BC87900F1D85C /* AppDelegate.h */,
+				CAAB2396238BC87900F1D85C /* AppDelegate.m */,
+				CAAB239B238BC87B00F1D85C /* Assets.xcassets */,
 				CAAB23A0238BC87B00F1D85C /* Info.plist */,
 				CAAB23A1238BC87B00F1D85C /* main.m */,
 				CAAB239D238BC87B00F1D85C /* Main.storyboard */,
 				CAAB23A3238BC87B00F1D85C /* mania.entitlements */,
+				CA705DC9259146A200559EE7 /* MyMetalView.h */,
+				CA705DCA259146A200559EE7 /* MyMetalView.m */,
 				CAAB2407238BC9EE00F1D85C /* MyOpenGLView.h */,
 				CAAB23C2238BC9EA00F1D85C /* MyOpenGLView.mm */,
-				CAAB2395238BC87900F1D85C /* AppDelegate.h */,
-				CAAB2396238BC87900F1D85C /* AppDelegate.m */,
-				CAAB239B238BC87B00F1D85C /* Assets.xcassets */,
+				CA705DD525914B5700559EE7 /* MyRenderer.h */,
+				CA705DD625914B5700559EE7 /* MyRenderer.m */,
+				CA705DDF25914EBA00559EE7 /* MyShaders.metal */,
+				CA705DDB25914D9A00559EE7 /* MyShaderTypes.h */,
+				CAAB2398238BC87900F1D85C /* ViewController.h */,
+				CAAB2399238BC87900F1D85C /* ViewController.m */,
 			);
 			name = platform;
 			sourceTree = "<group>";
@@ -774,10 +789,13 @@
 				CAAB2448238BC9F000F1D85C /* reflector.cpp in Sources */,
 				CAAB23A2238BC87B00F1D85C /* main.m in Sources */,
 				CAAB242F238BC9F000F1D85C /* renderer.cpp in Sources */,
+				CA705DCB259146A200559EE7 /* MyMetalView.m in Sources */,
 				CAAB242E238BC9F000F1D85C /* program.cpp in Sources */,
 				CAAB2445238BC9F000F1D85C /* animation.cpp in Sources */,
+				CA705DD725914B5700559EE7 /* MyRenderer.m in Sources */,
 				CAAB2447238BC9F000F1D85C /* packer.cpp in Sources */,
 				CAAB244C238BC9F000F1D85C /* preprocessor.cpp in Sources */,
+				CA705DE025914EBA00559EE7 /* MyShaders.metal in Sources */,
 				CAAB249D2394E91300F1D85C /* async.cpp in Sources */,
 				CAAB242B238BC9F000F1D85C /* MyOpenGLView.mm in Sources */,
 				CABEB8D723B2BEA800A12ACC /* entity2.cpp in Sources */,

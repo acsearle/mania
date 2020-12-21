@@ -6,9 +6,12 @@
 //  Copyright © 2017 Antony Searle. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+@import AppKit;
+@import MetalKit;
 
-@interface ViewController : NSViewController
+#import "MyMetalView.h"
+
+@interface ViewController : NSViewController <MyMetalViewDelegate>
 
 
 @end
