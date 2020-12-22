@@ -1,17 +1,32 @@
 //
-//  application.cpp
+//  application.mm
 //  mania
 //
 //  Created by Antony Searle on 30/10/19.
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/gl3.h>
+#include <fstream>
 
 #include "application.hpp"
 
+
 namespace manic {
+    
+    string path_for_resource(string_view name, string_view ext) {
+        return [[[NSBundle mainBundle] pathForResource:[NSString stringWithUTF8String:string(name).c_str()]
+                                                ofType:[NSString stringWithUTF8String:string(ext).c_str()]] UTF8String];
+    }
+    
+    string load(string name) {
+        std::ifstream ifs(name.c_str());
+        std::string s{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
+        return string(s.c_str());
+    }
+    
+    string load(string_view name, string_view ext) {
+        return load(path_for_resource(name, ext));
+    }
 
 void application::draw(id <MTLRenderCommandEncoder> renderEncoder) {
     draw_proxy::get().presize({_width, _height});

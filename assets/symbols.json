@@ -1,0 +1,25 @@
+{
+    "tile_size" : 64,
+    "names" : [
+        [ "store", "load", "increment", "decrement_saturate", "kill", "add",
+            "sub", "fork", "missing", "chest", "bitwise_and", "bitwise_or",
+            "bitwise_xor", "decrement", "increment_saturate"],
+        [ "go", "was_increment", "swap", "flip_increment", "flip_decrement",
+            "was_and_complement_of", "less_than", "equal_to", "conservative_or",
+            "conservative_and", "clear", "compare"],
+        [ "square", "house", "reticule", "button", "tray", "house0", "house1", "house2", "house3", "barrier", "mutex", "dump" ],
+        [ "was_0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" ],
+        [ "northeast", "southeast", "southwest", "northwest", "register_a", "register_b", "register_c", "register_d", "left0", "left1", "left2", "left3" ],
+        [ "water", "coal", "iron_ore", "iron", "oxygen", "water_tile", "sand_tile", "", "right0", "right1", "right2", "right3"],
+        [ "and_complement_of", "go_right", "go_down", "go_left", "go_up", "", "", "", "uturn0", "uturn1", "uturn2", "uturn3"],
+        [ "chest1", "chest2", "pane1", "pane2"],
+        [ "chest3", "chest4", "pane3", "pane4"],
+        [],
+        [ "tileD","tileB","tileC","tile2","tile4","tile3", "tileF", "", "tracks_v"],
+        [ "tileE","tile7","","tile1","tile8"],
+        [ "tile9","","tileA","tile6","","tile0", "", "tracks_h" ],
+        [ "","","tile5"]
+        
+    ]
+}
+

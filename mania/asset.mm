@@ -13,7 +13,7 @@
 namespace manic {
 
 sprite load_image(string_view image_name, atlas& atl) {
-    image a = from_png_and_multiply_alpha(image_name + ".png");
+    image a = from_png_and_multiply_alpha(path_for_resource(image_name, ".png"));
     vec2 origin = { a.rows() / 2, a.columns() / 2 };
     return atl.place(a, origin);
 }
@@ -27,10 +27,10 @@ table3<string, sprite> load_asset(string_view asset_name, atlas& atl) {
                     a(i + 1, j).a = std::max(a(i + 1, j).a, a(i, j).a);
     };
     
-    image a = from_png_and_multiply_alpha(asset_name + ".png");
+    image a = from_png_and_multiply_alpha(path_for_resource(asset_name, "png"));
     clean_image(a);
     
-    auto z = _string_from_file(asset_name + ".json");
+    auto z = _string_from_file(path_for_resource(asset_name, "json"));
     json b = json::from(z);
 
     ptrdiff_t c = b["tile_size"].as_i64();

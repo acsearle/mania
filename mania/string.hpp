@@ -36,6 +36,7 @@ struct string {
     string() = default;
     
     string(char const* z) {
+        assert(z);
         std::size_t n = std::strlen(z);
         _bytes.assign(z, z + n + 1);
         _bytes.pop_back();

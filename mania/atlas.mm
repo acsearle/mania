@@ -11,19 +11,7 @@
 
 namespace manic {
 
-atlas::atlas(GLsizei n, id<MTLDevice> device) : _packer(n), _size(n) {
-    //_vao.bind();
-    //_vbo.bind(GL_ARRAY_BUFFER);
-    //gl::vertex::bind();
-    //_texture.bind(GL_TEXTURE_2D);
-    //glTexImage2D(GL_TEXTURE_2D, 0,
-                 // gl::format<pixel>,
-    //             GL_SRGB8_ALPHA8,
-    //             n, n,
-    //             0,
-    //             gl::format<pixel>, gl::type<pixel>,
-    //             nullptr);
-    
+atlas::atlas(std::size_t n, id<MTLDevice> device) : _packer(n), _size(n) {
     _buffer = [device newBufferWithLength:sizeof(gl::vertex) * 1024 * 32
                                   options:MTLResourceStorageModeShared];
     
@@ -36,11 +24,6 @@ atlas::atlas(GLsizei n, id<MTLDevice> device) : _packer(n), _size(n) {
 
 
 void atlas::commit(id<MTLRenderCommandEncoder> renderEncoder) {
-    //_vbo.bind(GL_ARRAY_BUFFER);
-    //gl::vbo::assign(GL_ARRAY_BUFFER, _vertices, GL_STREAM_DRAW);
-    //_texture.bind(GL_TEXTURE_2D);
-    //_vao.bind();
-    //glDrawArrays(GL_TRIANGLES, 0, (GLsizei) _vertices.size());
     auto n = std::min<std::size_t>(_vertices.size(), 1024 * 32);
     std::memcpy(_buffer.contents,
                 _vertices.data(),
@@ -62,16 +45,7 @@ void atlas::discard() {
 // Place a sprite within the free space of the atlas
 
 sprite atlas::place(const_matrix_view<pixel> v, vec2 origin) {
-    auto tl = _packer.place({(GLsizei) v.columns(), (GLsizei) v.rows()});
-    //glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint) v.stride());
-    //glPixelStorei(GL_UNPACK_ALIGNMENT, (GLint) 1);
-    //_texture.bind(GL_TEXTURE_2D);
-    //glTexSubImage2D(GL_TEXTURE_2D, 0,
-    //                tl.x, tl.y,
-    //                (GLsizei) v.columns(), (GLsizei) v.rows(),
-    //                gl::format<pixel>,
-    //                gl::type<pixel>,
-    //                v.data());
+    auto tl = _packer.place({v.columns(), v.rows()});
     [_texture replaceRegion:MTLRegionMake2D(tl.x, tl.y, v.columns(), v.rows())
                 mipmapLevel:0
                   withBytes:v.data()
@@ -94,8 +68,8 @@ sprite atlas::place(const_matrix_view<pixel> v, vec2 origin) {
 
 
 void atlas::release(sprite s) {
-    vec<GLint, 2> a = s.a.texCoord * _size;
-    vec<GLint, 2> b = s.b.texCoord * _size;
+    vec<int, 2> a = s.a.texCoord * _size;
+    vec<int, 2> b = s.b.texCoord * _size;
     _packer.release(a, b);
 }
 

@@ -23,10 +23,13 @@
 #include "vec.hpp"
 
 namespace manic {
+    
+    string path_for_resource(string_view name, string_view ext);
+
 
 // Apply a simple pixel-scale drop-shadow to existing artwork
 
-image apply_shadow(const_matrix_view<GLubyte> x) {
+image apply_shadow(const_matrix_view<std::uint8_t> x) {
     // We get an alpha map.
     //
     // We want the following drop-shadow:
@@ -43,7 +46,7 @@ image apply_shadow(const_matrix_view<GLubyte> x) {
 
     
     matrix<double> a(x.rows() + 2, x.columns() + 2);
-    matrix<GLubyte> b(x.rows() + 4, x.columns() + 4);
+    matrix<std::uint8_t> b(x.rows() + 4, x.columns() + 4);
     b.sub(2, 2, x.rows(), x.columns()) = x;
 
     // Compute offset filter
@@ -67,7 +70,7 @@ image apply_shadow(const_matrix_view<GLubyte> x) {
     // Infer color for final result
     for (i64 i = 0; i != x.rows(); ++i)
         for (i64 j = 0; j != x.columns(); ++j) {
-            u8 d = std::round(to_sRGB(x(i, j) / 255.0) * 255.0);
+            u8 d = std::round(to_sRGB(x(i, j) / 255.0) * 255.0); // <-- replace with table
             c(i, j + 1).rgb = {d, d, d};
         }
             
@@ -89,7 +92,7 @@ font build_font(atlas& atl) {
     
     FT_Face face;
     e = FT_New_Face(ft,
-                    "/Users/acsearle/Downloads/textures/Futura Medium Condensed.otf",
+                    path_for_resource("Futura Medium Condensed", "otf").c_str(),
                     0,
                     &face);
     assert(!e);
@@ -107,15 +110,10 @@ font build_font(atlas& atl) {
         
         FT_Load_Glyph(face, gindex, FT_LOAD_RENDER);
         
-        auto v = const_matrix_view<GLubyte>(face->glyph->bitmap.buffer,
+        auto v = const_matrix_view<std::uint8_t>(face->glyph->bitmap.buffer,
                                             face->glyph->bitmap.width,
                                             face->glyph->bitmap.pitch,
                                             face->glyph->bitmap.rows);
-        
-        // Unfortunately we can't tell OpenGL to load one channel into all
-        // channels so we have to expand in memory
-        // TODO: investigate texture swizzling
-
         image u = apply_shadow(v);
         
         sprite s = atl.place(u,

@@ -45,7 +45,7 @@ struct atlas {
 
     //gl::texture _texture;
     id<MTLTexture> _texture;
-    GLsizei _size;
+    std::size_t _size;
     //gl::vao _vao;
     //gl::vbo _vbo;
     id<MTLBuffer> _buffer;
@@ -53,9 +53,9 @@ struct atlas {
 
     std::vector<gl::vertex> _vertices;
     
-    packer<GLsizei> _packer;
+    packer<std::size_t> _packer;
     
-    atlas(GLsizei n, id<MTLDevice> device);
+    atlas(std::size_t n, id<MTLDevice> device);
 
     void push_sprite(sprite s) {
         // a - x

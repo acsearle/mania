@@ -238,18 +238,16 @@ static CVReturn DispatchRenderLoop(CVDisplayLinkRef displayLink,
 
 // Keyboard events
 
+// all these events need to be made thread safe
+
 - (void) keyDown:(NSEvent *)event
 {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().key_down([event.charactersIgnoringModifiers characterAtIndex:0]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 - (void) keyUp:(NSEvent*) event
 {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().key_up([event.charactersIgnoringModifiers characterAtIndex:0]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) flagsChanged:(NSEvent *)event
@@ -269,74 +267,50 @@ static CVReturn DispatchRenderLoop(CVDisplayLinkRef displayLink,
 
 -(void) mouseMoved:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_moved(p.x, p.y);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) mouseUp:(NSEvent *)event {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_up([event buttonNumber]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) mouseDown:(NSEvent *)event {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_down([event buttonNumber]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) mouseDragged:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_moved(p.x, p.y);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) rightMouseUp:(NSEvent *)event {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_up([event buttonNumber]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) rightMouseDown:(NSEvent *)event {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_down([event buttonNumber]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) rightMouseDragged:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_moved(p.x, p.y);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) otherMouseUp:(NSEvent *)event {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_up([event buttonNumber]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) otherMouseDown:(NSEvent *)event {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_down([event buttonNumber]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) otherMouseDragged:(NSEvent *)event {
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().mouse_moved(p.x, p.y);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
 -(void) scrollWheel:(NSEvent *)event {
-    //CGLLockContext([[self openGLContext] CGLContextObj]);
     application::get().scrolled([event scrollingDeltaX], [event scrollingDeltaY]);
-    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
-
-
 
 @end

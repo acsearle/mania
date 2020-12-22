@@ -44,7 +44,7 @@ namespace manic {
         vec<T, 2> place(vec<T, 2> wh) {
             
             // Start with the smallest free rectangle with enough area
-            auto i = _free.lower_bound(rect(0, 0, wh.x, wh.y));
+            auto i = _free.lower_bound(rect<T>(0, 0, wh.x, wh.y));
             // Search for free rectangle with big enough dimensions
             while ((i != _free.end()) && ((i->width() < wh.x) || (i->height() < wh.y)))
                 ++i;

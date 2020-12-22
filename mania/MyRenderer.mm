@@ -120,7 +120,6 @@
 
 - (void)renderToMetalLayer:(nonnull CAMetalLayer*)metalLayer
 {
-    printf("%lu\n", sizeof(MyVertex));
     _frameNum++;
     
     // Create a new command buffer for each render pass to the current drawable.

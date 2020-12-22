@@ -432,9 +432,6 @@ namespace manic {
 #include <cstdlib>
 #include <vector>
 
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/gl3.h>
-
 #include "program.hpp"
 #include "vao.hpp"
 #include "vbo.hpp"

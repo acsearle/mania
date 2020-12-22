@@ -10,6 +10,9 @@
 #include "debug.hpp"
 
 namespace manic {
+    
+    string path_for_resource(string_view name, string_view ext);
+
 
 vector<sprite> load_animation(atlas& atl, string_view v, vec2 delta, int n) {
     
@@ -17,8 +20,8 @@ vector<sprite> load_animation(atlas& atl, string_view v, vec2 delta, int n) {
     
     for (int k = 0; k != n; ++k) {
         char z[256];
-        sprintf(z, "%02i.png", k);
-        image a = from_png_and_multiply_alpha(v + z);
+        sprintf(z, "%02i", k);
+        image a = from_png_and_multiply_alpha(path_for_resource(v + z, "png"));
         // BUG: We have just taken an opaque image and premultiplied alpha,
         // achieving nothing at great expense
         

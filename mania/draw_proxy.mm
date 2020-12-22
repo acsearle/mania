@@ -61,7 +61,7 @@ draw_proxy_concrete::draw_proxy_concrete(id<MTLDevice> device)
 : _device(device)
     // , _program("basic")
 , _atlas(4192, device) {
-    _assets = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
+    _assets = load_asset("symbols", _atlas);
     _font = build_font(_atlas);
     {
         // Put a white pixel on the texture so we can render solid blocks of color
@@ -70,16 +70,16 @@ draw_proxy_concrete::draw_proxy_concrete(id<MTLDevice> device)
         auto midpoint = (_solid.a.texCoord + _solid.b.texCoord) / 2.0f;
         _solid.a.texCoord = _solid.b.texCoord = midpoint;
     }
-    _ui_rect = load_image("/Users/acsearle/Downloads/textures/frame", _atlas);
+    _ui_rect = load_image("frame", _atlas);
     //std::cout << load("enum", "hpp") << std::endl;
     
-    _animation_h = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepper", {1, 0}, 32);
-    _animation_v = load_animation(_atlas, "/Users/acsearle/Documents/pov/stepperv", {0, (float)(1.0/sqrt(2.0))}, 32);
+    _animation_h = load_animation(_atlas, "stepper", {1, 0}, 32);
+    _animation_v = load_animation(_atlas, "stepperv", {0, (float)(1.0/sqrt(2.0))}, 32);
     
-    _buildings = load_animation(_atlas, "/Users/acsearle/Documents/pov/silo", {0,0}, 5);
-    _terrain = load_animation(_atlas, "/Users/acsearle/Documents/pov/terrain", {0, 0}, 16);
+    _buildings = load_animation(_atlas, "silo", {0,0}, 5);
+    _terrain = load_animation(_atlas, "terrain", {0, 0}, 16);
 
-    _background = load_image("/Users/acsearle/Downloads/textures/curioso-photography", _atlas);
+    _background = load_image("curioso-photography", _atlas);
     
     /*
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
