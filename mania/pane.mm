@@ -45,7 +45,6 @@ application& application::get() {
             y += b.y * 1.5;
         }
         a->_pane = q;
-        
         */
         return a;
     }();

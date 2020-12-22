@@ -6,6 +6,7 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
+#include "MyShaderTypes.h"
 #include "atlas.hpp"
 
 namespace manic {
@@ -23,10 +24,11 @@ atlas::atlas(GLsizei n, id<MTLDevice> device) : _packer(n), _size(n) {
     //             gl::format<pixel>, gl::type<pixel>,
     //             nullptr);
     
-    _buffer = [device newBufferWithLength:sizeof(gl::vertex) * 1024 options:MTLResourceStorageModeShared];
+    _buffer = [device newBufferWithLength:sizeof(gl::vertex) * 1024 * 32
+                                  options:MTLResourceStorageModeShared];
     
     MTLTextureDescriptor *descriptor = [[MTLTextureDescriptor alloc] init];
-    descriptor.pixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
+    descriptor.pixelFormat = MTLPixelFormatRGBA8Unorm_sRGB;
     descriptor.width = n;
     descriptor.height = n;
     _texture = [device newTextureWithDescriptor:descriptor];
@@ -39,7 +41,7 @@ void atlas::commit(id<MTLRenderCommandEncoder> renderEncoder) {
     //_texture.bind(GL_TEXTURE_2D);
     //_vao.bind();
     //glDrawArrays(GL_TRIANGLES, 0, (GLsizei) _vertices.size());
-    auto n = std::min<std::size_t>(_vertices.size(), 1024);
+    auto n = std::min<std::size_t>(_vertices.size(), 1024 * 32);
     std::memcpy(_buffer.contents,
                 _vertices.data(),
                 n * sizeof(gl::vertex));
@@ -48,6 +50,8 @@ void atlas::commit(id<MTLRenderCommandEncoder> renderEncoder) {
     [renderEncoder setVertexBuffer:_buffer
                             offset:0
                            atIndex:0 ];
+    [renderEncoder setFragmentTexture:_texture
+                              atIndex:AAPLTextureIndexBaseColor];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:n];
 }
 

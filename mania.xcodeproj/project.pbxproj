@@ -25,25 +25,17 @@
 		CAAB23A2238BC87B00F1D85C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23A1238BC87B00F1D85C /* main.m */; };
 		CAAB23BB238BC92C00F1D85C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23BA238BC92C00F1D85C /* main.cpp */; };
 		CAAB242A238BC9F000F1D85C /* text.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23C0238BC9EA00F1D85C /* text.mm */; };
-		CAAB242B238BC9F000F1D85C /* MyOpenGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23C2238BC9EA00F1D85C /* MyOpenGLView.mm */; };
 		CAAB242D238BC9F000F1D85C /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23D1238BC9EB00F1D85C /* image.cpp */; };
-		CAAB242E238BC9F000F1D85C /* program.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23D5238BC9EB00F1D85C /* program.cpp */; };
 		CAAB242F238BC9F000F1D85C /* renderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23D9238BC9EC00F1D85C /* renderer.mm */; };
 		CAAB2430238BC9F000F1D85C /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23DA238BC9EC00F1D85C /* debug.cpp */; };
-		CAAB2431238BC9F000F1D85C /* basic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = CAAB23DB238BC9EC00F1D85C /* basic.fsh */; };
 		CAAB2434238BC9F000F1D85C /* atlas.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23E0238BC9EC00F1D85C /* atlas.mm */; };
 		CAAB2435238BC9F000F1D85C /* asset.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23E2238BC9EC00F1D85C /* asset.mm */; };
 		CAAB2437238BC9F000F1D85C /* parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23E5238BC9EC00F1D85C /* parse.cpp */; };
 		CAAB243C238BC9F000F1D85C /* terrain2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23F2238BC9ED00F1D85C /* terrain2.cpp */; };
-		CAAB243D238BC9F000F1D85C /* vbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23F3238BC9ED00F1D85C /* vbo.cpp */; };
-		CAAB243E238BC9F000F1D85C /* vao.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23F8238BC9ED00F1D85C /* vao.cpp */; };
 		CAAB2441238BC9F000F1D85C /* application.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2400238BC9EE00F1D85C /* application.mm */; };
-		CAAB2443238BC9F000F1D85C /* vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB240A238BC9EE00F1D85C /* vertex.cpp */; };
 		CAAB2445238BC9F000F1D85C /* animation.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2412238BC9EF00F1D85C /* animation.mm */; };
-		CAAB2446238BC9F000F1D85C /* shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2416238BC9EF00F1D85C /* shader.cpp */; };
 		CAAB2447238BC9F000F1D85C /* packer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2417238BC9EF00F1D85C /* packer.cpp */; };
 		CAAB2448238BC9F000F1D85C /* reflector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2418238BC9EF00F1D85C /* reflector.cpp */; };
-		CAAB244B238BC9F000F1D85C /* basic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = CAAB2422238BC9F000F1D85C /* basic.vsh */; };
 		CAAB244C238BC9F000F1D85C /* preprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2426238BC9F000F1D85C /* preprocessor.cpp */; };
 		CAAB244D238BC9F000F1D85C /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2428238BC9F000F1D85C /* json.cpp */; };
 		CAAB244E238BC9F000F1D85C /* terrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2429238BC9F000F1D85C /* terrain.cpp */; };
@@ -137,9 +129,7 @@
 		CAAB23BF238BC9EA00F1D85C /* image.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = image.hpp; sourceTree = "<group>"; };
 		CAAB23C0238BC9EA00F1D85C /* text.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = text.mm; sourceTree = "<group>"; };
 		CAAB23C1238BC9EA00F1D85C /* debug.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
-		CAAB23C2238BC9EA00F1D85C /* MyOpenGLView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MyOpenGLView.mm; sourceTree = "<group>"; };
 		CAAB23C3238BC9EA00F1D85C /* ordset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ordset.hpp; sourceTree = "<group>"; };
-		CAAB23C4238BC9EA00F1D85C /* texture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = texture.hpp; sourceTree = "<group>"; };
 		CAAB23C6238BC9EB00F1D85C /* filter_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = filter_iterator.hpp; sourceTree = "<group>"; };
 		CAAB23C8238BC9EB00F1D85C /* option.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = option.hpp; sourceTree = "<group>"; };
 		CAAB23C9238BC9EB00F1D85C /* cg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cg.hpp; sourceTree = "<group>"; };
@@ -153,13 +143,11 @@
 		CAAB23D2238BC9EB00F1D85C /* const_matrix_view.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = const_matrix_view.hpp; sourceTree = "<group>"; };
 		CAAB23D3238BC9EB00F1D85C /* reflector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = reflector.hpp; sourceTree = "<group>"; };
 		CAAB23D4238BC9EB00F1D85C /* enumerate.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = enumerate.hpp; sourceTree = "<group>"; };
-		CAAB23D5238BC9EB00F1D85C /* program.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = program.cpp; sourceTree = "<group>"; };
 		CAAB23D6238BC9EB00F1D85C /* table3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = table3.hpp; sourceTree = "<group>"; };
 		CAAB23D7238BC9EB00F1D85C /* terrain2.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = terrain2.hpp; sourceTree = "<group>"; };
 		CAAB23D8238BC9EB00F1D85C /* raw_vector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = raw_vector.hpp; sourceTree = "<group>"; };
 		CAAB23D9238BC9EC00F1D85C /* renderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = renderer.mm; sourceTree = "<group>"; };
 		CAAB23DA238BC9EC00F1D85C /* debug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = debug.cpp; sourceTree = "<group>"; };
-		CAAB23DB238BC9EC00F1D85C /* basic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = basic.fsh; sourceTree = "<group>"; };
 		CAAB23DD238BC9EC00F1D85C /* hash.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = hash.hpp; sourceTree = "<group>"; };
 		CAAB23DE238BC9EC00F1D85C /* vector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vector.hpp; sourceTree = "<group>"; };
 		CAAB23DF238BC9EC00F1D85C /* nr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nr.cpp; sourceTree = "<group>"; };
@@ -167,7 +155,6 @@
 		CAAB23E2238BC9EC00F1D85C /* asset.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = asset.mm; sourceTree = "<group>"; };
 		CAAB23E4238BC9EC00F1D85C /* renderer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = renderer.hpp; sourceTree = "<group>"; };
 		CAAB23E5238BC9EC00F1D85C /* parse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parse.cpp; sourceTree = "<group>"; };
-		CAAB23E6238BC9EC00F1D85C /* vertex.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vertex.hpp; sourceTree = "<group>"; };
 		CAAB23E8238BC9EC00F1D85C /* cg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cg.cpp; sourceTree = "<group>"; };
 		CAAB23E9238BC9EC00F1D85C /* string.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = string.hpp; sourceTree = "<group>"; };
 		CAAB23EA238BC9EC00F1D85C /* const_vector_view.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = const_vector_view.hpp; sourceTree = "<group>"; };
@@ -176,15 +163,12 @@
 		CAAB23F0238BC9ED00F1D85C /* asset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = asset.hpp; sourceTree = "<group>"; };
 		CAAB23F1238BC9ED00F1D85C /* const_matrix_iterator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = const_matrix_iterator.hpp; sourceTree = "<group>"; };
 		CAAB23F2238BC9ED00F1D85C /* terrain2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = terrain2.cpp; sourceTree = "<group>"; };
-		CAAB23F3238BC9ED00F1D85C /* vbo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vbo.cpp; sourceTree = "<group>"; };
 		CAAB23F4238BC9ED00F1D85C /* stride_ptr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = stride_ptr.hpp; sourceTree = "<group>"; };
 		CAAB23F5238BC9ED00F1D85C /* sentinel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sentinel.h; sourceTree = "<group>"; };
 		CAAB23F6238BC9ED00F1D85C /* parse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = parse.hpp; sourceTree = "<group>"; };
 		CAAB23F7238BC9ED00F1D85C /* unicode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = unicode.hpp; sourceTree = "<group>"; };
-		CAAB23F8238BC9ED00F1D85C /* vao.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vao.cpp; sourceTree = "<group>"; };
 		CAAB23FA238BC9ED00F1D85C /* vector_view.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vector_view.hpp; sourceTree = "<group>"; };
 		CAAB23FB238BC9ED00F1D85C /* pane.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pane.hpp; sourceTree = "<group>"; };
-		CAAB23FC238BC9EE00F1D85C /* program.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = program.hpp; sourceTree = "<group>"; };
 		CAAB23FD238BC9EE00F1D85C /* application.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = application.hpp; sourceTree = "<group>"; };
 		CAAB23FF238BC9EE00F1D85C /* space2.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = space2.hpp; sourceTree = "<group>"; };
 		CAAB2400238BC9EE00F1D85C /* application.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = application.mm; sourceTree = "<group>"; };
@@ -193,11 +177,8 @@
 		CAAB2403238BC9EE00F1D85C /* rleq.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rleq.hpp; sourceTree = "<group>"; };
 		CAAB2404238BC9EE00F1D85C /* vec.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vec.hpp; sourceTree = "<group>"; };
 		CAAB2405238BC9EE00F1D85C /* matrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = matrix.hpp; sourceTree = "<group>"; };
-		CAAB2407238BC9EE00F1D85C /* MyOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOpenGLView.h; sourceTree = "<group>"; };
 		CAAB2408238BC9EE00F1D85C /* matrix_view.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = matrix_view.hpp; sourceTree = "<group>"; };
 		CAAB2409238BC9EE00F1D85C /* rect.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rect.hpp; sourceTree = "<group>"; };
-		CAAB240A238BC9EE00F1D85C /* vertex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertex.cpp; sourceTree = "<group>"; };
-		CAAB240B238BC9EE00F1D85C /* vbo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vbo.hpp; sourceTree = "<group>"; };
 		CAAB240C238BC9EE00F1D85C /* deque.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = deque.hpp; sourceTree = "<group>"; };
 		CAAB240D238BC9EE00F1D85C /* int.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = int.cpp; sourceTree = "<group>"; };
 		CAAB240E238BC9EF00F1D85C /* mat.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mat.hpp; sourceTree = "<group>"; };
@@ -207,17 +188,13 @@
 		CAAB2413238BC9EF00F1D85C /* json.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json.hpp; sourceTree = "<group>"; };
 		CAAB2414238BC9EF00F1D85C /* text.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = text.hpp; sourceTree = "<group>"; };
 		CAAB2415238BC9EF00F1D85C /* object.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = object.hpp; sourceTree = "<group>"; };
-		CAAB2416238BC9EF00F1D85C /* shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shader.cpp; sourceTree = "<group>"; };
 		CAAB2417238BC9EF00F1D85C /* packer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = packer.cpp; sourceTree = "<group>"; };
 		CAAB2418238BC9EF00F1D85C /* reflector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reflector.cpp; sourceTree = "<group>"; };
 		CAAB2419238BC9EF00F1D85C /* relocate.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = relocate.hpp; sourceTree = "<group>"; };
-		CAAB241B238BC9EF00F1D85C /* shader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = shader.hpp; sourceTree = "<group>"; };
 		CAAB241C238BC9EF00F1D85C /* graveyard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = graveyard.cpp; sourceTree = "<group>"; };
 		CAAB241D238BC9EF00F1D85C /* packer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = packer.hpp; sourceTree = "<group>"; };
 		CAAB241E238BC9EF00F1D85C /* common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = common.hpp; sourceTree = "<group>"; };
-		CAAB241F238BC9EF00F1D85C /* vao.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vao.hpp; sourceTree = "<group>"; };
 		CAAB2421238BC9F000F1D85C /* indirect.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = indirect.hpp; sourceTree = "<group>"; };
-		CAAB2422238BC9F000F1D85C /* basic.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = basic.vsh; sourceTree = "<group>"; };
 		CAAB2423238BC9F000F1D85C /* capture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = capture.hpp; sourceTree = "<group>"; };
 		CAAB2425238BC9F000F1D85C /* maybe.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = maybe.hpp; sourceTree = "<group>"; };
 		CAAB2426238BC9F000F1D85C /* preprocessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = preprocessor.cpp; sourceTree = "<group>"; };
@@ -361,7 +338,6 @@
 				CAAB2486238E47E800F1D85C /* delta */,
 				CAAB2477238BDFC800F1D85C /* io */,
 				CAAB246F238BDD8500F1D85C /* junkyard */,
-				CAAB246C238BDD5000F1D85C /* opengl */,
 				CAAB2472238BDE6F00F1D85C /* platform */,
 				CAAB2474238BDEE900F1D85C /* simulation */,
 				CAAB2478238BE01100F1D85C /* text */,
@@ -426,25 +402,6 @@
 				CAAB2464238BCAE800F1D85C /* libpng16.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		CAAB246C238BDD5000F1D85C /* opengl */ = {
-			isa = PBXGroup;
-			children = (
-				CAAB2479238BE0A900F1D85C /* shaders */,
-				CAAB23D5238BC9EB00F1D85C /* program.cpp */,
-				CAAB23FC238BC9EE00F1D85C /* program.hpp */,
-				CAAB2416238BC9EF00F1D85C /* shader.cpp */,
-				CAAB241B238BC9EF00F1D85C /* shader.hpp */,
-				CAAB23C4238BC9EA00F1D85C /* texture.hpp */,
-				CAAB23F8238BC9ED00F1D85C /* vao.cpp */,
-				CAAB241F238BC9EF00F1D85C /* vao.hpp */,
-				CAAB23F3238BC9ED00F1D85C /* vbo.cpp */,
-				CAAB240B238BC9EE00F1D85C /* vbo.hpp */,
-				CAAB240A238BC9EE00F1D85C /* vertex.cpp */,
-				CAAB23E6238BC9EC00F1D85C /* vertex.hpp */,
-			);
-			name = opengl;
 			sourceTree = "<group>";
 		};
 		CAAB246F238BDD8500F1D85C /* junkyard */ = {
@@ -523,8 +480,6 @@
 				CAAB23A3238BC87B00F1D85C /* mania.entitlements */,
 				CA705DC9259146A200559EE7 /* MyMetalView.h */,
 				CA705DCA259146A200559EE7 /* MyMetalView.mm */,
-				CAAB2407238BC9EE00F1D85C /* MyOpenGLView.h */,
-				CAAB23C2238BC9EA00F1D85C /* MyOpenGLView.mm */,
 				CA705DD525914B5700559EE7 /* MyRenderer.h */,
 				CA705DD625914B5700559EE7 /* MyRenderer.mm */,
 				CA705DDF25914EBA00559EE7 /* MyShaders.metal */,
@@ -620,15 +575,6 @@
 				CAAB23F7238BC9ED00F1D85C /* unicode.hpp */,
 			);
 			name = text;
-			sourceTree = "<group>";
-		};
-		CAAB2479238BE0A900F1D85C /* shaders */ = {
-			isa = PBXGroup;
-			children = (
-				CAAB23DB238BC9EC00F1D85C /* basic.fsh */,
-				CAAB2422238BC9F000F1D85C /* basic.vsh */,
-			);
-			name = shaders;
 			sourceTree = "<group>";
 		};
 		CAAB2486238E47E800F1D85C /* delta */ = {
@@ -763,9 +709,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CAAB2431238BC9F000F1D85C /* basic.fsh in Resources */,
 				CAAB239C238BC87B00F1D85C /* Assets.xcassets in Resources */,
-				CAAB244B238BC9F000F1D85C /* basic.vsh in Resources */,
 				CAAB239F238BC87B00F1D85C /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -778,31 +722,26 @@
 			buildActionMask = 2147483647;
 			files = (
 				CAAB2434238BC9F000F1D85C /* atlas.mm in Sources */,
-				CAAB243D238BC9F000F1D85C /* vbo.cpp in Sources */,
 				CA8CB34D240F97A200FE7E52 /* bytes.cpp in Sources */,
 				CABEB8DA23B4BB9D00A12ACC /* draw_proxy.mm in Sources */,
 				CAAB244D238BC9F000F1D85C /* json.cpp in Sources */,
 				CAAB242D238BC9F000F1D85C /* image.cpp in Sources */,
-				CAAB2443238BC9F000F1D85C /* vertex.cpp in Sources */,
 				CAAB239A238BC87900F1D85C /* ViewController.m in Sources */,
 				CAAB2437238BC9F000F1D85C /* parse.cpp in Sources */,
 				CAAB2448238BC9F000F1D85C /* reflector.cpp in Sources */,
 				CAAB23A2238BC87B00F1D85C /* main.m in Sources */,
 				CAAB242F238BC9F000F1D85C /* renderer.mm in Sources */,
 				CA705DCB259146A200559EE7 /* MyMetalView.mm in Sources */,
-				CAAB242E238BC9F000F1D85C /* program.cpp in Sources */,
 				CAAB2445238BC9F000F1D85C /* animation.mm in Sources */,
 				CA705DD725914B5700559EE7 /* MyRenderer.mm in Sources */,
 				CAAB2447238BC9F000F1D85C /* packer.cpp in Sources */,
 				CAAB244C238BC9F000F1D85C /* preprocessor.cpp in Sources */,
 				CA705DE025914EBA00559EE7 /* MyShaders.metal in Sources */,
 				CAAB249D2394E91300F1D85C /* async.cpp in Sources */,
-				CAAB242B238BC9F000F1D85C /* MyOpenGLView.mm in Sources */,
 				CABEB8D723B2BEA800A12ACC /* entity2.cpp in Sources */,
 				CAAB244E238BC9F000F1D85C /* terrain.cpp in Sources */,
 				CA2745DA251AD09500198510 /* atomic_wait.cpp in Sources */,
 				CAAB243C238BC9F000F1D85C /* terrain2.cpp in Sources */,
-				CAAB243E238BC9F000F1D85C /* vao.cpp in Sources */,
 				CAAB242A238BC9F000F1D85C /* text.mm in Sources */,
 				CAAB2441238BC9F000F1D85C /* application.mm in Sources */,
 				CABEB8DC23B4C89400A12ACC /* pane.mm in Sources */,
@@ -810,7 +749,6 @@
 				CAAB2397238BC87900F1D85C /* AppDelegate.m in Sources */,
 				CAAB2430238BC9F000F1D85C /* debug.cpp in Sources */,
 				CAAB2482238CF1C400F1D85C /* world.cpp in Sources */,
-				CAAB2446238BC9F000F1D85C /* shader.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

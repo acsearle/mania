@@ -44,7 +44,7 @@
         _drawableRenderDescriptor = [MTLRenderPassDescriptor new];
         _drawableRenderDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
         _drawableRenderDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-        _drawableRenderDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 1, 1, 1);
+        _drawableRenderDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1);
                 
         {
             id<MTLLibrary> shaderLib = [_device newDefaultLibrary];
@@ -73,10 +73,10 @@
             static const MyVertex quadVertices[] =
             {
                 // Pixel positions, Color coordinates
-                { { -250,  -250 },  {0, 0}, { 0, 255, 0, 255 } },
-                { {  250,  -250 },  {1, 0}, { 255, 0, 0, 255 } },
-                { { -250,   250 },  {0, 1}, { 0, 0, 255, 255 } },
-                { {  250,   250 },  {1, 1}, { 255, 0, 255, 255 } },
+                { { -250,  -250 },  {0, 0}, { 255, 255, 255, 255 } },
+                { {  250,  -250 },  {1, 0}, { 255, 255, 255, 255 } },
+                { { -250,   250 },  {0, 1}, { 255, 255, 255, 255 } },
+                { {  250,   250 },  {1, 1}, { 255, 255, 255, 255 } },
             };
             
             // Create a vertex buffer, and initialize it with the vertex data.
@@ -93,6 +93,15 @@
             pipelineDescriptor.vertexFunction                  = vertexProgram;
             pipelineDescriptor.fragmentFunction                = fragmentProgram;
             pipelineDescriptor.colorAttachments[0].pixelFormat = drawabklePixelFormat;
+            
+            pipelineDescriptor.colorAttachments[0].blendingEnabled = YES;
+            pipelineDescriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
+            pipelineDescriptor.colorAttachments[0].alphaBlendOperation = MTLBlendOperationAdd;
+            pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorOne;
+            pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+            pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorOne;
+            pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+
                         
             NSError *error;
             _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineDescriptor
@@ -126,6 +135,7 @@
     }
     
     _drawableRenderDescriptor.colorAttachments[0].texture = currentDrawable.texture;
+
     
     id <MTLRenderCommandEncoder> renderEncoder =
     [commandBuffer renderCommandEncoderWithDescriptor:_drawableRenderDescriptor];
@@ -133,14 +143,10 @@
     
     [renderEncoder setRenderPipelineState:_pipelineState];
     
-    [renderEncoder setVertexBuffer:_vertices
-                            offset:0
-                           atIndex:MyVertexInputIndexVertices ];
-    
     {
         MyUniforms uniforms;
         
-        uniforms.scale = 0.5 + (1.0 + 0.5 * sin(_frameNum * 0.1));
+        uniforms.scale = 1.0; // + (1.0 + 0.5 * sin(_frameNum * 0.1));
         uniforms.viewportSize = _viewportSize;
         
         [renderEncoder setVertexBytes:&uniforms
@@ -148,11 +154,13 @@
                               atIndex:MyVertexInputIndexUniforms ];
     }
     
-    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-    
-    
     manic::application::get().draw(renderEncoder);
     
+    //[renderEncoder setVertexBuffer:_vertices
+    //                        offset:0
+    //                       atIndex:MyVertexInputIndexVertices ];
+        
+    //[renderEncoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     
     [renderEncoder endEncoding];
     
@@ -165,6 +173,8 @@
 {
     _viewportSize.x = drawableSize.width;
     _viewportSize.y = drawableSize.height;
+    
+    manic::application::get().resize(drawableSize.width, drawableSize.height);
     
 }
 

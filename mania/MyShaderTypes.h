@@ -17,6 +17,11 @@ typedef enum MyVertexInputIndex
     MyVertexInputIndexUniforms = 1,
 } MyVertexInputIndex;
 
+typedef enum AAPLTextureIndex
+{
+    AAPLTextureIndexBaseColor = 0,
+} AAPLTextureIndex;
+
 typedef struct
 {
     // Positions in pixel space (i.e. a value of 100 indicates 100 pixels from the origin/center)
