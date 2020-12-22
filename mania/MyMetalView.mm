@@ -1,5 +1,5 @@
 //
-//  MyMetalView.m
+//  MyMetalView.mm
 //  mania
 //
 //  Created by Antony Searle on 22/12/20.
@@ -7,6 +7,11 @@
 //
 
 #import "MyMetalView.h"
+
+#include "application.hpp"
+#include "renderer.hpp"
+
+using manic::application;
 
 @implementation MyMetalView
 {
@@ -209,5 +214,129 @@ static CVReturn DispatchRenderLoop(CVDisplayLinkRef displayLink,
         [_delegate renderToMetalLayer:_metalLayer];
     }
 }
+
+
+
+// IO events
+
+
+- (BOOL)acceptsFirstResponder
+{
+    return YES;
+}
+
+- (BOOL)becomeFirstResponder
+{
+    return  YES;
+}
+
+- (BOOL)resignFirstResponder
+{
+    NSLog(@"Will resignFirstResponder");
+    return [super resignFirstResponder];
+}
+
+// Keyboard events
+
+- (void) keyDown:(NSEvent *)event
+{
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().key_down([event.charactersIgnoringModifiers characterAtIndex:0]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+- (void) keyUp:(NSEvent*) event
+{
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().key_up([event.charactersIgnoringModifiers characterAtIndex:0]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) flagsChanged:(NSEvent *)event
+{
+    NSLog(@"%lu", (unsigned long)event.modifierFlags);
+}
+
+// Mouse events
+
+-(void) mouseEntered:(NSEvent *)event {
+    NSLog(@"mouseEntered");
+}
+
+-(void) mouseExited:(NSEvent *)event {
+    NSLog(@"mouseExited");
+}
+
+-(void) mouseMoved:(NSEvent *)event {
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_moved(p.x, p.y);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) mouseUp:(NSEvent *)event {
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_up([event buttonNumber]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) mouseDown:(NSEvent *)event {
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_down([event buttonNumber]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) mouseDragged:(NSEvent *)event {
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_moved(p.x, p.y);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) rightMouseUp:(NSEvent *)event {
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_up([event buttonNumber]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) rightMouseDown:(NSEvent *)event {
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_down([event buttonNumber]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) rightMouseDragged:(NSEvent *)event {
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_moved(p.x, p.y);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) otherMouseUp:(NSEvent *)event {
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_up([event buttonNumber]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) otherMouseDown:(NSEvent *)event {
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_down([event buttonNumber]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) otherMouseDragged:(NSEvent *)event {
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().mouse_moved(p.x, p.y);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+-(void) scrollWheel:(NSEvent *)event {
+    //CGLLockContext([[self openGLContext] CGLContextObj]);
+    application::get().scrolled([event scrollingDeltaX], [event scrollingDeltaY]);
+    //CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+
 
 @end

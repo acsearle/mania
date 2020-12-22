@@ -70,13 +70,10 @@
             static const MyVertex quadVertices[] =
             {
                 // Pixel positions, Color coordinates
-                { {  250,  -250 },  { 1.f, 0.f, 0.f } },
-                { { -250,  -250 },  { 0.f, 1.f, 0.f } },
-                { { -250,   250 },  { 0.f, 0.f, 1.f } },
-                
-                { {  250,  -250 },  { 1.f, 0.f, 0.f } },
-                { { -250,   250 },  { 0.f, 0.f, 1.f } },
-                { {  250,   250 },  { 1.f, 0.f, 1.f } },
+                { { -250,  -250 },  {0, 0}, { 0, 255, 0, 255 } },
+                { {  250,  -250 },  {1, 0}, { 255, 0, 0, 255 } },
+                { { -250,   250 },  {0, 1}, { 0, 0, 255, 255 } },
+                { {  250,   250 },  {1, 1}, { 255, 0, 255, 255 } },
             };
             
             // Create a vertex buffer, and initialize it with the vertex data.
@@ -109,6 +106,7 @@
 
 - (void)renderToMetalLayer:(nonnull CAMetalLayer*)metalLayer
 {
+    printf("%lu\n", sizeof(MyVertex));
     _frameNum++;
     
     // Create a new command buffer for each render pass to the current drawable.
@@ -145,7 +143,7 @@
                               atIndex:MyVertexInputIndexUniforms ];
     }
     
-    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:6];
+    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     
     [renderEncoder endEncoding];
     

@@ -11,7 +11,7 @@
 		CA2745DA251AD09500198510 /* atomic_wait.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA2745D9251AD09500198510 /* atomic_wait.cpp */; };
 		CA2745DB251AD09500198510 /* atomic_wait.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA2745D9251AD09500198510 /* atomic_wait.cpp */; };
 		CA4ABA4E244ACAAB008295A7 /* awrc-test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA4ABA4D244ACAAB008295A7 /* awrc-test.cpp */; };
-		CA705DCB259146A200559EE7 /* MyMetalView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA705DCA259146A200559EE7 /* MyMetalView.m */; };
+		CA705DCB259146A200559EE7 /* MyMetalView.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA705DCA259146A200559EE7 /* MyMetalView.mm */; };
 		CA705DD725914B5700559EE7 /* MyRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = CA705DD625914B5700559EE7 /* MyRenderer.m */; };
 		CA705DE025914EBA00559EE7 /* MyShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = CA705DDF25914EBA00559EE7 /* MyShaders.metal */; };
 		CA8CB34823FBCF5A00FE7E52 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23D1238BC9EB00F1D85C /* image.cpp */; };
@@ -113,7 +113,7 @@
 		CA4ABA4D244ACAAB008295A7 /* awrc-test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "awrc-test.cpp"; sourceTree = "<group>"; };
 		CA705D4C258B32D800559EE7 /* bytes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bytes.h; sourceTree = "<group>"; };
 		CA705DC9259146A200559EE7 /* MyMetalView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyMetalView.h; sourceTree = "<group>"; };
-		CA705DCA259146A200559EE7 /* MyMetalView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyMetalView.m; sourceTree = "<group>"; };
+		CA705DCA259146A200559EE7 /* MyMetalView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MyMetalView.mm; sourceTree = "<group>"; };
 		CA705DD525914B5700559EE7 /* MyRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyRenderer.h; sourceTree = "<group>"; };
 		CA705DD625914B5700559EE7 /* MyRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyRenderer.m; sourceTree = "<group>"; };
 		CA705DDB25914D9A00559EE7 /* MyShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyShaderTypes.h; sourceTree = "<group>"; };
@@ -522,7 +522,7 @@
 				CAAB239D238BC87B00F1D85C /* Main.storyboard */,
 				CAAB23A3238BC87B00F1D85C /* mania.entitlements */,
 				CA705DC9259146A200559EE7 /* MyMetalView.h */,
-				CA705DCA259146A200559EE7 /* MyMetalView.m */,
+				CA705DCA259146A200559EE7 /* MyMetalView.mm */,
 				CAAB2407238BC9EE00F1D85C /* MyOpenGLView.h */,
 				CAAB23C2238BC9EA00F1D85C /* MyOpenGLView.mm */,
 				CA705DD525914B5700559EE7 /* MyRenderer.h */,
@@ -789,7 +789,7 @@
 				CAAB2448238BC9F000F1D85C /* reflector.cpp in Sources */,
 				CAAB23A2238BC87B00F1D85C /* main.m in Sources */,
 				CAAB242F238BC9F000F1D85C /* renderer.cpp in Sources */,
-				CA705DCB259146A200559EE7 /* MyMetalView.m in Sources */,
+				CA705DCB259146A200559EE7 /* MyMetalView.mm in Sources */,
 				CAAB242E238BC9F000F1D85C /* program.cpp in Sources */,
 				CAAB2445238BC9F000F1D85C /* animation.cpp in Sources */,
 				CA705DD725914B5700559EE7 /* MyRenderer.m in Sources */,

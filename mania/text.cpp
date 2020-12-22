@@ -6,8 +6,14 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+#pragma clang diagnostic pop
+
 
 #include "debug.hpp"
 #include "text.hpp"

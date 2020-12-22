@@ -17,7 +17,8 @@ using namespace metal;
 struct RasterizerData
 {
     float4 clipSpacePosition [[position]];
-    float3 color;
+    float2 texCoord;
+    float4 color;
 };
 
 vertex RasterizerData
@@ -41,7 +42,9 @@ vertexShader(uint vertexID [[ vertex_id ]],
     out.clipSpacePosition.z = 0.0;
     out.clipSpacePosition.w = 1.0;
     
-    out.color = vertexArray[vertexID].color;
+    out.texCoord = vertexArray[vertexID].texCoord;
+    
+    out.color = float4(vertexArray[vertexID].color) / 255;
     
     return out;
 }
@@ -49,6 +52,6 @@ vertexShader(uint vertexID [[ vertex_id ]],
 fragment float4
 fragmentShader(RasterizerData in [[stage_in]])
 {
-    return float4(in.color, 1.0);
+    return in.color;
 }
 

@@ -20,6 +20,8 @@
 
 namespace manic {
     
+    // these are under-aligned for SIMD
+    
     template<typename T, std::size_t N>
     class vec;
     

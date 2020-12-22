@@ -26,12 +26,14 @@ enum class attribute {
     texCoord
 };
 
-struct vertex {
+struct alignas(8) vertex {
     vec2 position;
     vec2 texCoord;
     vec<GLubyte, 4> color;
     static void bind();
 };
+    
+    static_assert(sizeof(vertex) == 24);
 
 // Infer format from a struct
 

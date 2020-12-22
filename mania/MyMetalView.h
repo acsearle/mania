@@ -9,7 +9,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 #import <Metal/Metal.h>
 
-@import AppKit;
+#include <AppKit/AppKit.h>
 
 // Protocol to provide resize and redraw callbacks to a delegate
 @protocol MyMetalViewDelegate <NSObject>

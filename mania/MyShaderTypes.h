@@ -22,8 +22,10 @@ typedef struct
     // Positions in pixel space (i.e. a value of 100 indicates 100 pixels from the origin/center)
     vector_float2 position;
     
+    vector_float2 texCoord;
+    
     // 2D texture coordinate
-    vector_float3 color;
+    vector_uchar4 color;
 } MyVertex;
 
 typedef struct
