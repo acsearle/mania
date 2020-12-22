@@ -9,17 +9,21 @@
 #ifndef atlas_hpp
 #define atlas_hpp
 
-#define GL_SILENCE_DEPRECATION
+//#define GL_SILENCE_DEPRECATION
 
 #include <vector>
+
+#import <Metal/Metal.h>
 
 #include "const_matrix_view.hpp"
 #include "image.hpp"
 #include "packer.hpp"
-#include "texture.hpp"
-#include "vao.hpp"
-#include "vbo.hpp"
+//#include "texture.hpp"
+//#include "vao.hpp"
+//#include "vbo.hpp"
 #include "vertex.hpp"
+
+
 
 namespace manic {
 
@@ -39,16 +43,19 @@ struct sprite {
 // with smaller images such as png assets and font glyphs.
 struct atlas {
 
-    gl::texture _texture;
+    //gl::texture _texture;
+    id<MTLTexture> _texture;
     GLsizei _size;
-    gl::vao _vao;
-    gl::vbo _vbo;
+    //gl::vao _vao;
+    //gl::vbo _vbo;
+    id<MTLBuffer> _buffer;
+    
 
     std::vector<gl::vertex> _vertices;
     
     packer<GLsizei> _packer;
     
-    atlas(GLsizei n = 1024);
+    atlas(GLsizei n, id<MTLDevice> device);
 
     void push_sprite(sprite s) {
         // a - x
@@ -85,7 +92,7 @@ struct atlas {
         push_sprite(s);
     }
         
-    void commit();
+    void commit(id<MTLRenderCommandEncoder> renderEncoder);
     
     void discard();
     

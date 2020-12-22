@@ -9,6 +9,9 @@
 #import "MyShaderTypes.h"
 #import "MyRenderer.h"
 
+#include "application.hpp"
+#include "draw_proxy.hpp"
+
 @implementation MyRenderer
 {
     // renderer global ivars
@@ -99,6 +102,8 @@
                 NSLog(@"ERROR: Failed aquiring pipeline state: %@", error);
                 return nil;
             }
+            
+            gl::draw_proxy::get(_device);
         }
     }
     return self;
@@ -144,6 +149,10 @@
     }
     
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    
+    
+    manic::application::get().draw(renderEncoder);
+    
     
     [renderEncoder endEncoding];
     

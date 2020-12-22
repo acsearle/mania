@@ -9,6 +9,8 @@
 #ifndef application_hpp
 #define application_hpp
 
+#import <Metal/Metal.h>
+
 #include "string.hpp"
 #include "table3.hpp"
 #include "vec.hpp"
@@ -50,7 +52,7 @@ struct application {
     static application& get(); // hopefully the only singleton?
     
     virtual void resize(usize width, usize height);
-    virtual void draw();
+    virtual void draw(id <MTLRenderCommandEncoder>);
     
     virtual void key_down(u32);
     virtual void key_up(u32);

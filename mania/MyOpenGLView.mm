@@ -216,8 +216,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     // simultaneously when resizing
     CGLLockContext([[self openGLContext] CGLContextObj]);
     
+    /*
     application::get().draw();
-    
+    */
     CGLFlushDrawable([[self openGLContext] CGLContextObj]);
     CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }

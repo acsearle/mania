@@ -13,10 +13,10 @@
 
 namespace manic {
 
-void application::draw() {
+void application::draw(id <MTLRenderCommandEncoder> renderEncoder) {
     draw_proxy::get().presize({_width, _height});
     _pane->draw(rect<f32>{{0,0},{_width,_height}}, &draw_proxy::get());
-    draw_proxy::get().commit();
+    draw_proxy::get().commit(renderEncoder);
 
     
 }

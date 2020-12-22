@@ -414,8 +414,8 @@ void game::draw(rect<f32> _ext, manic::draw_proxy* _draw_proxy) {
     
     // With total redraw, clearing may or may not be necessary
     //glClearColor(0.1, 0.0, 0.1, 0.0);
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClearColor(0, 0, 0, 0);
+    //glClear(GL_COLOR_BUFFER_BIT);
     
     
     /*

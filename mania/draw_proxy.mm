@@ -19,7 +19,8 @@ namespace manic {
 
 struct draw_proxy_concrete : draw_proxy {
     
-    gl::program _program;
+    id<MTLDevice> _device;
+    // gl::program _program;
     font _font;
     atlas _atlas;
     table3<string, sprite> _assets;
@@ -30,7 +31,7 @@ struct draw_proxy_concrete : draw_proxy {
     sprite _ui_rect;
     sprite _solid;
     
-    draw_proxy_concrete();
+    explicit draw_proxy_concrete(id<MTLDevice> device);
 
     virtual ~draw_proxy_concrete() = default;
     
@@ -46,19 +47,20 @@ struct draw_proxy_concrete : draw_proxy {
     virtual void draw_sprite(vec2, sprite s) override;
 
     virtual void presize(vec2) override;
-    virtual void commit() override;
+    virtual void commit(id<MTLRenderCommandEncoder> renderEncoder) override;
     
 };
 
-draw_proxy& draw_proxy::get() {
-    static draw_proxy_concrete x;
+draw_proxy& draw_proxy::get(id<MTLDevice> device) {
+    static draw_proxy_concrete x(device);
     return x;
 }
 
 
-draw_proxy_concrete::draw_proxy_concrete()
-: _program("basic")
-, _atlas(4192) {
+draw_proxy_concrete::draw_proxy_concrete(id<MTLDevice> device)
+: _device(device)
+    // , _program("basic")
+, _atlas(4192, device) {
     _assets = load_asset("/Users/acsearle/Downloads/textures/symbols", _atlas);
     _font = build_font(_atlas);
     {
@@ -79,6 +81,7 @@ draw_proxy_concrete::draw_proxy_concrete()
 
     _background = load_image("/Users/acsearle/Downloads/textures/curioso-photography", _atlas);
     
+    /*
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -99,7 +102,7 @@ draw_proxy_concrete::draw_proxy_concrete()
     _program.use();
     
     _program.assign("sampler", 0);
-
+*/
     
 }
 
@@ -197,7 +200,7 @@ void draw_proxy_concrete::draw_animation_v(vec2 xy, int i) {
 }
 
 void draw_proxy_concrete::presize(vec2 ext) {
-    glViewport(0, 0, (GLsizei) ext.x, (GLsizei) ext.y);
+    // glViewport(0, 0, (GLsizei) ext.x, (GLsizei) ext.y);
     
     GLfloat transform[16] = {
         (float) 2.0f/ext.x, 0, 0, -1,
@@ -209,12 +212,12 @@ void draw_proxy_concrete::presize(vec2 ext) {
     //_camera_position.x += sin(frame * 0.1);
     //_camera_position.y += cos(frame * 0.1);
 
-    glUniformMatrix4fv(glGetUniformLocation(_program, "transform"), 1, GL_TRUE, transform);
+    // glUniformMatrix4fv(glGetUniformLocation(_program, "transform"), 1, GL_TRUE, transform);
 
 }
 
-void draw_proxy_concrete::commit() {
-    _atlas.commit();
+void draw_proxy_concrete::commit(id<MTLRenderCommandEncoder> renderEncoder) {
+    _atlas.commit(renderEncoder);
 }
 
 

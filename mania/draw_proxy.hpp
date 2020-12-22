@@ -21,12 +21,12 @@ struct draw_proxy {
     virtual ~draw_proxy() = default;
     
     // is this a singleton, or should it be a member of application_concrete or something?
-    static draw_proxy& get();
+    static draw_proxy& get(id<MTLDevice> device = nil);
 
     // before drawing anything, setup viewport and view transform to pixel-perfect
     virtual void presize(vec2 ext) = 0;
     // splat the accumulated sprites
-    virtual void commit() = 0;
+    virtual void commit(id<MTLRenderCommandEncoder> renderEncoder) = 0;
     
     // good for UI panes but not game pane?
     virtual void draw_frame(rect<f32>) = 0;
