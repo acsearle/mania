@@ -15,17 +15,23 @@
 #include "reactor.hpp"
 #include "pool.hpp"
 
-//  await forever
-//
-//  an awaitable that never calls (and immediately destroys) its continuation
+namespace std::experimental {
+        
+    template<typename... Args>
+    struct coroutine_traits<void, Args...> {
+        
+        struct promise_type {
+            void get_return_object() {}
+            suspend_never initial_suspend() { return {}; }
+            void return_void() {}
+            suspend_never final_suspend() { return {}; }
+            void unhandled_exception() { terminate(); }
+        };
+        
+    };
+    
+}
 
-inline constexpr struct {
-    bool await_ready() const { return false; }
-    void await_suspend(std::experimental::coroutine_handle<> handle) const {
-        handle.destroy();
-    }
-    void await_resume() const { std::terminate(); };
-} forever;
 
 // await transfer to another thread
 //
@@ -39,35 +45,6 @@ inline constexpr struct  {
     }
     void await_resume() const {};
 } transfer;
-
-
-//  promise for a void-returning coroutine
-//
-//  the coroutine body is eagerly evaluated until a co_await schedules the
-//  continuation elsewhere
-//
-//      void foo() {
-//          printf("about to suspend...\n");
-//          ssize_t n = co_await async_read(fd, buf, n);
-//          printf("read %td\n", n);
-//      }
-
-struct promise_nothing {
-    
-    void get_return_object() {}
-    auto initial_suspend() { return std::experimental::suspend_never{}; }
-    void return_void() {}
-    auto final_suspend() { return std::experimental::suspend_never{}; }
-    void unhandled_exception() { std::terminate(); }
-    
-};
-
-namespace std::experimental {
-
-template<typename... Args>
-struct coroutine_traits<void, Args...> { using promise_type = promise_nothing; };
-
-}
 
 template<typename Rep, typename Period>
 struct await_duration {

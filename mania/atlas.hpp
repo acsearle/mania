@@ -49,6 +49,10 @@ struct atlas {
     //gl::vao _vao;
     //gl::vbo _vbo;
     id<MTLBuffer> _buffer;
+    id<MTLBuffer> _buffer2;
+    
+    dispatch_semaphore_t _semaphore;
+    
     
 
     std::vector<gl::vertex> _vertices;

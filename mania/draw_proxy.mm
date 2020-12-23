@@ -49,6 +49,8 @@ struct draw_proxy_concrete : draw_proxy {
     virtual void presize(vec2) override;
     virtual void commit(id<MTLRenderCommandEncoder> renderEncoder) override;
     
+    virtual void signal() override;
+    
 };
 
 draw_proxy& draw_proxy::get(id<MTLDevice> device) {
@@ -256,4 +258,11 @@ void draw_proxy_concrete::draw_frame(rect<float> r) {
     
 }
 
+    void draw_proxy_concrete::signal() {
+        printf("unlocking\n");
+        dispatch_semaphore_signal(_atlas._semaphore);
+    }
+    
 } // namespace manic
+
+

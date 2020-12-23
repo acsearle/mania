@@ -52,6 +52,7 @@ struct draw_proxy {
     
     virtual void draw_sprite(vec2, sprite s) = 0;
 
+    virtual void signal() = 0;
     
         
 }; // struct draw_proxy

@@ -35,8 +35,9 @@ typedef struct
 
 typedef struct
 {
-    float scale;
-    vector_uint2 viewportSize;
+    // float scale;
+    // vector_uint2 viewportSize;
+    matrix_float3x2 position_transform;
 } MyUniforms;
 
 

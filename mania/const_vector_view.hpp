@@ -31,7 +31,6 @@ struct const_vector_view {
     using iterator = const T*;
     using const_iterator = const T*;
     
-    
     T* _begin;
     isize _size;
     
@@ -42,16 +41,20 @@ struct const_vector_view {
     const_vector_view(std::nullptr_t, isize n)
     : _begin(nullptr)
     , _size(n) {
+        assert(n == 0);
     }
     
     const_vector_view(const T* ptr, isize n)
     : _begin(const_cast<T*>(ptr))
     , _size(n) {
+        assert(n >= 0);
+        assert(ptr || (n == 0));
     }
     
     const_vector_view(const T* first, const T* last)
     : _begin(const_cast<T*>(first))
     , _size(last - first) {
+        assert(_size >= 0);
     }
     
     const_vector_view(const std::vector<T>& v)
@@ -63,15 +66,21 @@ struct const_vector_view {
     
     const_vector_view& operator=(const const_vector_view&) = delete;
     const_vector_view& operator=(const_vector_view&&) = delete;
-    
-    const T* begin() const { return _begin; }
-    const T* end() const { return _begin + _size; }
+
     isize size() const { return _size; }
     isize columns() const { return _size; }
+    bool empty() const { return !_size; }
+
+    const T* begin() const { return _begin; }
+    const T* end() const { return _begin + _size; }
+
     const T& operator[](isize i) const { return _begin[i]; }
     const T& operator()(isize i) const { return _begin[i]; }
     const T& front() const { return *_begin; }
     const T& back() const { return _begin[_size - 1]; }
+    
+    // void pop_front(isize i = 1) { assert(i <= _size); _begin += i; _size -= i; }
+    // void pop_back(isize i = 1) { assert(i <= _size); _size -= i; }
     
     const_vector_view sub(isize i, isize n) const {
         return const_vector_view(_begin + i, n);
@@ -82,9 +91,7 @@ struct const_vector_view {
             std::cout << a << ", ";
         std::cout << std::endl;
     }
-    
-    bool empty() const { return !_size; }
-    
+        
 };
 
 

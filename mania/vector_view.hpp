@@ -19,11 +19,10 @@ namespace manic {
         
         using reference = T&;
         using iterator = T*;
-        
-        
+                
         vector_view() = delete;
         
-        // Unusal copy semantics ensure that we cannot discard the const
+        // Unusual copy semantics ensure that we cannot discard the const
         // qualification of a view by copying it
         
         vector_view(const vector_view&) = delete;
@@ -33,10 +32,13 @@ namespace manic {
         
         vector_view(std::nullptr_t, ptrdiff_t n)
         : const_vector_view<T>(nullptr, n) {
+            assert(n == 0);
         }
         
         vector_view(T* ptr, ptrdiff_t n)
         : const_vector_view<T>(ptr, n) {
+            assert(n >= 0);
+            assert(ptr || (n == 0));
         }
         
         vector_view(T* first, T* last)

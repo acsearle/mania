@@ -6,15 +6,22 @@
 //  Copyright © 2019 Antony Searle. All rights reserved.
 //
 
-#include "MyShaderTypes.h"
+#include <chrono>
+#include <thread>
+
 #include "atlas.hpp"
+#include "debug.hpp"
+#include "MyShaderTypes.h"
 
 namespace manic {
 
 atlas::atlas(std::size_t n, id<MTLDevice> device) : _packer(n), _size(n) {
     _buffer = [device newBufferWithLength:sizeof(gl::vertex) * 1024 * 32
                                   options:MTLResourceStorageModeShared];
-    
+    _buffer2 = [device newBufferWithLength:sizeof(gl::vertex) * 1024 * 32
+                                  options:MTLResourceStorageModeShared];
+    _semaphore = dispatch_semaphore_create(2);
+
     MTLTextureDescriptor *descriptor = [[MTLTextureDescriptor alloc] init];
     descriptor.pixelFormat = MTLPixelFormatRGBA8Unorm_sRGB;
     descriptor.width = n;
@@ -24,18 +31,32 @@ atlas::atlas(std::size_t n, id<MTLDevice> device) : _packer(n), _size(n) {
 
 
 void atlas::commit(id<MTLRenderCommandEncoder> renderEncoder) {
-    auto n = std::min<std::size_t>(_vertices.size(), 1024 * 32);
+    auto n = _vertices.size();
+    _vertices.reserve(n * 2);
+    DUMP(_vertices.back().position.x);
+    DUMP(_vertices.back().position.y);
+    
+    printf("about to wait\n");
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
+    printf("unlocked\n");
+    
+    printf("%lu\n", n);
+    assert(_buffer.contents);
+    DUMP(_buffer.length);
+    DUMP(n * sizeof(gl::vertex));
     std::memcpy(_buffer.contents,
                 _vertices.data(),
                 n * sizeof(gl::vertex));
-    _vertices.clear();
-    
+    // [_buffer didModifyRange:NSMakeRange(0, n)];
     [renderEncoder setVertexBuffer:_buffer
                             offset:0
-                           atIndex:0 ];
+                           atIndex:MyVertexInputIndexVertices];
     [renderEncoder setFragmentTexture:_texture
                               atIndex:AAPLTextureIndexBaseColor];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:n];
+    _vertices.clear();
+    //std::swap(_buffer, _buffer2);
+
 }
 
 void atlas::discard() {

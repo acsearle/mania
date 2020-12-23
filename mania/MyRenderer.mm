@@ -130,6 +130,7 @@
     // If the current drawable is nil, skip rendering this frame
     if(!currentDrawable)
     {
+        assert(false);
         return;
     }
     
@@ -139,15 +140,19 @@
     id <MTLRenderCommandEncoder> renderEncoder =
     [commandBuffer renderCommandEncoderWithDescriptor:_drawableRenderDescriptor];
     
-    
     [renderEncoder setRenderPipelineState:_pipelineState];
     
     {
         MyUniforms uniforms;
-        
-        uniforms.scale = 1.0; // + (1.0 + 0.5 * sin(_frameNum * 0.1));
-        uniforms.viewportSize = _viewportSize;
-        
+        // 2d pixels to clip space
+        uniforms.position_transform = matrix_float3x2{{
+            {2.0f / _viewportSize.x, 0},
+            {0, -2.0f / _viewportSize.y},
+            {-1.0f, +1.0f}
+//            {1.8f / _viewportSize.x, 0},
+  //          {0, -1.8f / _viewportSize.y},
+    //        {-0.9f, +0.9f}
+        }};
         [renderEncoder setVertexBytes:&uniforms
                                length:sizeof(uniforms)
                               atIndex:MyVertexInputIndexUniforms ];
@@ -155,16 +160,14 @@
     
     manic::application::get().draw(renderEncoder);
     
-    //[renderEncoder setVertexBuffer:_vertices
-    //                        offset:0
-    //                       atIndex:MyVertexInputIndexVertices ];
-        
-    //[renderEncoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-    
     [renderEncoder endEncoding];
     
-    [commandBuffer presentDrawable:currentDrawable];
+    [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer)
+     {
+        manic::draw_proxy::get(nil).signal();
+    }];
     
+    [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
 }
 

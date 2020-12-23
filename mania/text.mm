@@ -79,9 +79,6 @@ image apply_shadow(const_matrix_view<std::uint8_t> x) {
     
 }
 
-
-
-// short build_font(atlas2<unsigned long>& font_atlas, table3<unsigned long, float>& advances) {
 font build_font(atlas& atl) {
     
     font result;
@@ -103,10 +100,11 @@ font build_font(atlas& atl) {
     FT_ULong charcode = FT_Get_First_Char(face, &gindex);
     
     image u;
+    constexpr float k = 1.0f / 64.0f; // metrics are in 26.6 fixed point
     
     while (gindex) {
         
-        // DUMP(charcode);
+        DUMP(charcode);
         
         FT_Load_Glyph(face, gindex, FT_LOAD_RENDER);
         
@@ -120,15 +118,15 @@ font build_font(atlas& atl) {
                              vec2(-face->glyph->bitmap_left + 1,
                                       +face->glyph->bitmap_top));
         
-        float advance = face->glyph->advance.x * 0.015625f;
+        float advance = face->glyph->advance.x * k;
         result.charmap.insert((u32) charcode, font::glyph{s, advance});
         
         charcode = FT_Get_Next_Char(face, charcode, &gindex);
     }
     
-    result.height = face->size->metrics.height * 0.015625f;
-    result.ascender = face->size->metrics.ascender * 0.015625f;
-    result.descender = face->size->metrics.descender * 0.015625f;
+    result.height = face->size->metrics.height * k;
+    result.ascender = face->size->metrics.ascender * k;
+    result.descender = face->size->metrics.descender * k;
 
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
