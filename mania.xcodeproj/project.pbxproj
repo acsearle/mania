@@ -111,7 +111,7 @@
 		CA8CB34A23FBCFDB00FE7E52 /* libpng16.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAAB2464238BCAE800F1D85C /* libpng16.a */; };
 		CA8CB34D240F97A200FE7E52 /* bytes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA8CB34B240F97A200FE7E52 /* bytes.cpp */; };
 		CAAB2397238BC87900F1D85C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2396238BC87900F1D85C /* AppDelegate.m */; };
-		CAAB239A238BC87900F1D85C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2399238BC87900F1D85C /* ViewController.m */; };
+		CAAB239A238BC87900F1D85C /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAAB2399238BC87900F1D85C /* ViewController.mm */; };
 		CAAB239C238BC87B00F1D85C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAAB239B238BC87B00F1D85C /* Assets.xcassets */; };
 		CAAB239F238BC87B00F1D85C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CAAB239D238BC87B00F1D85C /* Main.storyboard */; };
 		CAAB23A2238BC87B00F1D85C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CAAB23A1238BC87B00F1D85C /* main.m */; };
@@ -300,7 +300,7 @@
 		CAAB2395238BC87900F1D85C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CAAB2396238BC87900F1D85C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		CAAB2398238BC87900F1D85C /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		CAAB2399238BC87900F1D85C /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		CAAB2399238BC87900F1D85C /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
 		CAAB239B238BC87B00F1D85C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CAAB239E238BC87B00F1D85C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		CAAB23A0238BC87B00F1D85C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -721,7 +721,7 @@
 				CA705DDF25914EBA00559EE7 /* MyShaders.metal */,
 				CA705DDB25914D9A00559EE7 /* MyShaderTypes.h */,
 				CAAB2398238BC87900F1D85C /* ViewController.h */,
-				CAAB2399238BC87900F1D85C /* ViewController.m */,
+				CAAB2399238BC87900F1D85C /* ViewController.mm */,
 			);
 			name = platform;
 			sourceTree = "<group>";
@@ -1046,7 +1046,7 @@
 				CABEB8DA23B4BB9D00A12ACC /* draw_proxy.mm in Sources */,
 				CAAB244D238BC9F000F1D85C /* json.cpp in Sources */,
 				CAAB242D238BC9F000F1D85C /* image.cpp in Sources */,
-				CAAB239A238BC87900F1D85C /* ViewController.m in Sources */,
+				CAAB239A238BC87900F1D85C /* ViewController.mm in Sources */,
 				CAAB2437238BC9F000F1D85C /* parse.cpp in Sources */,
 				CAAB23A2238BC87B00F1D85C /* main.m in Sources */,
 				CAAB242F238BC9F000F1D85C /* renderer.mm in Sources */,

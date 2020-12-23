@@ -102,6 +102,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
                                                        userInfo:nil];
      */
     
+    [super updateTrackingAreas];
+    
     while (NSTrackingArea* p = [[self trackingAreas] firstObject]) {
         NSLog(@"Removed tracking");
         [self removeTrackingArea:p];

@@ -18,6 +18,10 @@
 
 - (void)renderToMetalLayer:(nonnull CAMetalLayer *)metalLayer;
 
+- (void)didReceiveEvent:(nonnull NSEvent*)event;
+
+// also add UI callbacks
+
 @end
 
 

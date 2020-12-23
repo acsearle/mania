@@ -6,8 +6,7 @@
 //  Copyright © 2017 Antony Searle. All rights reserved.
 //
 
-@import AppKit;
-@import MetalKit;
+#import <AppKit/AppKit.h>
 
 #import "MyMetalView.h"
 

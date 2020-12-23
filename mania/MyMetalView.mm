@@ -209,8 +209,7 @@ static CVReturn DispatchRenderLoop(CVDisplayLinkRef displayLink,
 {
     // Must synchronize if rendering on background thread to ensure resize operations from the
     // main thread are complete before rendering which depends on the size occurs.
-    @synchronized(_metalLayer)
-    {
+    @synchronized(_metalLayer) {
         [_delegate renderToMetalLayer:_metalLayer];
     }
 }
@@ -242,75 +241,92 @@ static CVReturn DispatchRenderLoop(CVDisplayLinkRef displayLink,
 
 - (void) keyDown:(NSEvent *)event
 {
-    application::get().key_down([event.charactersIgnoringModifiers characterAtIndex:0]);
+    [_delegate didReceiveEvent:event];
 }
 
 - (void) keyUp:(NSEvent*) event
 {
-    application::get().key_up([event.charactersIgnoringModifiers characterAtIndex:0]);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) flagsChanged:(NSEvent *)event
 {
-    NSLog(@"%lu", (unsigned long)event.modifierFlags);
+    [_delegate didReceiveEvent:event];
 }
 
 // Mouse events
 
+
+- (void) updateTrackingAreas {
+    
+    [super updateTrackingAreas];
+    
+    while (NSTrackingArea* p = [[self trackingAreas] firstObject]) {
+        [self removeTrackingArea:p];
+    }
+    
+    constexpr auto options = (NSTrackingActiveAlways |
+                              NSTrackingInVisibleRect |
+                              NSTrackingMouseEnteredAndExited |
+                              NSTrackingMouseMoved);
+    [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self bounds]
+                                                       options:options
+                                                         owner:self
+                                                      userInfo:nil]];
+
+}
+
+
 -(void) mouseEntered:(NSEvent *)event {
-    NSLog(@"mouseEntered");
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) mouseExited:(NSEvent *)event {
-    NSLog(@"mouseExited");
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) mouseMoved:(NSEvent *)event {
-    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    application::get().mouse_moved(p.x, p.y);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) mouseUp:(NSEvent *)event {
-    application::get().mouse_up([event buttonNumber]);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) mouseDown:(NSEvent *)event {
-    application::get().mouse_down([event buttonNumber]);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) mouseDragged:(NSEvent *)event {
-    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    application::get().mouse_moved(p.x, p.y);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) rightMouseUp:(NSEvent *)event {
-    application::get().mouse_up([event buttonNumber]);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) rightMouseDown:(NSEvent *)event {
-    application::get().mouse_down([event buttonNumber]);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) rightMouseDragged:(NSEvent *)event {
-    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    application::get().mouse_moved(p.x, p.y);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) otherMouseUp:(NSEvent *)event {
-    application::get().mouse_up([event buttonNumber]);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) otherMouseDown:(NSEvent *)event {
-    application::get().mouse_down([event buttonNumber]);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) otherMouseDragged:(NSEvent *)event {
-    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
-    application::get().mouse_moved(p.x, p.y);
+    [_delegate didReceiveEvent:event];
 }
 
 -(void) scrollWheel:(NSEvent *)event {
-    application::get().scrolled([event scrollingDeltaX], [event scrollingDeltaY]);
+    [_delegate didReceiveEvent:event];
 }
 
 @end

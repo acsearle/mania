@@ -259,7 +259,6 @@ void draw_proxy_concrete::draw_frame(rect<float> r) {
 }
 
     void draw_proxy_concrete::signal() {
-        printf("unlocking\n");
         dispatch_semaphore_signal(_atlas._semaphore);
     }
     

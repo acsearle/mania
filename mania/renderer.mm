@@ -436,7 +436,7 @@ void game::draw(rect<f32> _ext, manic::draw_proxy* _draw_proxy) {
         auto n = 0;
         char s[128];
         auto new_t = mach_absolute_time();
-        sprintf(s, "%.2f ms | %d quads\n%gxw%g\nf%d", (new_t - old_t) * 1e-6, n, _ext.b.x, _ext.b.y, frame);
+        sprintf(s, "%.2f ms | %d quads | %gx%g | f%d", (new_t - old_t) * 1e-6, n, _ext.b.x, _ext.b.y, frame);
         //_draw_proxy->draw_text({{_draw_proxy._font.charmap[' '].advance, _draw_proxy._font.height},{_ext.b}}, s);
         _draw_proxy->draw_text({{16.0f, 48.0f},{_ext.b}}, s);
         old_t = new_t;

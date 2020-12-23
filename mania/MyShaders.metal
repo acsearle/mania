@@ -29,7 +29,8 @@ vertexShader(uint vertexID [[ vertex_id ]],
 {
     RasterizerData out;
 
-    out.clipSpacePosition = float4(uniforms.position_transform * float3(vertexArray[vertexID].position, 1), 1);
+    out.clipSpacePosition = float4(uniforms.position_transform
+                                   * float3(vertexArray[vertexID].position, 1), 1);
     out.texCoord = vertexArray[vertexID].texCoord;
     out.color = float4(vertexArray[vertexID].color) / 255;
     
