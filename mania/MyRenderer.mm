@@ -18,34 +18,20 @@
     id <MTLDevice>              _device;
     id <MTLCommandQueue>        _commandQueue;
     id <MTLRenderPipelineState> _pipelineState;
-    id <MTLBuffer>              _vertices;
-
-    // Render pass descriptor which creates a render command encoder to draw to the drawable
-    // textures
-    MTLRenderPassDescriptor *_drawableRenderDescriptor;
     
     vector_uint2 _viewportSize;
-    
-    NSUInteger _frameNum;
 }
 
 - (nonnull instancetype)initWithMetalDevice:(nonnull id<MTLDevice>)device
-                        drawablePixelFormat:(MTLPixelFormat)drawabklePixelFormat
+                        drawablePixelFormat:(MTLPixelFormat)drawablePixelFormat
 {
-    self = [super init];
-    if (self)
+    
+    if (self = [super init])
     {
-        _frameNum = 0;
-        
         _device = device;
         
         _commandQueue = [_device newCommandQueue];
-        
-        _drawableRenderDescriptor = [MTLRenderPassDescriptor new];
-        _drawableRenderDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-        _drawableRenderDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-        _drawableRenderDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1);
-                
+                        
         {
             id<MTLLibrary> shaderLib = [_device newDefaultLibrary];
             if(!shaderLib)
@@ -68,31 +54,14 @@
                 NSLog(@" ERROR: Couldn't load fragment function from default library");
                 return nil;
             }
-            
-            // Set up a simple MTLBuffer with the vertices, including position and texture coordinates
-            static const MyVertex quadVertices[] =
-            {
-                // Pixel positions, Color coordinates
-                { { -250,  -250 },  {0, 0}, { 255, 255, 255, 255 } },
-                { {  250,  -250 },  {1, 0}, { 255, 255, 255, 255 } },
-                { { -250,   250 },  {0, 1}, { 255, 255, 255, 255 } },
-                { {  250,   250 },  {1, 1}, { 255, 255, 255, 255 } },
-            };
-            
-            // Create a vertex buffer, and initialize it with the vertex data.
-            _vertices = [_device newBufferWithBytes:quadVertices
-                                             length:sizeof(quadVertices)
-                                            options:MTLResourceStorageModeShared];
-            
-            _vertices.label = @"Quad";
-            
+                        
             // Create a pipeline state descriptor to create a compiled pipeline state object
             MTLRenderPipelineDescriptor *pipelineDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
             
             pipelineDescriptor.label                           = @"MyPipeline";
             pipelineDescriptor.vertexFunction                  = vertexProgram;
             pipelineDescriptor.fragmentFunction                = fragmentProgram;
-            pipelineDescriptor.colorAttachments[0].pixelFormat = drawabklePixelFormat;
+            pipelineDescriptor.colorAttachments[0].pixelFormat = drawablePixelFormat;
             
             pipelineDescriptor.colorAttachments[0].blendingEnabled = YES;
             pipelineDescriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
@@ -101,7 +70,6 @@
             pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
             pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorOne;
             pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
-
                         
             NSError *error;
             _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineDescriptor
@@ -120,54 +88,51 @@
 
 - (void)renderToMetalLayer:(nonnull CAMetalLayer*)metalLayer
 {
-    _frameNum++;
-    
     // Create a new command buffer for each render pass to the current drawable.
     id <MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
     
-    id<CAMetalDrawable> currentDrawable = [metalLayer nextDrawable];
+    auto drawable = [metalLayer nextDrawable];
     
     // If the current drawable is nil, skip rendering this frame
-    if(!currentDrawable)
+    // - this means we are rendering too many drawables at once?
+    if(!drawable)
     {
         assert(false);
         return;
     }
     
-    _drawableRenderDescriptor.colorAttachments[0].texture = currentDrawable.texture;
-
+    auto render_pass_descriptor = [MTLRenderPassDescriptor new];
+    render_pass_descriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
+    render_pass_descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    render_pass_descriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1);
+    render_pass_descriptor.colorAttachments[0].texture = drawable.texture;
     
-    id <MTLRenderCommandEncoder> renderEncoder =
-    [commandBuffer renderCommandEncoderWithDescriptor:_drawableRenderDescriptor];
+    auto encoder = [commandBuffer renderCommandEncoderWithDescriptor:render_pass_descriptor];
     
-    [renderEncoder setRenderPipelineState:_pipelineState];
+    [encoder setRenderPipelineState:_pipelineState];
     
     {
         MyUniforms uniforms;
-        // 2d pixels to clip space
         uniforms.position_transform = matrix_float3x2{{
             {2.0f / _viewportSize.x, 0},
             {0, -2.0f / _viewportSize.y},
             {-1.0f, +1.0f}
-//            {1.8f / _viewportSize.x, 0},
-  //          {0, -1.8f / _viewportSize.y},
-    //        {-0.9f, +0.9f}
         }};
-        [renderEncoder setVertexBytes:&uniforms
-                               length:sizeof(uniforms)
-                              atIndex:MyVertexInputIndexUniforms ];
+        [encoder setVertexBytes:&uniforms
+                         length:sizeof(uniforms)
+                        atIndex:MyVertexInputIndexUniforms ];
     }
     
-    manic::application::get().draw(renderEncoder);
+    manic::application::get().draw(encoder);
     
-    [renderEncoder endEncoding];
+    [encoder endEncoding];
     
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer)
      {
         manic::draw_proxy::get(nil).signal();
     }];
     
-    [commandBuffer presentDrawable:currentDrawable];
+    [commandBuffer presentDrawable:drawable];
     [commandBuffer commit];
 }
 

@@ -32,8 +32,10 @@ vertexShader(uint vertexID [[ vertex_id ]],
     out.clipSpacePosition = float4(uniforms.position_transform
                                    * float3(vertexArray[vertexID].position, 1), 1);
     out.texCoord = vertexArray[vertexID].texCoord;
-    out.color = float4(vertexArray[vertexID].color) / 255;
     
+    // out.color = float4(vertexArray[vertexID].color) / 255;
+    out.color = unpack_unorm4x8_srgb_to_float(vertexArray[vertexID].color);
+        
     return out;
 }
 

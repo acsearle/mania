@@ -23,8 +23,6 @@ struct draw_proxy {
     // is this a singleton, or should it be a member of application_concrete or something?
     static draw_proxy& get(id<MTLDevice> device = nil);
 
-    // before drawing anything, setup viewport and view transform to pixel-perfect
-    virtual void presize(vec2 ext) = 0;
     // splat the accumulated sprites
     virtual void commit(id<MTLRenderCommandEncoder> renderEncoder) = 0;
     

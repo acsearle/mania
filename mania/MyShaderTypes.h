@@ -29,8 +29,10 @@ typedef struct
     
     vector_float2 texCoord;
     
-    // 2D texture coordinate
-    vector_uchar4 color;
+    // vector_uchar4 color;
+    // srgba8unorm
+    unsigned int color;
+
 } MyVertex;
 
 typedef struct

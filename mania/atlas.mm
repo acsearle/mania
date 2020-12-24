@@ -15,18 +15,21 @@
 
 namespace manic {
 
-atlas::atlas(std::size_t n, id<MTLDevice> device) : _packer(n), _size(n) {
-    _buffer = [device newBufferWithLength:sizeof(gl::vertex) * 1024 * 32
-                                  options:MTLResourceStorageModeShared];
-    _buffer2 = [device newBufferWithLength:sizeof(gl::vertex) * 1024 * 32
-                                  options:MTLResourceStorageModeShared];
-    _semaphore = dispatch_semaphore_create(2);
+atlas::atlas(std::size_t n, id<MTLDevice> device) : _size(n), _packer(n) {
 
     MTLTextureDescriptor *descriptor = [[MTLTextureDescriptor alloc] init];
     descriptor.pixelFormat = MTLPixelFormatRGBA8Unorm_sRGB;
     descriptor.width = n;
     descriptor.height = n;
     _texture = [device newTextureWithDescriptor:descriptor];
+
+    _vertices.reserve(65536);
+    _buffer = [device newBufferWithLength:sizeof(gl::vertex) * _vertices.capacity()
+                                  options:MTLResourceStorageModeShared];
+    _buffer2 = [device newBufferWithLength:sizeof(gl::vertex) * _vertices.capacity()
+                                  options:MTLResourceStorageModeShared];
+    _semaphore = dispatch_semaphore_create(2);
+
 }
 
 
@@ -59,17 +62,16 @@ void atlas::discard() {
 
 sprite atlas::place(const_matrix_view<pixel> v, vec2 origin) {
     auto tl = _packer.place({v.columns(), v.rows()});
-    [_texture replaceRegion:MTLRegionMake2D(tl.x, tl.y, v.columns(), v.rows())
+    [_texture replaceRegion:MTLRegionMake2D(tl.x, tl.y,
+                                            v.columns(), v.rows())
                 mipmapLevel:0
                   withBytes:v.data()
                 bytesPerRow:v.stride() * sizeof(pixel)];
     sprite s;
     s.a.position = - origin;
     s.a.texCoord = tl / (float) _size;
-    s.a.color = {255, 255, 255, 255};
     s.b.position = { v.columns() - origin.x, v.rows() - origin.y };
     s.b.texCoord = vec2{ tl.x + v.columns(), tl.y + v.rows() } / _size;
-    s.b.color = s.a.color;
     return s;
 }
 

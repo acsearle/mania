@@ -46,7 +46,6 @@ struct draw_proxy_concrete : draw_proxy {
 
     virtual void draw_sprite(vec2, sprite s) override;
 
-    virtual void presize(vec2) override;
     virtual void commit(id<MTLRenderCommandEncoder> renderEncoder) override;
     
     virtual void signal() override;
@@ -127,7 +126,6 @@ void draw_proxy_concrete::draw_text(rect<f32> x, string_view v) { // ::scribe(st
     //x.a.y = 0; //+= _font.height;
     auto xy = x.a;
 
-    pixel col = { 255, 255, 255, 255 };
     // char const* p = v.data();
     while (v) {
         u32 c = *v; ++v;
@@ -137,9 +135,7 @@ void draw_proxy_concrete::draw_text(rect<f32> x, string_view v) { // ::scribe(st
         //} else {
             if (auto* q = _font.charmap.try_get(c)) {
                 sprite s = q->sprite_;
-                s.a.color = col;
-                s.b.color = col;
-                _atlas.push_sprite_translated(s, xy);
+                _atlas.push_sprite(s + xy);
                 xy.x += q->advance;
             }
         //}
@@ -180,42 +176,25 @@ rect<f32> draw_proxy_concrete::bound_text(string_view v) {
 
 void draw_proxy_concrete::draw_asset(vec2 xy, string_view v) {
     if (auto p = _assets.try_get(v)) {
-        _atlas.push_sprite_translated(*p, xy);
+        _atlas.push_sprite(*p + xy);
     }
 }
 
 void draw_proxy_concrete::draw_terrain(vec2 xy, int i) {
-    _atlas.push_sprite_translated(_terrain[i], xy);
+    _atlas.push_sprite(_terrain[i] + xy);
 }
 
 void draw_proxy_concrete::draw_sprite(vec2 v, sprite s) {
-    _atlas.push_sprite_translated(s, v);
+    _atlas.push_sprite(s + v);
 }
 
 
 void draw_proxy_concrete::draw_animation_h(vec2 xy, int i) {
-    _atlas.push_sprite_translated(_animation_h[i], xy);
+    _atlas.push_sprite(_animation_h[i] + xy);
 }
 
 void draw_proxy_concrete::draw_animation_v(vec2 xy, int i) {
-    _atlas.push_sprite_translated(_animation_v[i], xy);
-}
-
-void draw_proxy_concrete::presize(vec2 ext) {
-    // glViewport(0, 0, (GLsizei) ext.x, (GLsizei) ext.y);
-    
-    GLfloat transform[16] = {
-        (float) 2.0f/ext.x, 0, 0, -1,
-        0, - (float) 2.0f/ext.y, 0, +1,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    };
-    
-    //_camera_position.x += sin(frame * 0.1);
-    //_camera_position.y += cos(frame * 0.1);
-
-    // glUniformMatrix4fv(glGetUniformLocation(_program, "transform"), 1, GL_TRUE, transform);
-
+    _atlas.push_sprite(_animation_v[i] + xy);
 }
 
 void draw_proxy_concrete::commit(id<MTLRenderCommandEncoder> renderEncoder) {
@@ -250,10 +229,10 @@ void draw_proxy_concrete::draw_frame(rect<float> r) {
     for (int i = 0; i != 3; ++i)
         for (int j = 0; j != 3; ++ j) {
             sprite t = {
-                {{vx[i], vy[j]}, {vu[i], vv[j]}, s.a.color},
-                {{vx[i+1], vy[j+1]}, {vu[i+1], vv[j+1]}, s.a.color}
+                {{vx[i], vy[j]}, {vu[i], vv[j]}},
+                {{vx[i+1], vy[j+1]}, {vu[i+1], vv[j+1]}}
             };
-            _atlas.push_sprite_translated(t, {x, y});
+            _atlas.push_sprite(t + vec2{x, y});
         }
     
 }

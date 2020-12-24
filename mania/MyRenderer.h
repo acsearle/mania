@@ -12,7 +12,7 @@
 @interface MyRenderer : NSObject
 
 - (nonnull instancetype)initWithMetalDevice:(nonnull id<MTLDevice>)device
-                        drawablePixelFormat:(MTLPixelFormat)drawabklePixelFormat;
+                        drawablePixelFormat:(MTLPixelFormat)drawablePixelFormat;
 
 - (void)renderToMetalLayer:(nonnull CAMetalLayer*)metalLayer;
 

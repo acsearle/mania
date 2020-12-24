@@ -67,10 +67,11 @@ image apply_shadow(const_matrix_view<std::uint8_t> x) {
         for (i64 j = 0; j != c.columns(); ++j)
             c(i, j).a = round(a(i, j));
     
-    // Infer color for final result
+    // Color is alpha to linear color to sRGB
     for (i64 i = 0; i != x.rows(); ++i)
         for (i64 j = 0; j != x.columns(); ++j) {
-            u8 d = std::round(to_sRGB(x(i, j) / 255.0) * 255.0); // <-- replace with table
+            // u8 d = std::round(to_sRGB(x(i, j) / 255.0) * 255.0); // <-- replace with table
+            u8 d = _multiply_alpha_table[x(i, j)][255];
             c(i, j + 1).rgb = {d, d, d};
         }
             

@@ -29,7 +29,7 @@ namespace manic {
     }
 
 void application::draw(id <MTLRenderCommandEncoder> renderEncoder) {
-    draw_proxy::get().presize({_width, _height});
+    //draw_proxy::get().presize({_width, _height});
     _pane->draw(rect<f32>{{0,0},{_width,_height}}, &draw_proxy::get());
     draw_proxy::get().commit(renderEncoder);
 
@@ -87,7 +87,7 @@ void application::scrolled(double x, double y) {
 void application::resize(usize width, usize height) {
     _width = width;
     _height = height;
-    draw_proxy::get().presize(vec2(_width, _height));
+    //draw_proxy::get().presize(vec2(_width, _height));
 }
 
 

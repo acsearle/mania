@@ -11,6 +11,9 @@
 #include "application.hpp"
 #include "renderer.hpp"
 
+#include <cinttypes>
+
+
 using manic::application;
 
 @implementation MyMetalView
@@ -129,6 +132,7 @@ static CVReturn DispatchRenderLoop(CVDisplayLinkRef displayLink,
                                    CVOptionFlags* flagsOut,
                                    void* displayLinkContext)
 {
+    // printf("leading by %" PRIu64 " ticks\n", (outputTime->hostTime - now->hostTime));
     @autoreleasepool
     {
         MyMetalView *customView = (__bridge MyMetalView*)displayLinkContext;
@@ -261,14 +265,14 @@ static CVReturn DispatchRenderLoop(CVDisplayLinkRef displayLink,
     
     [super updateTrackingAreas];
     
-    while (NSTrackingArea* p = [[self trackingAreas] firstObject]) {
-        [self removeTrackingArea:p];
-    }
+    for (id area in [self trackingAreas])
+        [self removeTrackingArea:area];
     
-    constexpr auto options = (NSTrackingActiveAlways |
-                              NSTrackingInVisibleRect |
-                              NSTrackingMouseEnteredAndExited |
-                              NSTrackingMouseMoved);
+    NSTrackingAreaOptions options = (NSTrackingActiveAlways |
+                                     NSTrackingInVisibleRect |
+                                     NSTrackingMouseEnteredAndExited |
+                                     NSTrackingMouseMoved);
+    
     [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[self bounds]
                                                        options:options
                                                          owner:self

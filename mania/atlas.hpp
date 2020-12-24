@@ -33,53 +33,68 @@ namespace manic {
 // to the vertices that will be emitted - just add the offset and construct
 // the opposite corners.
 struct sprite {
-    gl::vertex a;
-    gl::vertex b;
+    gl::subvert a;
+    gl::subvert b;
 };
+    
+    inline sprite operator+(sprite s, vec2 x) {
+        s.a.position += x;
+        s.b.position += x;
+        return s;
+    }
+    
+    inline sprite operator*(sprite s, float k) {
+        s.a.position *= k;
+        s.b.position *= k;
+        return s;
+    }
 
 
-// atlas holds the OpenGL texture, vertex array and buffer objects needed to
-// draw textured triangles, and it provides an interface to pack the texture
-// with smaller images such as png assets and font glyphs.
+    // atlas bundles together some functionality, some of which should move elsewhere
+    //
+    // allocate subregions of the texture atlas, returning sprite keys
+    //
+    // managing the lifetime of the texture
+    //
+    // provide the interface for gethering sprite draws
+    //
+    // setting the texture passing the sprites to the GPU
+    //
+    // managing the round-robin use of GPU vertex buffers
+    
 struct atlas {
 
-    //gl::texture _texture;
-    id<MTLTexture> _texture;
     std::size_t _size;
-    //gl::vao _vao;
-    //gl::vbo _vbo;
-    id<MTLBuffer> _buffer;
-    id<MTLBuffer> _buffer2;
-    
-    dispatch_semaphore_t _semaphore;
-    
-    
+    packer<std::size_t> _packer;
 
     std::vector<gl::vertex> _vertices;
-    
-    packer<std::size_t> _packer;
+
+    id<MTLTexture> _texture;
+    id<MTLBuffer> _buffer;
+    id<MTLBuffer> _buffer2;
+    dispatch_semaphore_t _semaphore;
     
     atlas(std::size_t n, id<MTLDevice> device);
+    
+    sprite as_sprite() const {
+        return sprite{
+            {{0.0f, 0.0f}, {0.0f, 0.0f}},
+            {{(float) _size, (float)_size}, {1.0f, 1.0f}},
+        };
+    }
 
-    void push_sprite(sprite s) {
+    void push_sprite(sprite s, vec<std::uint8_t, 4> c = { 255, 255, 255, 255 }) {
         // a - x
-        // | \ | => abx axb
-        // x - b
-        _vertices.push_back(s.a);
-        _vertices.push_back(s.b);
-        _vertices.push_back({{s.b.position.x, s.a.position.y}, {s.b.texCoord.x, s.a.texCoord.y}, s.a.color});
-        _vertices.push_back(s.a);
-        _vertices.push_back({{s.a.position.x, s.b.position.y}, {s.a.texCoord.x, s.b.texCoord.y}, s.b.color});
-        _vertices.push_back(s.b);
+        // | \ | => abx ayb
+        // y - b
+        _vertices.push_back({s.a, c});
+        _vertices.push_back({s.b, c});
+        _vertices.push_back({{{s.b.position.x, s.a.position.y}, {s.b.texCoord.x, s.a.texCoord.y}}, c});
+        _vertices.push_back({s.a, c});
+        _vertices.push_back({{{s.a.position.x, s.b.position.y}, {s.a.texCoord.x, s.b.texCoord.y}}, c});
+        _vertices.push_back({s.b, c});
     }
-    
-    void push_atlas_translated(vec2 v) {
-        // Draw the whole texture, typically for debugging
-        push_sprite(
-                {{{v.x, v.y}, {0, 0}, {255,255,255,255}},
-            {{v.x + _size, v.y + _size}, {1, 1}, {255,255,255,255}}});
-    }
-    
+        
     void push_quad(gl::vertex v[]) {
         // Draw an arbitrary quad, such as one resulting from a rotation
         _vertices.push_back(v[0]);
@@ -90,12 +105,6 @@ struct atlas {
         _vertices.push_back(v[3]);
     }
     
-    void push_sprite_translated(sprite s, vec2 v) {
-        s.a.position += v;
-        s.b.position += v;
-        push_sprite(s);
-    }
-        
     void commit(id<MTLRenderCommandEncoder> renderEncoder);
     
     void discard();
