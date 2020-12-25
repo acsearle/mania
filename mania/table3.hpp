@@ -234,6 +234,7 @@ struct table3 {
     explicit table3(usize n)
     : _vector(_capacity_for_occupants(n))
     , _occupants(0) {
+        _vector._capacity = n;
     }
     
     ~table3() {
@@ -268,6 +269,7 @@ struct table3 {
             _destroy_all();
             _occupants = 0;
             _vector = raw_vector<_entry_type>(n);
+            _vector._capacity = n;
         }
     }
 
@@ -304,6 +306,7 @@ struct table3 {
         n = _capacity_for_occupants(n);
         if (n > _vector._capacity) {
             raw_vector<_entry_type> v(n);
+            v._capacity = n;
             v.swap(_vector);
             for (_entry_type& src : v)
                 if (src._hash) {
@@ -318,6 +321,7 @@ struct table3 {
         usize n = _capacity_for_occupants(_occupants);
         if (n < _vector._capacity) {
             raw_vector<_entry_type> v(n);
+            v._capacity = n;
             v.swap(_vector);
             for (_entry_type& src : v)
                 if (src._hash) {

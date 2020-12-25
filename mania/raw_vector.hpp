@@ -12,8 +12,14 @@
 #include <cstdlib>
 #include <utility>
 
+#ifdef __APPLE__
+#include <malloc/malloc.h>
+#endif
+
+
 #include "common.hpp"
 #include "vector_view.hpp"
+
 
 namespace manic {
 
@@ -34,12 +40,28 @@ struct raw_vector {
     raw_vector(const raw_vector&) = delete;
     raw_vector(raw_vector&& v) : raw_vector() { swap(v); }
     explicit raw_vector(isize capacity) {
+#if defined _WIN64
+        HANDLE heap = GetProcessHeap();
+        _allocation = (T*) HeapAlloc(heap, HEAP_ZERO_MEMORY, capacity * sizeof(T));
+        _capacity = HeapSize(heap, _allocation) / sizeof(T);
+#elif defined __APPLE__
+        _allocation = (T*) std::calloc(capacity, sizeof(T));
+        _capacity = malloc_size(_allocation) / sizeof(T);
+        assert(_capacity >= capacity);
+#else
         _allocation = (T*) std::calloc(capacity, sizeof(T));
         _capacity = capacity;
+#endif
     }
     raw_vector(T* ptr, isize n) : _allocation(ptr), _capacity(n) {}
     
-    ~raw_vector() { free(_allocation); }
+    ~raw_vector() {
+#if defined _WIN64
+        HeapFree(GetProcessHeap(), _allocation);
+#else
+        free(_allocation);
+#endif
+    }
     
     raw_vector& operator=(const raw_vector&) = delete;
     raw_vector& operator=(raw_vector<T>&&);

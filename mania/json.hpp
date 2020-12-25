@@ -10,6 +10,8 @@
 #define json_hpp
 
 #include <utility>
+
+#include "string.hpp"
 #include "table3.hpp"
 #include "vector.hpp"
 
